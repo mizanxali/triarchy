@@ -1,0 +1,24 @@
+{
+  "name": "@battleground/tailwind-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./native": "./native.ts",
+    "./web": "./web.ts"
+  },
+  "license": "MIT",
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "postcss": "^8.4.49",
+    "tailwindcss": "catalog:",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@battleground/tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

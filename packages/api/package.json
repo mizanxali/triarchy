@@ -1,0 +1,37 @@
+{
+  "name": "@battleground/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./src/schema/index.ts"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "tsc",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@battleground/auth": "workspace:*",
+    "@battleground/db": "workspace:*",
+    "@battleground/validators": "workspace:*",
+    "@battleground/web3": "workspace:*",
+    "@trpc/server": "catalog:",
+    "superjson": "2.2.1",
+    "viem": "^2.21.52",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@battleground/tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

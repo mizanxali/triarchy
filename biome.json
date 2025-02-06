@@ -1,0 +1,71 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.3/schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noConsoleLog": "off",
+        "noShadowRestrictedNames": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useSemanticElements": "off",
+        "useFocusableInteractive": "off",
+        "useKeyWithClickEvents": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "useJsxKeyInIterable": "off"
+      }
+    },
+    "ignore": ["node_modules", ".next", "dist", "esmbuild"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "enabled": true,
+    "ignore": [
+      "node_modules",
+      ".next",
+      "dist",
+      "gen/*",
+      "esmbuild",
+      "artifacts",
+      "typechain-types/"
+    ]
+  },
+  "files": {
+    "ignore": [
+      "node_modules",
+      "contracts/lib/*",
+      "openzeppelin-contracts/*",
+      ".next",
+      "dist",
+      "gen/*",
+      "esmbuild",
+      "artifacts",
+      "deployments/*",
+      "typechain-types/"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "overrides": [
+    {
+      "include": ["**/*.mdx"],
+      "linter": {
+        "enabled": false
+      },
+      "formatter": {
+        "enabled": true
+      }
+    }
+  ]
+}

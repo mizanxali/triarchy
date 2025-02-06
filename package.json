@@ -1,0 +1,36 @@
+{
+  "name": "card-battle",
+  "private": true,
+  "engines": {
+    "node": ">=20.18.1",
+    "pnpm": "^9.14.2"
+  },
+  "packageManager": "pnpm@9.14.2",
+  "scripts": {
+    "frontend": "turbo dev --filter @battleground/dashboard",
+    "watcher": "turbo dev --filter @battleground/watcher",
+    "build": "turbo run build",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo run clean",
+    "db:push": "turbo -F @battleground/db push",
+    "db:studio": "turbo -F @battleground/db studio",
+    "dev": "turbo watch dev --continue",
+    "dev:next": "turbo watch dev -F @battleground/dashboard...",
+    "format": "pnpm biome format --write ./",
+    "lint": "pnpm biome lint --write ./",
+    "fix": "pnpm biome check --write ./",
+    "lint:ws": "pnpm dlx sherif@latest",
+    "postinstall": "pnpm lint:ws",
+    "taze": "taze -r -I",
+    "typecheck": "turbo run typecheck",
+    "ui-add": "turbo run ui-add"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.3",
+    "@turbo/gen": "^2.3.1",
+    "taze": "^0.18.0",
+    "turbo": "^2.3.1",
+    "typescript": "catalog:"
+  },
+  "trustedDependencies": ["@biomejs/biome"]
+}
