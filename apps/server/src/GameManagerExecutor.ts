@@ -11,7 +11,7 @@ class GameManagerExecutor {
   gameExecutorMap: Map<string, GameExecutor> = new Map();
 
   constructor() {
-    console.log('GameManagerExecutor');
+    console.log('GameManagerExecutor created');
   }
 
   private async createAccessToken(roomId: string) {
@@ -43,6 +43,11 @@ class GameManagerExecutor {
     const token = await this.createAccessToken(roomId);
 
     await client.joinRoom({ roomId, token });
+
+    client.room.on('room-closed', () => {
+      console.log('Room closed');
+      this.gameExecutorMap.delete(roomId);
+    });
 
     const gameExecutor = new GameExecutor(client);
 

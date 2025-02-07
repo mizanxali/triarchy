@@ -1,8 +1,27 @@
 import { z } from 'zod';
 
-export const unused = z.string().describe(
-  `This lib is currently not used as we use drizzle-zod for simple schemas
-   But as your application grows and you need other validators to share
-   with back and frontend, you can put them in here
-  `,
-);
+const cardSchema = z.enum([
+  'A2',
+  'A3',
+  'A4',
+  'A5',
+  'A6',
+  'A7',
+  'A8',
+  'S2',
+  'S3',
+  'S4',
+  'S5',
+  'S6',
+  'S7',
+  'S8',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'H7',
+  'H8',
+]);
+
+export type TCard = z.infer<typeof cardSchema>;
