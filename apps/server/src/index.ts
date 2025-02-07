@@ -13,7 +13,9 @@ const main = async () => {
 
   app.get('/:roomId', async (req, res) => {
     const roomId = req.params.roomId;
-    gameManagerExecutor.joinRoom(roomId);
+    await gameManagerExecutor.joinRoom(roomId);
+
+    res.send('Room Joined!');
   });
 
   app.listen(7878, () => {

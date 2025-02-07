@@ -47,10 +47,6 @@ class GameManagerExecutor {
     const gameExecutor = new GameExecutor(client);
 
     this.gameExecutorMap.set(roomId, gameExecutor);
-
-    for (const roomId of this.gameExecutorMap.keys()) {
-      console.log('Room ID:', roomId);
-    }
   }
 }
 

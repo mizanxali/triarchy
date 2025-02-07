@@ -27,7 +27,7 @@ export const roomRouter = {
 
     const roomId: string = data.data.roomId;
 
-    fetch(`http://localhost:7878/${roomId}`);
+    await fetch(`http://localhost:7878/${roomId}`);
 
     return roomId;
   }),

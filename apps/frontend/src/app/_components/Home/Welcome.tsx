@@ -16,7 +16,7 @@ const Welcome = ({ walletAddress }: Props) => {
 
   const [gameCode, setGameCode] = useState('');
 
-  const { mutateAsync } = api.room.createRoom.useMutation();
+  const { mutateAsync, isPending } = api.room.createRoom.useMutation();
 
   return (
     <div className="w-full h-screen flex flex-col gap-2 justify-center items-center">
@@ -25,13 +25,14 @@ const Welcome = ({ walletAddress }: Props) => {
           Welcome, {walletAddress}
         </h3>
         <Button
+          disabled={isPending}
           onClick={async () => {
             const roomId = await mutateAsync();
             router.push(`/play/${roomId}`);
           }}
           variant={'primary'}
         >
-          Create Game
+          {isPending ? 'Creating Game...' : 'Create Game'}
         </Button>
         <h6>OR</h6>
         <Input

@@ -1,7 +1,12 @@
 'use client';
 
 import { Button } from '@battleground/ui/button';
-import { useLocalPeer, usePeerIds, useRoom } from '@huddle01/react';
+import {
+  useDataMessage,
+  useLocalPeer,
+  usePeerIds,
+  useRoom,
+} from '@huddle01/react';
 import { Role } from '@huddle01/server-sdk/auth';
 import { useRouter } from 'next/navigation';
 import { api } from '~/trpc/react';
@@ -16,10 +21,12 @@ const GameWrapper = ({ gameCode }: Props) => {
   const { joinRoom, state, closeRoom } = useRoom();
   const { peerId: localPeerId } = useLocalPeer();
 
-  const { peerIds: botRemotePeerIds } = usePeerIds({
+  const { sendData } = useDataMessage();
+
+  const { peerIds: hostRemotePeerIds } = usePeerIds({
     roles: [Role.HOST],
   });
-  const botPeerId = botRemotePeerIds[0];
+  const serverPeerId = hostRemotePeerIds[0];
 
   const { peerIds: playerRemotePeerIds } = usePeerIds({
     roles: [Role.GUEST],
@@ -47,13 +54,23 @@ const GameWrapper = ({ gameCode }: Props) => {
     router.push('/');
   };
 
+  const pingServerHandler = async () => {
+    if (!serverPeerId) return;
+
+    await sendData({
+      to: [serverPeerId],
+      label: 'ping',
+      payload: 'hello server',
+    });
+  };
+
   return (
     <div>
       <div>My Game Code: {gameCode}</div>
       <div>Room State: {state}</div>
       <div>Local Peer ID: {localPeerId}</div>
       <div>Opponent Peer ID: {opponentPeerId}</div>
-      <div>Bot Peer ID: {botPeerId}</div>
+      <div>Bot Peer ID: {serverPeerId}</div>
       <Button
         disabled={state !== 'idle'}
         variant={'primary'}
@@ -67,6 +84,13 @@ const GameWrapper = ({ gameCode }: Props) => {
         onClick={closeRoomHandler}
       >
         Close Room
+      </Button>
+      <Button
+        disabled={state !== 'connected' || !serverPeerId}
+        variant={'primary'}
+        onClick={pingServerHandler}
+      >
+        Ping Server
       </Button>
     </div>
   );
