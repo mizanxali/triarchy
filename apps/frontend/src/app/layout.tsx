@@ -11,6 +11,7 @@ import { TRPCReactProvider } from '~/trpc/react';
 import '~/app/globals.css';
 
 import { Web3Provider } from './_layouts/Web3Provider';
+import { MyHuddleProvider } from './_layouts/HuddleProvider';
 
 export const viewport: Viewport = {
   themeColor: [{ media: '(prefers-color-scheme: dark)', color: 'black' }],
@@ -65,10 +66,12 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       >
         <Web3Provider>
           <SessionProvider>
-            <ThemeProvider attribute="class" defaultTheme="dark">
-              <TRPCReactProvider>{props.children}</TRPCReactProvider>
-              <Toaster />
-            </ThemeProvider>
+            <MyHuddleProvider>
+              <ThemeProvider attribute="class" defaultTheme="dark">
+                <TRPCReactProvider>{props.children}</TRPCReactProvider>
+                <Toaster />
+              </ThemeProvider>
+            </MyHuddleProvider>
           </SessionProvider>
         </Web3Provider>
       </body>

@@ -1,9 +1,16 @@
-import WalletBox from './_components/Home/WalletBox';
+import { auth } from '@battleground/auth';
+import WalletConnect from './_components/Button/WalletConnect';
+import Welcome from './_components/Home/Welcome';
 
-export default function HomePage() {
-  return (
-    <div className="w-full h-screen flex justify-center items-center">
-      <WalletBox />
-    </div>
-  );
+export default async function HomePage() {
+  const session = await auth();
+
+  if (!session)
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <WalletConnect />
+      </div>
+    );
+
+  return <Welcome walletAddress={session.user.walletAddress} />;
 }

@@ -5,6 +5,7 @@ import {
   timestamp,
   uuid,
   varchar,
+  integer,
 } from 'drizzle-orm/pg-core';
 
 export const User = pgTable('user', {
@@ -12,6 +13,7 @@ export const User = pgTable('user', {
   walletAddress: varchar('walletAddress', { length: 255 })
     .notNull()
     .primaryKey(),
+  level: integer('level').notNull().default(0),
 });
 
 export const ChallengeStore = pgTable('challengeStore', {

@@ -25,6 +25,7 @@
     "@battleground/db": "workspace:*",
     "@battleground/validators": "workspace:*",
     "@battleground/web3": "workspace:*",
+    "@huddle01/server-sdk": "^2.5.6",
     "@trpc/server": "catalog:",
     "superjson": "2.2.1",
     "viem": "^2.21.52",

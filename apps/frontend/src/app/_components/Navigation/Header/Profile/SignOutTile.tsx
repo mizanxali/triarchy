@@ -27,7 +27,7 @@ const SignOutTile = () => {
         onKeyDown={() => disconnect()}
         role="button"
         tabIndex={0}
-        className="flex w-full space-x-2 p-1.5 rounded-lg hover:bg-zinc-700/50 items-center"
+        className="flex w-full space-x-2 rounded-lg hover:bg-zinc-700/50 items-center"
       >
         <ExitIcon className="text-red-400" />
         <div className="text-red-400 text-sm">
