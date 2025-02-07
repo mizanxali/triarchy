@@ -25,7 +25,11 @@ export const roomRouter = {
 
     const data = await res.json();
 
-    return data.data.roomId;
+    const roomId: string = data.data.roomId;
+
+    fetch(`http://localhost:7878/${roomId}`);
+
+    return roomId;
   }),
 
   createAccessToken: protectedProcedure
@@ -38,22 +42,12 @@ export const roomRouter = {
       const accessToken = new AccessToken({
         apiKey: env.HUDDLE01_API_KEY,
         roomId: input.roomId as string,
-        role: Role.CO_HOST,
+        role: Role.GUEST,
         permissions: {
           admin: true,
-          canConsume: true,
-          canProduce: true,
-          canProduceSources: {
-            cam: true,
-            mic: true,
-            screen: true,
-          },
-          canRecvData: true,
-          canSendData: true,
-          canUpdateMetadata: true,
         },
         options: {
-          maxPeersAllowed: 2,
+          maxPeersAllowed: 3,
         },
       });
 
