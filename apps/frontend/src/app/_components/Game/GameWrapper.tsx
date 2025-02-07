@@ -21,7 +21,13 @@ const GameWrapper = ({ gameCode }: Props) => {
   const { joinRoom, state, closeRoom } = useRoom();
   const { peerId: localPeerId } = useLocalPeer();
 
-  const { sendData } = useDataMessage();
+  const { sendData } = useDataMessage({
+    onMessage: (payload, from, label) => {
+      if (label === 'pong') {
+        alert(`Your opponent says: ${payload}`);
+      }
+    },
+  });
 
   const { peerIds: hostRemotePeerIds } = usePeerIds({
     roles: [Role.HOST],
@@ -35,10 +41,6 @@ const GameWrapper = ({ gameCode }: Props) => {
 
   const { mutateAsync: createAccessToken } =
     api.room.createAccessToken.useMutation();
-
-  // useEffect(() => {
-  //   joinRoomHandler();
-  // }, []);
 
   const joinRoomHandler = async () => {
     const token = await createAccessToken({ roomId: gameCode });
@@ -60,7 +62,7 @@ const GameWrapper = ({ gameCode }: Props) => {
     await sendData({
       to: [serverPeerId],
       label: 'ping',
-      payload: 'hello server',
+      payload: 'hi bitch',
     });
   };
 
