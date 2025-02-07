@@ -10,13 +10,25 @@ import {
 import { Role } from '@huddle01/server-sdk/auth';
 import { api } from '~/trpc/react';
 import CardStack from './CardStack';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   gameCode: string;
 }
 
 const GameWrapper = ({ gameCode }: Props) => {
-  const { joinRoom, state } = useRoom();
+  const router = useRouter();
+
+  const { joinRoom, state } = useRoom({
+    onLeave: (data) => {
+      if (data.reason === 'MAX_PEERS_REACHED') alert('Game is full');
+      router.push('/');
+    },
+    onPeerLeft: () => {
+      alert('Opponent left the game');
+      router.push('/');
+    },
+  });
   const { peerId: localPeerId } = useLocalPeer();
   const { sendData } = useDataMessage({
     onMessage: (payload, from, label) => {

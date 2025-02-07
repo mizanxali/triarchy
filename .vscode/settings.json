@@ -31,5 +31,5 @@
   "[solidity]": {
     "editor.defaultFormatter": "NomicFoundation.hardhat-solidity"
   },
-  "cSpell.words": ["mediasoup", "mizan", "packetization", "Werift"]
+  "cSpell.words": ["mediasoup", "mizan", "packetization", "uuidv", "Werift"]
 }
