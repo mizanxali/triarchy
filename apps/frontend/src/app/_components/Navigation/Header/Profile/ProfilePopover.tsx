@@ -9,9 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@battleground/ui/popover';
-import { externalLinks } from '~/app/_constants';
 import SignOutTile from './SignOutTile';
-import Link from 'next/link';
 import type { Address } from 'viem';
 
 const ProfilePopover = ({
@@ -48,47 +46,7 @@ const ProfilePopover = ({
             </div>
           </div>
         </div>
-        <div className="w-full bg-zinc-700 h-px" />
-        <div className="pt-2 px-1.5">
-          <Link
-            href="#"
-            onClick={() => {
-              window.open(externalLinks.discord, '_blank')?.focus();
-            }}
-          >
-            <div className="flex cursor-pointer space-x-2 p-1.5 rounded-lg hover:bg-zinc-700/50">
-              <Image
-                src="/images/socials/Discord.png"
-                alt="discord"
-                width={20}
-                height={20}
-                className="object-contain"
-              />
-              <div className="text-zinc-200 text-sm">Discord</div>
-            </div>
-          </Link>
-        </div>
-        <div className="px-1.5 mt-1">
-          <Link
-            href="#"
-            onClick={() => {
-              window.open(externalLinks.twitter, '_blank')?.focus();
-            }}
-          >
-            <div className="flex cursor-pointer space-x-2 p-1.5 rounded-lg hover:bg-zinc-700/50">
-              <Image
-                src="/images/socials/X.png"
-                alt="discord"
-                width={20}
-                height={20}
-                className="object-contain"
-              />
-              <div className="text-zinc-200 text-sm">Twitter</div>
-            </div>
-          </Link>
-        </div>
         <div className="w-full bg-zinc-700 h-px mt-2" />
-
         <SignOutTile />
       </PopoverContent>
     </Popover>
