@@ -38,16 +38,8 @@ const CardStack = () => {
     });
   };
 
-  if (state !== 'connected') {
+  if (state !== 'connected' || !opponentPeerId) {
     return null;
-  }
-
-  if (!opponentPeerId) {
-    return (
-      <div className="text-lg font-medium text-center flex flex-1 items-center justify-center">
-        <span>Waiting for opponent...</span>
-      </div>
-    );
   }
 
   const archers = wonCards.filter((card) => card.card.slice(0, 1) === 'A');

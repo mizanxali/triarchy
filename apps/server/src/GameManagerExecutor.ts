@@ -21,7 +21,7 @@ class GameManagerExecutor {
       role: Role.HOST,
       options: {
         metadata: {
-          displayName: 'computer',
+          displayName: 'GameExecutor',
         },
         maxPeersAllowed: 3,
       },
@@ -43,6 +43,8 @@ class GameManagerExecutor {
     const token = await this.createAccessToken(roomId);
 
     await client.joinRoom({ roomId, token });
+
+    console.log('GameExecutor joined');
 
     client.room.on('room-closed', () => {
       console.log('Room closed');

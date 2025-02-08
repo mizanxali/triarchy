@@ -25,3 +25,9 @@ const cardSchema = z.enum([
 ]);
 
 export type TCard = z.infer<typeof cardSchema>;
+
+const PeerMetadataSchema = z.object({
+  displayName: z.string(),
+});
+
+export type TPeerMetadata = z.infer<typeof PeerMetadataSchema>;

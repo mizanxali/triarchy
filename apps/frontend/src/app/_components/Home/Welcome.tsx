@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SignOutTile from '../Navigation/Header/Profile/SignOutTile';
 import { api } from '~/trpc/react';
+import { useRoom } from '@huddle01/react';
 
 interface Props {
   walletAddress: string;
@@ -16,7 +17,32 @@ const Welcome = ({ walletAddress }: Props) => {
 
   const [gameCode, setGameCode] = useState('');
 
-  const { mutateAsync, isPending } = api.room.createRoom.useMutation();
+  const { joinRoom, room } = useRoom({
+    onJoin: () => {
+      router.push(`/play/${room.roomId}`);
+    },
+    onLeave: (data) => {
+      if (data.reason === 'MAX_PEERS_REACHED') alert('Game is full');
+      router.push('/');
+    },
+  });
+
+  const { mutateAsync, isPending } = api.room.createRoom.useMutation({
+    onSuccess: async (roomId) => {
+      setGameCode(roomId);
+      await createAccessToken({ roomId });
+    },
+  });
+
+  const { mutateAsync: createAccessToken } =
+    api.room.createAccessToken.useMutation({
+      onSuccess: async (token) => {
+        await joinRoom({
+          roomId: gameCode,
+          token,
+        });
+      },
+    });
 
   return (
     <div className="w-full h-screen flex flex-col gap-2 justify-center items-center">
@@ -43,8 +69,8 @@ const Welcome = ({ walletAddress }: Props) => {
         />
         <Button
           disabled={!gameCode}
-          onClick={() => {
-            router.push(`/play/${gameCode}`);
+          onClick={async () => {
+            await createAccessToken({ roomId: gameCode });
           }}
           variant={'primary'}
         >

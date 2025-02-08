@@ -1,21 +1,14 @@
 'use client';
 
-import { Button } from '@battleground/ui/button';
-import {
-  useDataMessage,
-  useLocalPeer,
-  usePeerIds,
-  useRoom,
-} from '@huddle01/react';
-import { Role } from '@huddle01/server-sdk/auth';
-import { api } from '~/trpc/react';
-import CardStack from './CardStack';
-import { useRouter } from 'next/navigation';
-import { useGameAtom } from '~/app/_atoms/game.atom';
-import type { TCard } from '@battleground/validators';
-import { v4 as uuidv4 } from 'uuid';
-import { CARD_COLOR_MAP } from '~/app/_constants';
 import { cn } from '@battleground/ui';
+import type { TCard } from '@battleground/validators';
+import { useDataMessage, useRoom } from '@huddle01/react';
+import { useRouter } from 'next/navigation';
+import { v4 as uuidv4 } from 'uuid';
+import { useGameAtom } from '~/app/_atoms/game.atom';
+import { CARD_COLOR_MAP } from '~/app/_constants';
+import CardStack from './CardStack';
+import GameInfo from './GameInfo';
 
 interface Props {
   gameCode: string;
@@ -62,17 +55,13 @@ const GameWrapper = ({ gameCode }: Props) => {
     }));
   };
 
-  const { joinRoom, state } = useRoom({
-    onLeave: (data) => {
-      if (data.reason === 'MAX_PEERS_REACHED') alert('Game is full');
-      router.push('/');
-    },
+  useRoom({
     onPeerLeft: () => {
       alert('Opponent left the game');
       router.push('/');
     },
   });
-  const { peerId: localPeerId } = useLocalPeer();
+
   useDataMessage({
     onMessage: (payload, from, label) => {
       if (label === 'initial-cards') {
@@ -97,19 +86,6 @@ const GameWrapper = ({ gameCode }: Props) => {
       }
     },
   });
-  const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
-
-  const { mutateAsync: createAccessToken } =
-    api.room.createAccessToken.useMutation();
-
-  const joinRoomHandler = async () => {
-    const token = await createAccessToken({ roomId: gameCode });
-
-    await joinRoom({
-      roomId: gameCode,
-      token,
-    });
-  };
 
   return (
     <div className="w-full h-screen flex flex-col p-6 justify-between">
@@ -123,31 +99,7 @@ const GameWrapper = ({ gameCode }: Props) => {
           >
             <span>{activeCard}</span>
           </div>
-
-          <div className="flex flex-col gap-2 text-center items-center">
-            <div>
-              <div className="text-2xl font-semibold">
-                Game Code: {gameCode}
-              </div>
-              <div className="text-base">Room State: {state}</div>
-            </div>
-
-            <div>
-              <div className="text-lg">Local Peer ID: {localPeerId}</div>
-              <div className="text-lg">Opponent Peer ID: {opponentPeerId}</div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                disabled={state !== 'idle'}
-                variant={'primary'}
-                onClick={joinRoomHandler}
-              >
-                Join Room
-              </Button>
-            </div>
-          </div>
-
+          <GameInfo gameCode={gameCode} />
           <div
             className={cn(
               'w-36 h-56 cursor-pointer rounded-lg text-black text-3xl font-bold flex items-center justify-center',

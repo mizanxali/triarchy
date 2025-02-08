@@ -137,6 +137,11 @@ class GameExecutor {
           label: 'opponent-card-played',
           payload: card,
         });
+        this.#client.localPeer.sendData({
+          to: [this.blackPeerId],
+          label: 'opponent-card-played',
+          payload: this.whiteActiveCard,
+        });
       }
     } else if (from === this.whitePeerId) {
       console.log('White played', card);
@@ -157,6 +162,11 @@ class GameExecutor {
           to: [this.blackPeerId],
           label: 'opponent-card-played',
           payload: card,
+        });
+        this.#client.localPeer.sendData({
+          to: [this.whitePeerId],
+          label: 'opponent-card-played',
+          payload: this.blackActiveCard,
         });
       }
     }

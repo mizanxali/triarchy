@@ -48,8 +48,10 @@ export const roomRouter = {
         roomId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
+        const { walletAddress } = ctx.session.user;
+
         const accessToken = new AccessToken({
           apiKey: env.HUDDLE01_API_KEY,
           roomId: input.roomId as string,
@@ -59,6 +61,9 @@ export const roomRouter = {
           },
           options: {
             maxPeersAllowed: 3,
+            metadata: {
+              displayName: walletAddress,
+            },
           },
         });
 
