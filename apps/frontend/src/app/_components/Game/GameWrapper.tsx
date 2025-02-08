@@ -11,10 +11,11 @@ import { Role } from '@huddle01/server-sdk/auth';
 import { api } from '~/trpc/react';
 import CardStack from './CardStack';
 import { useRouter } from 'next/navigation';
-import { useGameSetAtom } from '~/app/_atoms/game.atom';
+import { useGameAtom } from '~/app/_atoms/game.atom';
 import type { TCard } from '@battleground/validators';
 import { v4 as uuidv4 } from 'uuid';
-import ActiveCard from './ActiveCard';
+import { CARD_COLOR_MAP } from '~/app/_constants';
+import { cn } from '@battleground/ui';
 
 interface Props {
   gameCode: string;
@@ -23,7 +24,7 @@ interface Props {
 const GameWrapper = ({ gameCode }: Props) => {
   const router = useRouter();
 
-  const setGameAtom = useGameSetAtom();
+  const [{ activeCard, opponentActiveCard }, setGameAtom] = useGameAtom();
 
   const onInitialCardsReceived = (cards: TCard[]) => {
     setGameAtom((prev) => ({
@@ -87,6 +88,12 @@ const GameWrapper = ({ gameCode }: Props) => {
         onTurnOver(JSON.parse(payload));
       } else if (label === 'opponent-card-played') {
         onOpponentCardPlayed(payload as TCard);
+      } else if (label === 'game-win') {
+        alert('You won the game!');
+        router.push('/');
+      } else if (label === 'game-lose') {
+        alert('You lost the game!');
+        router.push('/');
       }
     },
   });
@@ -106,29 +113,54 @@ const GameWrapper = ({ gameCode }: Props) => {
 
   return (
     <div className="w-full h-screen flex flex-col p-6 justify-between">
-      <div className="flex flex-col gap-2">
-        <div>
-          <div className="text-2xl font-semibold">Game Code: {gameCode}</div>
-          <div className="text-base">Room State: {state}</div>
-        </div>
-
-        <div>
-          <div className="text-lg">Local Peer ID: {localPeerId}</div>
-          <div className="text-lg">Opponent Peer ID: {opponentPeerId}</div>
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            disabled={state !== 'idle'}
-            variant={'primary'}
-            onClick={joinRoomHandler}
+      <div className="flex-1">
+        <div className="w-full flex justify-between items-center">
+          <div
+            className={cn(
+              'w-36 h-56 cursor-pointer rounded-lg text-black text-3xl font-bold flex items-center justify-center',
+              activeCard ? CARD_COLOR_MAP[activeCard] : 'invisible',
+            )}
           >
-            Join Room
-          </Button>
+            <span>{activeCard}</span>
+          </div>
+
+          <div className="flex flex-col gap-2 text-center items-center">
+            <div>
+              <div className="text-2xl font-semibold">
+                Game Code: {gameCode}
+              </div>
+              <div className="text-base">Room State: {state}</div>
+            </div>
+
+            <div>
+              <div className="text-lg">Local Peer ID: {localPeerId}</div>
+              <div className="text-lg">Opponent Peer ID: {opponentPeerId}</div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                disabled={state !== 'idle'}
+                variant={'primary'}
+                onClick={joinRoomHandler}
+              >
+                Join Room
+              </Button>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              'w-36 h-56 cursor-pointer rounded-lg text-black text-3xl font-bold flex items-center justify-center',
+              opponentActiveCard
+                ? CARD_COLOR_MAP[opponentActiveCard]
+                : 'invisible',
+            )}
+          >
+            {opponentActiveCard !== 'redacted' && (
+              <span>{opponentActiveCard}</span>
+            )}
+          </div>
         </div>
-      </div>
-      <div>
-        <ActiveCard />
       </div>
       <div>
         <CardStack />

@@ -17,17 +17,6 @@ class GameExecutor {
   blackWonCards: TCard[] = [];
   whiteWonCards: TCard[] = [];
 
-  private generateInitialCards() {
-    const initialCards: TCard[] = [];
-
-    for (let i = 0; i < 5; i++) {
-      const randomIndex = Math.floor(Math.random() * CARD_DECK.length);
-      initialCards.push(CARD_DECK[randomIndex] as TCard);
-    }
-
-    return initialCards;
-  }
-
   constructor(client: HuddleClient) {
     this.#client = client;
 
@@ -94,6 +83,21 @@ class GameExecutor {
         this.#client.room.close();
       }
     });
+  }
+
+  private generateInitialCards() {
+    const initialCards: TCard[] = [];
+
+    for (let i = 0; i < 5; i++) {
+      const randomIndex = Math.floor(Math.random() * CARD_DECK.length);
+      initialCards.push(CARD_DECK[randomIndex] as TCard);
+    }
+
+    return initialCards;
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async receivedPing(from: string, message: string) {
@@ -302,10 +306,71 @@ class GameExecutor {
     // reset active cards
     this.blackActiveCard = undefined;
     this.whiteActiveCard = undefined;
+
+    // check if game is over
+    this.checkGameOver();
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private async checkGameOver() {
+    if (this.blackWonCards.length >= 3) {
+      // check if there are 3 cards with same suit or 3 cards with all different suits
+      const suits = this.blackWonCards.map((card) => card.slice(0, 1));
+
+      if (
+        suits.filter((suit) => suit === 'A').length === 3 ||
+        suits.filter((suit) => suit === 'H').length === 3 ||
+        suits.filter((suit) => suit === 'S').length === 3 ||
+        new Set(suits).size === 3
+      ) {
+        console.log('Black wins the game');
+
+        // wait for 2 seconds before sending the win message
+        await this.sleep(2000);
+
+        this.#client.localPeer.sendData({
+          to: [this.blackPeerId],
+          label: 'game-win',
+          payload: 'You win!',
+        });
+        this.#client.localPeer.sendData({
+          to: [this.whitePeerId],
+          label: 'game-lose',
+          payload: 'You lose!',
+        });
+        this.#client.room.close();
+        return;
+      }
+    }
+
+    if (this.whiteWonCards.length >= 3) {
+      // check if there are 3 cards with same suit or 3 cards with all different suits
+      const suits = this.whiteWonCards.map((card) => card.slice(0, 1));
+
+      if (
+        suits.filter((suit) => suit === 'A').length === 3 ||
+        suits.filter((suit) => suit === 'H').length === 3 ||
+        suits.filter((suit) => suit === 'S').length === 3 ||
+        new Set(suits).size === 3
+      ) {
+        console.log('White wins the game');
+
+        // wait for 2 seconds before sending the win message
+        await this.sleep(2000);
+
+        this.#client.localPeer.sendData({
+          to: [this.whitePeerId],
+          label: 'game-win',
+          payload: 'You win!',
+        });
+        this.#client.localPeer.sendData({
+          to: [this.blackPeerId],
+          label: 'game-lose',
+          payload: 'You lose!',
+        });
+        this.#client.room.close();
+        return;
+      }
+    }
   }
 }
 

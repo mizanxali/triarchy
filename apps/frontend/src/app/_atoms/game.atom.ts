@@ -22,6 +22,55 @@ const defaultGameAtom: GameAtom = {
   opponentActiveCard: undefined,
 };
 
+const dummyGameAtom: GameAtom = {
+  cardsDeck: [
+    {
+      card: 'A2',
+      id: '1',
+    },
+    {
+      card: 'S3',
+      id: '2',
+    },
+    {
+      card: 'H4',
+      id: '3',
+    },
+    {
+      card: 'A5',
+      id: '4',
+    },
+    {
+      card: 'H7',
+      id: '6',
+    },
+  ],
+  wonCards: [
+    {
+      card: 'A2',
+      id: '1',
+    },
+    {
+      card: 'S3',
+      id: '2',
+    },
+    {
+      card: 'H4',
+      id: '3',
+    },
+    {
+      card: 'A5',
+      id: '4',
+    },
+    {
+      card: 'H7',
+      id: '6',
+    },
+  ],
+  activeCard: 'A2',
+  opponentActiveCard: 'redacted',
+};
+
 const gameAtom = atomWithReset<GameAtom>(defaultGameAtom);
 
 export const useGameAtom = () => useAtom(gameAtom);
