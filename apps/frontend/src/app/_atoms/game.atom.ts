@@ -4,18 +4,22 @@ import { atomWithReset, useResetAtom } from 'jotai/utils';
 
 type GameAtom = {
   cardsDeck: {
-    card: TCard;
+    card: TCard | 'redacted';
     id: string;
   }[];
   wonCards: {
     card: TCard;
     id: string;
   }[];
+  activeCard?: TCard;
+  opponentActiveCard?: TCard | 'redacted';
 };
 
 const defaultGameAtom: GameAtom = {
   cardsDeck: [],
   wonCards: [],
+  activeCard: undefined,
+  opponentActiveCard: undefined,
 };
 
 const gameAtom = atomWithReset<GameAtom>(defaultGameAtom);

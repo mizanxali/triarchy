@@ -36,6 +36,7 @@ const Welcome = ({ walletAddress }: Props) => {
         </Button>
         <h6>OR</h6>
         <Input
+          className="w-3/4"
           value={gameCode}
           onChange={(e) => setGameCode(e.target.value)}
           placeholder="Enter Game Code"

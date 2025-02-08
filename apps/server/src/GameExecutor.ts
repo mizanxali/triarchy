@@ -117,13 +117,50 @@ class GameExecutor {
       console.log('Black played', card);
       // set the active card for black
       this.blackActiveCard = card;
+
+      // if the other player has not played yet, send the redacted played card
+      if (!this.whiteActiveCard) {
+        this.#client.localPeer.sendData({
+          to: [this.whitePeerId],
+          label: 'opponent-card-played',
+          payload: 'redacted',
+        });
+      }
+      // else send the actual played card
+      else {
+        this.#client.localPeer.sendData({
+          to: [this.whitePeerId],
+          label: 'opponent-card-played',
+          payload: card,
+        });
+      }
     } else if (from === this.whitePeerId) {
       console.log('White played', card);
       // set the active card for white
       this.whiteActiveCard = card;
+
+      // if the other player has not played yet, send the redacted played card
+      if (!this.blackActiveCard) {
+        this.#client.localPeer.sendData({
+          to: [this.blackPeerId],
+          label: 'opponent-card-played',
+          payload: 'redacted',
+        });
+      }
+      // else send the actual played card
+      else {
+        this.#client.localPeer.sendData({
+          to: [this.blackPeerId],
+          label: 'opponent-card-played',
+          payload: card,
+        });
+      }
     }
 
     if (this.blackActiveCard && this.whiteActiveCard) {
+      // wait for 3 seconds before comparing cards
+      await this.sleep(3000);
+
       // compare cards
       const blackCardSuit = this.blackActiveCard.slice(0, 1);
       const whiteCardSuit = this.whiteActiveCard.slice(0, 1);
@@ -132,7 +169,7 @@ class GameExecutor {
       const whiteCardValue = this.whiteActiveCard.slice(1);
 
       if (blackCardSuit === whiteCardSuit) {
-        // copmare values
+        // compare values
         if (blackCardValue > whiteCardValue) this.blackWinsTurn();
         else if (blackCardValue < whiteCardValue) this.whiteWinsTurn();
         else this.turnDrawn();
@@ -265,6 +302,10 @@ class GameExecutor {
     // reset active cards
     this.blackActiveCard = undefined;
     this.whiteActiveCard = undefined;
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

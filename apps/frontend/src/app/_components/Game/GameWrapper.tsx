@@ -11,6 +11,10 @@ import { Role } from '@huddle01/server-sdk/auth';
 import { api } from '~/trpc/react';
 import CardStack from './CardStack';
 import { useRouter } from 'next/navigation';
+import { useGameSetAtom } from '~/app/_atoms/game.atom';
+import type { TCard } from '@battleground/validators';
+import { v4 as uuidv4 } from 'uuid';
+import ActiveCard from './ActiveCard';
 
 interface Props {
   gameCode: string;
@@ -18,6 +22,44 @@ interface Props {
 
 const GameWrapper = ({ gameCode }: Props) => {
   const router = useRouter();
+
+  const setGameAtom = useGameSetAtom();
+
+  const onInitialCardsReceived = (cards: TCard[]) => {
+    setGameAtom((prev) => ({
+      ...prev,
+      cardsDeck: cards.map((card) => ({
+        card,
+        id: uuidv4(),
+      })),
+    }));
+  };
+
+  const onTurnOver = ({
+    cards,
+    wonCards,
+  }: { cards: TCard[]; wonCards: TCard[] }) => {
+    setGameAtom((prev) => ({
+      ...prev,
+      cardsDeck: cards.map((card) => ({
+        card,
+        id: uuidv4(),
+      })),
+      wonCards: wonCards.map((card) => ({
+        card,
+        id: uuidv4(),
+      })),
+      activeCard: undefined,
+      opponentActiveCard: undefined,
+    }));
+  };
+
+  const onOpponentCardPlayed = (card: TCard) => {
+    setGameAtom((prev) => ({
+      ...prev,
+      opponentActiveCard: card,
+    }));
+  };
 
   const { joinRoom, state } = useRoom({
     onLeave: (data) => {
@@ -30,14 +72,24 @@ const GameWrapper = ({ gameCode }: Props) => {
     },
   });
   const { peerId: localPeerId } = useLocalPeer();
-  const { sendData } = useDataMessage({
+  useDataMessage({
     onMessage: (payload, from, label) => {
-      if (label === 'pong') {
-        alert(`Your opponent says: ${payload}`);
+      if (label === 'initial-cards') {
+        onInitialCardsReceived(JSON.parse(payload));
+      } else if (label === 'turn-win') {
+        console.log('You won the turn!');
+        onTurnOver(JSON.parse(payload));
+      } else if (label === 'turn-lose') {
+        console.log('You lost the turn!');
+        onTurnOver(JSON.parse(payload));
+      } else if (label === 'turn-draw') {
+        console.log('It was a draw!');
+        onTurnOver(JSON.parse(payload));
+      } else if (label === 'opponent-card-played') {
+        onOpponentCardPlayed(payload as TCard);
       }
     },
   });
-  const [serverPeerId] = usePeerIds({ roles: [Role.HOST] }).peerIds;
   const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
 
   const { mutateAsync: createAccessToken } =
@@ -49,16 +101,6 @@ const GameWrapper = ({ gameCode }: Props) => {
     await joinRoom({
       roomId: gameCode,
       token,
-    });
-  };
-
-  const pingServerHandler = async () => {
-    if (!serverPeerId) return;
-
-    await sendData({
-      to: [serverPeerId],
-      label: 'ping',
-      payload: 'hi bitch',
     });
   };
 
@@ -83,14 +125,10 @@ const GameWrapper = ({ gameCode }: Props) => {
           >
             Join Room
           </Button>
-          <Button
-            disabled={state !== 'connected' || !serverPeerId}
-            variant={'primary'}
-            onClick={pingServerHandler}
-          >
-            Ping Server
-          </Button>
         </div>
+      </div>
+      <div>
+        <ActiveCard />
       </div>
       <div>
         <CardStack />

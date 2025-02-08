@@ -1,72 +1,35 @@
-import { useDataMessage, usePeerIds, useRoom } from '@huddle01/react';
-import { useState } from 'react';
-import type { TCard } from '@battleground/validators';
 import { cn } from '@battleground/ui';
-import { CARD_COLOR_MAP } from '~/app/_constants';
-import { v4 as uuidv4 } from 'uuid';
+import type { TCard } from '@battleground/validators';
+import { useDataMessage, usePeerIds, useRoom } from '@huddle01/react';
 import { Role } from '@huddle01/server-sdk/auth';
 import { useGameAtom } from '~/app/_atoms/game.atom';
+import { CARD_COLOR_MAP } from '~/app/_constants';
 
 const CardStack = () => {
   const { state } = useRoom();
   const [serverPeerId] = usePeerIds({ roles: [Role.HOST] }).peerIds;
   const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
 
-  // const [cards, setCards] = useState<
-  //   {
-  //     card: TCard;
-  //     id: string;
-  //   }[]
-  // >([]);
+  const [{ cardsDeck }, setGameAtom] = useGameAtom();
 
-  const [gameAtom, setGameAtom] = useGameAtom();
+  const { sendData } = useDataMessage();
 
-  const onInitialCardsReceived = (cards: TCard[]) => {
+  const onPlayCardHandler = async (card: TCard | 'redacted', id: string) => {
+    if (!serverPeerId || card === 'redacted') return;
+
     setGameAtom((prev) => ({
       ...prev,
-      cardsDeck: cards.map((card) => ({
-        card,
-        id: uuidv4(),
-      })),
+      cardsDeck: prev.cardsDeck.map((cardObj) => {
+        if (cardObj.id === id) {
+          return {
+            card: 'redacted',
+            id,
+          };
+        }
+        return cardObj;
+      }),
+      activeCard: card,
     }));
-  };
-
-  const onTurnOver = ({
-    cards,
-    wonCards,
-  }: { cards: TCard[]; wonCards: TCard[] }) => {
-    setGameAtom((prev) => ({
-      ...prev,
-      cardsDeck: cards.map((card) => ({
-        card,
-        id: uuidv4(),
-      })),
-      wonCards: wonCards.map((card) => ({
-        card,
-        id: uuidv4(),
-      })),
-    }));
-  };
-
-  const { sendData } = useDataMessage({
-    onMessage: (payload, from, label) => {
-      if (label === 'initial-cards') {
-        onInitialCardsReceived(JSON.parse(payload));
-      } else if (label === 'turn-win') {
-        alert('You won the turn!');
-        onTurnOver(JSON.parse(payload));
-      } else if (label === 'turn-lose') {
-        alert('You lost the turn!');
-        onTurnOver(JSON.parse(payload));
-      } else if (label === 'turn-draw') {
-        alert('It was a draw!');
-        onTurnOver(JSON.parse(payload));
-      }
-    },
-  });
-
-  const onPlayCardHandler = async (card: TCard) => {
-    if (!serverPeerId) return;
 
     await sendData({
       to: [serverPeerId],
@@ -86,7 +49,7 @@ const CardStack = () => {
   return (
     <div>
       <div className="flex gap-4 justify-center items-center">
-        {gameAtom.cardsDeck.map(({ card, id }) => (
+        {cardsDeck.map(({ card, id }) => (
           <div
             key={id}
             className={cn(
@@ -94,7 +57,7 @@ const CardStack = () => {
               CARD_COLOR_MAP[card],
               'transform transition-transform duration-200 ease-out hover:scale-105',
             )}
-            onClick={() => onPlayCardHandler(card)}
+            onClick={() => onPlayCardHandler(card, id)}
           >
             <span>{card}</span>
           </div>
