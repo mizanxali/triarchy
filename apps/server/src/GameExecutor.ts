@@ -28,7 +28,7 @@ class GameExecutor {
         this.blackPeerId = event.peer.peerId;
 
         // set black player cards
-        this.blackCards = this.generateInitialCards();
+        this.blackCards = [...this.generateInitialCards()];
       } else if (!this.whitePeerId) {
         console.log('White player joined');
 
@@ -36,7 +36,7 @@ class GameExecutor {
         this.whitePeerId = event.peer.peerId;
 
         // set white player cards
-        this.whiteCards = this.generateInitialCards();
+        this.whiteCards = [...this.generateInitialCards()];
       }
 
       if (this.blackPeerId && this.whitePeerId) {

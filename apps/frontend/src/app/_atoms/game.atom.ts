@@ -3,6 +3,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atomWithReset, useResetAtom } from 'jotai/utils';
 
 type GameAtom = {
+  gameCode?: string;
   cardsDeck: {
     card: TCard | 'redacted';
     id: string;
@@ -16,6 +17,7 @@ type GameAtom = {
 };
 
 const defaultGameAtom: GameAtom = {
+  gameCode: undefined,
   cardsDeck: [],
   wonCards: [],
   activeCard: undefined,
@@ -23,6 +25,7 @@ const defaultGameAtom: GameAtom = {
 };
 
 const dummyGameAtom: GameAtom = {
+  gameCode: 'xxf-bvgv-ydn',
   cardsDeck: [
     {
       card: 'A2',

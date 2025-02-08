@@ -1,6 +1,6 @@
 import { auth } from '@battleground/auth';
 import WalletConnect from './_components/Button/WalletConnect';
-import Welcome from './_components/Home/Welcome';
+import Root from './_components/Game/Root';
 
 export default async function HomePage() {
   const session = await auth();
@@ -12,5 +12,5 @@ export default async function HomePage() {
       </div>
     );
 
-  return <Welcome walletAddress={session.user.walletAddress} />;
+  return <Root walletAddress={session.user.walletAddress} />;
 }

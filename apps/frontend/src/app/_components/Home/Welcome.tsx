@@ -3,29 +3,18 @@
 import { Button } from '@battleground/ui/button';
 import { Input } from '@battleground/ui/input';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import SignOutTile from '../Navigation/Header/Profile/SignOutTile';
 import { api } from '~/trpc/react';
 import { useRoom } from '@huddle01/react';
+import { useGameSetAtom } from '~/app/_atoms/game.atom';
 
 interface Props {
   walletAddress: string;
+  joinRoom: (data: { roomId: string; token: string }) => void;
 }
 
-const Welcome = ({ walletAddress }: Props) => {
-  const router = useRouter();
-
+const Welcome = ({ walletAddress, joinRoom }: Props) => {
   const [gameCode, setGameCode] = useState('');
-
-  const { joinRoom, room } = useRoom({
-    onJoin: () => {
-      router.push(`/play/${room.roomId}`);
-    },
-    onLeave: (data) => {
-      if (data.reason === 'MAX_PEERS_REACHED') alert('Game is full');
-      router.push('/');
-    },
-  });
 
   const { mutateAsync, isPending } = api.room.createRoom.useMutation({
     onSuccess: async (roomId) => {
@@ -53,8 +42,7 @@ const Welcome = ({ walletAddress }: Props) => {
         <Button
           disabled={isPending}
           onClick={async () => {
-            const roomId = await mutateAsync();
-            router.push(`/play/${roomId}`);
+            await mutateAsync();
           }}
           variant={'primary'}
         >
