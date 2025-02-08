@@ -14,6 +14,10 @@ export const User = pgTable('user', {
     .notNull()
     .primaryKey(),
   level: integer('level').notNull().default(0),
+  gamesWon: integer('gamesWon').notNull().default(0),
+  gamesLost: integer('gamesLost').notNull().default(0),
+  amountWagered: integer('amountWagered').notNull().default(0),
+  amountWon: integer('amountWon').notNull().default(0),
 });
 
 export const ChallengeStore = pgTable('challengeStore', {

@@ -1,9 +1,15 @@
+import { db } from '@battleground/db/client';
+import { User } from '@battleground/db/schema';
+import type { TCard, TPeerMetadata } from '@battleground/validators';
+import { eq } from '@battleground/db';
 import type { HuddleClient } from '@huddle01/web-core';
 import { CARD_DECK } from './constants';
-import type { TCard } from '@battleground/validators';
 
 class GameExecutor {
   #client: HuddleClient;
+
+  blackWalletAddress = '';
+  whiteWalletAddress = '';
 
   blackPeerId = '';
   whitePeerId = '';
@@ -27,6 +33,10 @@ class GameExecutor {
         // set black player peerId
         this.blackPeerId = event.peer.peerId;
 
+        // set black player wallet address
+        const metadata = event.peer.getMetadata() as TPeerMetadata;
+        this.blackWalletAddress = metadata.displayName;
+
         // set black player cards
         this.blackCards = [...this.generateInitialCards()];
       } else if (!this.whitePeerId) {
@@ -34,6 +44,10 @@ class GameExecutor {
 
         // set white player peerId
         this.whitePeerId = event.peer.peerId;
+
+        // set white player wallet address
+        const metadata = event.peer.getMetadata() as TPeerMetadata;
+        this.whiteWalletAddress = metadata.displayName;
 
         // set white player cards
         this.whiteCards = [...this.generateInitialCards()];
@@ -172,7 +186,7 @@ class GameExecutor {
     }
 
     if (this.blackActiveCard && this.whiteActiveCard) {
-      // wait for 3 seconds before comparing cards
+      // wait for 2 seconds before comparing cards
       await this.sleep(2000);
 
       // compare cards
@@ -347,7 +361,16 @@ class GameExecutor {
           label: 'game-lose',
           payload: 'You lose!',
         });
+
+        // close the room
         this.#client.room.close();
+
+        // update the database
+        await Promise.all([
+          this.updatePlayerStats(this.blackWalletAddress, true),
+          this.updatePlayerStats(this.whiteWalletAddress, false),
+        ]);
+
         return;
       }
     }
@@ -377,9 +400,34 @@ class GameExecutor {
           label: 'game-lose',
           payload: 'You lose!',
         });
+
+        // close the room
         this.#client.room.close();
+
+        // update the database
+        await Promise.all([
+          this.updatePlayerStats(this.whiteWalletAddress, true),
+          this.updatePlayerStats(this.blackWalletAddress, false),
+        ]);
+
         return;
       }
+    }
+  }
+
+  private async updatePlayerStats(walletAddress: string, didWin: boolean) {
+    const user = await db.query.User.findFirst({
+      where: (user, { eq }) => eq(user.walletAddress, walletAddress),
+    });
+
+    if (user) {
+      await db
+        .update(User)
+        .set({
+          gamesWon: didWin ? user.gamesWon + 1 : user.gamesWon,
+          gamesLost: didWin ? user.gamesLost : user.gamesLost + 1,
+        })
+        .where(eq(User.walletAddress, walletAddress));
     }
   }
 }
