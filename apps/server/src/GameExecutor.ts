@@ -173,7 +173,7 @@ class GameExecutor {
 
     if (this.blackActiveCard && this.whiteActiveCard) {
       // wait for 3 seconds before comparing cards
-      await this.sleep(3000);
+      await this.sleep(2000);
 
       // compare cards
       const blackCardSuit = this.blackActiveCard.slice(0, 1);

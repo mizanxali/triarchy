@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { Chakra_Petch, Inter, Space_Grotesk } from 'next/font/google';
+import { MedievalSharp } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 
 import { cn } from '@battleground/ui';
-import { ThemeProvider } from '@battleground/ui/theme';
 import { Toaster } from '@battleground/ui/toaster';
 
 import { TRPCReactProvider } from '~/trpc/react';
@@ -29,28 +28,12 @@ export const metadata: Metadata = {
   },
 };
 
-const grotesk = Space_Grotesk({
-  weight: ['400', '500', '600', '700'],
+const medieval = MedievalSharp({
+  weight: ['400'],
   style: ['normal'],
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-space-grotesk',
-});
-
-const chakra = Chakra_Petch({
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-chakra-petch',
-});
-
-const inter = Inter({
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-medieval-sharp',
 });
 
 export default function RootLayout(props: { children: React.ReactNode }) {
@@ -58,19 +41,20 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          'font-chakra min-h-screen bg-background text-foreground antialiased',
-          chakra.variable,
-          grotesk.variable,
-          inter.variable,
+          'font-medieval-sharp min-h-screen text-white antialiased',
+          medieval.className,
         )}
+        style={{
+          backgroundImage: 'url(/backgrounds/battleback5.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
         <Web3Provider>
           <SessionProvider>
             <MyHuddleProvider>
-              <ThemeProvider attribute="class" defaultTheme="dark">
-                <TRPCReactProvider>{props.children}</TRPCReactProvider>
-                <Toaster />
-              </ThemeProvider>
+              <TRPCReactProvider>{props.children}</TRPCReactProvider>
+              <Toaster />
             </MyHuddleProvider>
           </SessionProvider>
         </Web3Provider>

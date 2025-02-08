@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@battleground/ui/button';
 import { ExitIcon } from '@radix-ui/react-icons';
 import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -7,7 +8,7 @@ import { useState } from 'react';
 import { useDisconnect } from 'wagmi';
 import { logout } from '~/app/_actions';
 
-const SignOutTile = () => {
+const SignOutButton = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
@@ -22,20 +23,16 @@ const SignOutTile = () => {
 
   return (
     <div className="px-1.5 my-2">
-      <div
-        onClick={() => disconnect()}
-        onKeyDown={() => disconnect()}
-        role="button"
-        tabIndex={0}
-        className="flex w-full space-x-2 rounded-lg hover:bg-zinc-700/50 items-center"
+      <Button
+        variant="destructive"
+        disabled={isDisconnecting}
+        onClick={disconnect}
+        prefixIcon={<ExitIcon />}
       >
-        <ExitIcon className="text-red-400" />
-        <div className="text-red-400 text-sm">
-          {isDisconnecting ? 'Signing Out...' : 'Sign Out'}
-        </div>
-      </div>
+        {isDisconnecting ? 'Signing Out...' : 'Sign Out'}
+      </Button>
     </div>
   );
 };
 
-export default SignOutTile;
+export default SignOutButton;

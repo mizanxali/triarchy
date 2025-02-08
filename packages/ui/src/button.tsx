@@ -2,23 +2,30 @@ import type { VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva } from 'class-variance-authority';
-
 import { cn } from '@battleground/ui';
 
 const buttonVariants = cva(
-  'font-medium text-sm py-1.5 px-3 inline-flex items-center justify-center whitespace-nowrap rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  'relative font-bold text-sm inline-flex items-center justify-center whitespace-nowrap rounded-xl transition-all duration-200 border-2 shadow-lg active:translate-y-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed',
   {
     variants: {
       variant: {
-        primary: 'bg-base-1 text-base-2 font-medium',
-        destructive: 'bg-red-800 border border-white/20',
-        disabled:
-          'disabled cursor-not-allowed bg-base-3 text-base-4 font-medium',
-        outline: '',
-        secondary: 'bg-zinc-800 border border-[#FFFFFF33]',
-        ghost: '',
-        link: '',
+        primary:
+          'bg-yellow-600 hover:bg-yellow-700 text-white border-yellow-800 shadow-yellow-900/50',
+        secondary:
+          'bg-slate-700 hover:bg-slate-800 text-gray-200 border-slate-900 shadow-slate-900/50',
+        destructive:
+          'bg-red-600 hover:bg-red-700 text-white border-red-900 shadow-red-900/50',
       },
+      size: {
+        sm: 'text-sm px-4 py-1',
+        md: 'text-base px-6 py-2',
+        lg: 'text-lg px-8 py-3',
+        icon: 'h-9 w-9 p-2',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
     },
   },
 );
@@ -28,26 +35,36 @@ interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   prefixIcon?: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'icon';
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { className, variant, children, prefixIcon, asChild = false, ...props },
+    {
+      className,
+      variant,
+      size,
+      children,
+      prefixIcon,
+      asChild = false,
+      ...props
+    },
     ref,
   ) => {
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
-        className={cn(buttonVariants({ variant, className }), 'gap-1')}
+        className={cn(buttonVariants({ variant, size, className }), 'gap-2')}
         ref={ref}
         {...props}
       >
-        {prefixIcon && <span>{prefixIcon}</span>}
+        {prefixIcon && <span className="inline-flex">{prefixIcon}</span>}
         {children}
       </Comp>
     );
   },
 );
+
 Button.displayName = 'Button';
 
-export { Button, buttonVariants };
+export { Button, buttonVariants, type ButtonProps };

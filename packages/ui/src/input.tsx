@@ -1,20 +1,48 @@
 import * as React from 'react';
-
 import { cn } from '@battleground/ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 
 const inputVariants = cva(
-  'bg-zinc-800 text-sm text-chakra flex w-full items-center gap-2 rounded-lg border-[0.5px] px-2.5 py-2 transition-all duration-200 ease-in-out border-all border-[#ffffff33]',
+  'relative flex w-full items-center gap-2 rounded-xl border-2 px-3 py-2 transition-all duration-200 shadow-md font-medium text-sm',
   {
     variants: {
       variant: {
-        default:
-          'focus-within:shadow-[0px 1px 2px -0.5px #16191D0A, inset 0px -0.5px 0px 0px #16191D1F]',
-        success: '',
-        error:
-          'border-red-400 text-red-400 focus-within:shadow-[0px_0px_0px_3px_#7F1D1D]',
-        disabled: '',
+        default: `
+          bg-yellow-950/90 
+          border-yellow-800/50 
+          text-yellow-100
+          shadow-yellow-900/20
+          focus-within:border-yellow-600 
+          focus-within:shadow-yellow-600/20
+          placeholder:text-yellow-100/50
+        `,
+        success: `
+          bg-green-950/90 
+          border-green-700
+          text-green-100
+          shadow-green-900/20
+          focus-within:border-green-500
+          focus-within:shadow-green-600/20
+          placeholder:text-green-100/50
+        `,
+        error: `
+          bg-red-950/90 
+          border-red-700
+          text-red-100
+          shadow-red-900/20
+          focus-within:border-red-500
+          focus-within:shadow-red-600/20
+          placeholder:text-red-100/50
+        `,
+        disabled: `
+          bg-zinc-950/90 
+          border-zinc-700
+          text-slate-500
+          shadow-slate-900/20
+          cursor-not-allowed
+          placeholder:text-slate-600
+        `,
       },
     },
     defaultVariants: {
@@ -60,9 +88,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       setInputValue(value?.toString() ?? '');
     }, [value]);
 
+    const iconClasses = cn(
+      'opacity-70',
+      variant === 'success' && 'text-green-200',
+      variant === 'error' && 'text-red-200',
+      variant === 'disabled' && 'text-slate-500',
+    );
+
+    const clearButtonClasses = cn(
+      'cursor-pointer hover:opacity-100 transition-opacity',
+      variant === 'disabled' ? 'opacity-50 cursor-not-allowed' : 'opacity-70',
+    );
+
     return (
       <div className={cn(inputVariants({ variant, className }))}>
-        {icon && <div className="text-[#FFFFFF66]">{icon}</div>}
+        {icon && <div className={iconClasses}>{icon}</div>}
         <input
           value={inputValue}
           maxLength={maxCharacterCount}
@@ -80,13 +120,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             onChange?.(e);
           }}
           {...props}
-          className="bg-transparent focus:outline-none w-full"
+          className="bg-transparent focus:outline-none w-full placeholder:opacity-50"
         />
         {suffixIcon && (
           <button
             disabled={variant === 'disabled'}
             type="button"
-            className="cursor-pointer"
+            className={clearButtonClasses}
             onClick={onClose}
           >
             {suffixIcon}
@@ -96,7 +136,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <button
             disabled={variant === 'disabled'}
             type="button"
-            className="cursor-pointer"
+            className={clearButtonClasses}
             onClick={() => {
               setInputValue('');
               onChange?.({
@@ -113,4 +153,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 Input.displayName = 'Input';
 
-export { Input, inputVariants };
+export { Input, inputVariants, type InputProps };

@@ -3,22 +3,21 @@
 import { Button } from '@battleground/ui/button';
 import { Input } from '@battleground/ui/input';
 import React, { useState } from 'react';
-import SignOutTile from '../Navigation/Header/Profile/SignOutTile';
 import { api } from '~/trpc/react';
-import { useRoom } from '@huddle01/react';
-import { useGameSetAtom } from '~/app/_atoms/game.atom';
+import SignOutButton from '../common/SignOutButton';
 
 interface Props {
   walletAddress: string;
-  joinRoom: (data: { roomId: string; token: string }) => void;
+  joinRoom: (data: { roomId: string; token: string }) => Promise<unknown>;
 }
 
 const Welcome = ({ walletAddress, joinRoom }: Props) => {
+  const [createdGameCode, setCreatedGameCode] = useState('');
   const [gameCode, setGameCode] = useState('');
 
   const { mutateAsync, isPending } = api.room.createRoom.useMutation({
     onSuccess: async (roomId) => {
-      setGameCode(roomId);
+      setCreatedGameCode(roomId);
       await createAccessToken({ roomId });
     },
   });
@@ -26,45 +25,52 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
   const { mutateAsync: createAccessToken } =
     api.room.createAccessToken.useMutation({
       onSuccess: async (token) => {
+        const roomId = createdGameCode.length > 0 ? createdGameCode : gameCode;
+        if (roomId.length === 0) return;
         await joinRoom({
-          roomId: gameCode,
+          roomId,
           token,
         });
       },
     });
 
   return (
-    <div className="w-full h-screen flex flex-col gap-2 justify-center items-center">
-      <div className="flex flex-col gap-2 justify-center items-center w-1/3">
-        <h3 className="text-zinc-200 text-base font-medium">
-          Welcome, {walletAddress}
+    <div className="w-full h-screen flex flex-col justify-center items-center">
+      <div className="flex flex-col gap-6 justify-center items-center w-1/2">
+        <h3 className="text-zinc-200 text-4xl font-medium text-center">
+          Welcome {walletAddress}
         </h3>
-        <Button
-          disabled={isPending}
-          onClick={async () => {
-            await mutateAsync();
-          }}
-          variant={'primary'}
-        >
-          {isPending ? 'Creating Game...' : 'Create Game'}
-        </Button>
-        <h6>OR</h6>
-        <Input
-          className="w-3/4"
-          value={gameCode}
-          onChange={(e) => setGameCode(e.target.value)}
-          placeholder="Enter Game Code"
-        />
-        <Button
-          disabled={!gameCode}
-          onClick={async () => {
-            await createAccessToken({ roomId: gameCode });
-          }}
-          variant={'primary'}
-        >
-          Join Game
-        </Button>
-        <SignOutTile />
+        <div className="w-full grid grid-cols-2">
+          <div className="flex flex-col items-center justify-center">
+            <Button
+              disabled={isPending}
+              onClick={async () => {
+                await mutateAsync();
+              }}
+              variant={'primary'}
+            >
+              {isPending ? 'Creating Game...' : 'Create Game'}
+            </Button>
+          </div>
+          <div className="flex-1 border-l-2 border-gray-600 flex flex-col items-center gap-4 p-4 w-full">
+            <Input
+              className="w-3/4"
+              value={gameCode}
+              onChange={(e) => setGameCode(e.target.value)}
+              placeholder="Enter Game Code"
+            />
+            <Button
+              disabled={!gameCode}
+              onClick={async () => {
+                await createAccessToken({ roomId: gameCode });
+              }}
+              variant={'primary'}
+            >
+              Join Game
+            </Button>
+          </div>
+        </div>
+        <SignOutButton />
       </div>
     </div>
   );
