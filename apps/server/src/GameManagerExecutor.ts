@@ -15,19 +15,23 @@ class GameManagerExecutor {
   }
 
   private async createAccessToken(roomId: string) {
-    const token = new AccessToken({
-      apiKey: process.env.HUDDLE01_API_KEY ?? '',
-      roomId,
-      role: Role.HOST,
-      options: {
-        metadata: {
-          displayName: 'GameExecutor',
+    try {
+      const token = new AccessToken({
+        apiKey: process.env.HUDDLE01_API_KEY ?? '',
+        roomId,
+        role: Role.HOST,
+        options: {
+          metadata: {
+            displayName: 'GameExecutor',
+          },
+          maxPeersAllowed: 3,
         },
-        maxPeersAllowed: 3,
-      },
-    });
+      });
 
-    return token.toJwt();
+      return token.toJwt();
+    } catch (error) {
+      console.error('Error creating access token', error);
+    }
   }
 
   async joinRoom(roomId: string) {
@@ -42,18 +46,20 @@ class GameManagerExecutor {
 
     const token = await this.createAccessToken(roomId);
 
+    if (!token) return;
+
     await client.joinRoom({ roomId, token });
 
     console.log('GameExecutor joined');
+
+    const gameExecutor = new GameExecutor(client);
+
+    this.gameExecutorMap.set(roomId, gameExecutor);
 
     client.room.on('room-closed', () => {
       console.log('Room closed');
       this.gameExecutorMap.delete(roomId);
     });
-
-    const gameExecutor = new GameExecutor(client);
-
-    this.gameExecutorMap.set(roomId, gameExecutor);
   }
 }
 

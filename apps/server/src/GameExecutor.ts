@@ -8,11 +8,11 @@ import { CARD_DECK } from './constants';
 class GameExecutor {
   #client: HuddleClient;
 
-  blackWalletAddress = '';
-  whiteWalletAddress = '';
+  blackWalletAddress: string | undefined;
+  whiteWalletAddress: string | undefined;
 
-  blackPeerId = '';
-  whitePeerId = '';
+  blackPeerId: string | undefined;
+  whitePeerId: string | undefined;
 
   blackCards: TCard[] = [];
   whiteCards: TCard[] = [];
@@ -54,18 +54,18 @@ class GameExecutor {
       }
 
       if (this.blackPeerId && this.whitePeerId) {
-        // send both players their cards
-        this.#client.localPeer.sendData({
-          to: [this.blackPeerId],
-          label: 'initial-cards',
-          payload: JSON.stringify(this.blackCards),
-        });
-
-        this.#client.localPeer.sendData({
-          to: [this.whitePeerId],
-          label: 'initial-cards',
-          payload: JSON.stringify(this.whiteCards),
-        });
+        Promise.all([
+          this.sendData({
+            to: this.blackPeerId,
+            label: 'initial-cards',
+            payload: JSON.stringify(this.blackCards),
+          }),
+          this.sendData({
+            to: this.whitePeerId,
+            label: 'initial-cards',
+            payload: JSON.stringify(this.whiteCards),
+          }),
+        ]);
       }
     });
 
@@ -116,14 +116,14 @@ class GameExecutor {
 
   private async receivedPing(from: string, message: string) {
     if (from === this.blackPeerId) {
-      this.#client.localPeer.sendData({
-        to: [this.whitePeerId],
+      await this.sendData({
+        to: this.whitePeerId,
         label: 'pong',
         payload: message,
       });
     } else if (from === this.whitePeerId) {
-      this.#client.localPeer.sendData({
-        to: [this.blackPeerId],
+      await this.sendData({
+        to: this.blackPeerId,
         label: 'pong',
         payload: message,
       });
@@ -138,24 +138,26 @@ class GameExecutor {
 
       // if the other player has not played yet, send the redacted played card
       if (!this.whiteActiveCard) {
-        this.#client.localPeer.sendData({
-          to: [this.whitePeerId],
+        this.sendData({
+          to: this.whitePeerId,
           label: 'opponent-card-played',
           payload: 'redacted',
         });
       }
       // else send the actual played card
       else {
-        this.#client.localPeer.sendData({
-          to: [this.whitePeerId],
-          label: 'opponent-card-played',
-          payload: card,
-        });
-        this.#client.localPeer.sendData({
-          to: [this.blackPeerId],
-          label: 'opponent-card-played',
-          payload: this.whiteActiveCard,
-        });
+        Promise.all([
+          this.sendData({
+            to: this.whitePeerId,
+            label: 'opponent-card-played',
+            payload: card,
+          }),
+          this.sendData({
+            to: this.blackPeerId,
+            label: 'opponent-card-played',
+            payload: this.whiteActiveCard,
+          }),
+        ]);
       }
     } else if (from === this.whitePeerId) {
       console.log('White played', card);
@@ -164,24 +166,26 @@ class GameExecutor {
 
       // if the other player has not played yet, send the redacted played card
       if (!this.blackActiveCard) {
-        this.#client.localPeer.sendData({
-          to: [this.blackPeerId],
+        this.sendData({
+          to: this.blackPeerId,
           label: 'opponent-card-played',
           payload: 'redacted',
         });
       }
       // else send the actual played card
       else {
-        this.#client.localPeer.sendData({
-          to: [this.blackPeerId],
-          label: 'opponent-card-played',
-          payload: card,
-        });
-        this.#client.localPeer.sendData({
-          to: [this.whitePeerId],
-          label: 'opponent-card-played',
-          payload: this.blackActiveCard,
-        });
+        Promise.all([
+          this.sendData({
+            to: this.blackPeerId,
+            label: 'opponent-card-played',
+            payload: card,
+          }),
+          this.sendData({
+            to: this.whitePeerId,
+            label: 'opponent-card-played',
+            payload: this.blackActiveCard,
+          }),
+        ]);
       }
     }
 
@@ -229,22 +233,24 @@ class GameExecutor {
     this.resetCardsAfterTurn();
 
     // send the updated cards to the players
-    this.#client.localPeer.sendData({
-      to: [this.blackPeerId],
-      label: 'turn-win',
-      payload: JSON.stringify({
-        cards: this.blackCards,
-        wonCards: this.blackWonCards,
+    Promise.all([
+      this.sendData({
+        to: this.blackPeerId,
+        label: 'turn-win',
+        payload: JSON.stringify({
+          cards: this.blackCards,
+          wonCards: this.blackWonCards,
+        }),
       }),
-    });
-    this.#client.localPeer.sendData({
-      to: [this.whitePeerId],
-      label: 'turn-lose',
-      payload: JSON.stringify({
-        cards: this.whiteCards,
-        wonCards: this.whiteWonCards,
+      this.sendData({
+        to: this.whitePeerId,
+        label: 'turn-lose',
+        payload: JSON.stringify({
+          cards: this.whiteCards,
+          wonCards: this.whiteWonCards,
+        }),
       }),
-    });
+    ]);
   }
 
   private async whiteWinsTurn() {
@@ -259,22 +265,24 @@ class GameExecutor {
     this.resetCardsAfterTurn();
 
     // send the updated cards to the players
-    this.#client.localPeer.sendData({
-      to: [this.whitePeerId],
-      label: 'turn-win',
-      payload: JSON.stringify({
-        cards: this.whiteCards,
-        wonCards: this.whiteWonCards,
+    Promise.all([
+      this.sendData({
+        to: this.whitePeerId,
+        label: 'turn-win',
+        payload: JSON.stringify({
+          cards: this.whiteCards,
+          wonCards: this.whiteWonCards,
+        }),
       }),
-    });
-    this.#client.localPeer.sendData({
-      to: [this.blackPeerId],
-      label: 'turn-lose',
-      payload: JSON.stringify({
-        cards: this.blackCards,
-        wonCards: this.blackWonCards,
+      this.sendData({
+        to: this.blackPeerId,
+        label: 'turn-lose',
+        payload: JSON.stringify({
+          cards: this.blackCards,
+          wonCards: this.blackWonCards,
+        }),
       }),
-    });
+    ]);
   }
 
   private async turnDrawn() {
@@ -286,22 +294,24 @@ class GameExecutor {
     this.resetCardsAfterTurn();
 
     // send the updated cards to the players
-    this.#client.localPeer.sendData({
-      to: [this.blackPeerId],
-      label: 'turn-draw',
-      payload: JSON.stringify({
-        cards: this.blackCards,
-        wonCards: this.blackWonCards,
+    Promise.all([
+      this.sendData({
+        to: this.blackPeerId,
+        label: 'turn-draw',
+        payload: JSON.stringify({
+          cards: this.blackCards,
+          wonCards: this.blackWonCards,
+        }),
       }),
-    });
-    this.#client.localPeer.sendData({
-      to: [this.whitePeerId],
-      label: 'turn-draw',
-      payload: JSON.stringify({
-        cards: this.whiteCards,
-        wonCards: this.whiteWonCards,
+      this.sendData({
+        to: this.whitePeerId,
+        label: 'turn-draw',
+        payload: JSON.stringify({
+          cards: this.whiteCards,
+          wonCards: this.whiteWonCards,
+        }),
       }),
-    });
+    ]);
   }
 
   private async resetCardsAfterTurn() {
@@ -348,27 +358,29 @@ class GameExecutor {
       ) {
         console.log('Black wins the game');
 
-        // wait for 2 seconds before sending the win message
-        await this.sleep(2000);
+        // wait for 1 second before sending the win message
+        await this.sleep(1000);
 
-        this.#client.localPeer.sendData({
-          to: [this.blackPeerId],
-          label: 'game-win',
-          payload: 'You win!',
-        });
-        this.#client.localPeer.sendData({
-          to: [this.whitePeerId],
-          label: 'game-lose',
-          payload: 'You lose!',
-        });
+        Promise.all([
+          this.sendData({
+            to: this.blackPeerId,
+            label: 'game-win',
+            payload: 'You win!',
+          }),
+          this.sendData({
+            to: this.whitePeerId,
+            label: 'game-lose',
+            payload: 'You lose!',
+          }),
+        ]);
 
         // close the room
         this.#client.room.close();
 
         // update the database
         await Promise.all([
-          this.updatePlayerStats(this.blackWalletAddress, true),
-          this.updatePlayerStats(this.whiteWalletAddress, false),
+          this.updatePlayerStats(true, this.blackWalletAddress),
+          this.updatePlayerStats(false, this.whiteWalletAddress),
         ]);
 
         return;
@@ -390,24 +402,26 @@ class GameExecutor {
         // wait for 2 seconds before sending the win message
         await this.sleep(2000);
 
-        this.#client.localPeer.sendData({
-          to: [this.whitePeerId],
-          label: 'game-win',
-          payload: 'You win!',
-        });
-        this.#client.localPeer.sendData({
-          to: [this.blackPeerId],
-          label: 'game-lose',
-          payload: 'You lose!',
-        });
+        Promise.all([
+          this.sendData({
+            to: this.whitePeerId,
+            label: 'game-win',
+            payload: 'You win!',
+          }),
+          this.sendData({
+            to: this.blackPeerId,
+            label: 'game-lose',
+            payload: 'You lose!',
+          }),
+        ]);
 
         // close the room
         this.#client.room.close();
 
         // update the database
         await Promise.all([
-          this.updatePlayerStats(this.whiteWalletAddress, true),
-          this.updatePlayerStats(this.blackWalletAddress, false),
+          this.updatePlayerStats(true, this.whiteWalletAddress),
+          this.updatePlayerStats(false, this.blackWalletAddress),
         ]);
 
         return;
@@ -415,19 +429,45 @@ class GameExecutor {
     }
   }
 
-  private async updatePlayerStats(walletAddress: string, didWin: boolean) {
-    const user = await db.query.User.findFirst({
-      where: (user, { eq }) => eq(user.walletAddress, walletAddress),
-    });
+  private async updatePlayerStats(didWin: boolean, walletAddress?: string) {
+    if (!walletAddress) return;
 
-    if (user) {
-      await db
-        .update(User)
-        .set({
-          gamesWon: didWin ? user.gamesWon + 1 : user.gamesWon,
-          gamesLost: didWin ? user.gamesLost : user.gamesLost + 1,
-        })
-        .where(eq(User.walletAddress, walletAddress));
+    try {
+      const user = await db.query.User.findFirst({
+        where: (user, { eq }) => eq(user.walletAddress, walletAddress),
+      });
+
+      if (user) {
+        await db
+          .update(User)
+          .set({
+            gamesWon: didWin ? user.gamesWon + 1 : user.gamesWon,
+            gamesLost: didWin ? user.gamesLost : user.gamesLost + 1,
+          })
+          .where(eq(User.walletAddress, walletAddress));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  private async sendData({
+    to,
+    label,
+    payload,
+  }: { to?: string; label: string; payload: string }) {
+    if (!to) return;
+
+    console.log('sendData called ', to, label);
+
+    try {
+      await this.#client.localPeer.sendData({
+        to: [to],
+        label,
+        payload,
+      });
+    } catch (err) {
+      console.error(err);
     }
   }
 }
