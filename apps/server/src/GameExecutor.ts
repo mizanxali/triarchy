@@ -86,10 +86,12 @@ class GameExecutor {
     this.#client.room.on('peer-left', (event) => {
       if (event.peerId === this.blackPeerId) {
         console.log('Black player left');
-        this.blackPeerId = '';
+        this.blackPeerId = undefined;
+        this.blackWalletAddress = undefined;
       } else if (event.peerId === this.whitePeerId) {
         console.log('White player left');
-        this.whitePeerId = '';
+        this.whitePeerId = undefined;
+        this.whiteWalletAddress = undefined;
       }
 
       if (!this.blackPeerId || !this.whitePeerId) {
@@ -467,7 +469,7 @@ class GameExecutor {
         payload,
       });
     } catch (err) {
-      console.error(err);
+      console.error('Error sending data', err);
     }
   }
 }

@@ -50,7 +50,7 @@ class GameManagerExecutor {
 
     await client.joinRoom({ roomId, token });
 
-    console.log('GameExecutor joined');
+    console.log('GameExecutor joined', roomId);
 
     const gameExecutor = new GameExecutor(client);
 
