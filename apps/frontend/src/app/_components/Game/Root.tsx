@@ -3,7 +3,7 @@
 import { useDataMessage, useRoom } from '@huddle01/react';
 import Welcome from '../Home/Welcome';
 import GameWrapper from './GameWrapper';
-import { useGameAtom } from '~/app/_atoms/game.atom';
+import { useGameAtom, useGameResetAtom } from '~/app/_atoms/game.atom';
 import { v4 as uuidv4 } from 'uuid';
 import type { TCard } from '@battleground/validators';
 
@@ -13,6 +13,7 @@ interface Props {
 
 const Root = ({ walletAddress }: Props) => {
   const [{ gameCode }, setGameAtom] = useGameAtom();
+  const resetGameAtom = useGameResetAtom();
 
   const { joinRoom, closeRoom } = useRoom({
     onJoin: ({ room }) => {
@@ -25,18 +26,12 @@ const Root = ({ walletAddress }: Props) => {
     },
     onLeave: (data) => {
       if (data.reason === 'MAX_PEERS_REACHED') alert('Game is full');
-      setGameAtom((prev) => ({
-        ...prev,
-        gameCode: undefined,
-      }));
+      resetGameAtom();
       closeRoom();
     },
     onPeerLeft: () => {
       alert('Opponent left the game');
-      setGameAtom((prev) => ({
-        ...prev,
-        gameCode: undefined,
-      }));
+      resetGameAtom();
       closeRoom();
     },
   });
@@ -131,10 +126,7 @@ const Root = ({ walletAddress }: Props) => {
   };
 
   const onGameOver = () => {
-    setGameAtom((prev) => ({
-      ...prev,
-      gameCode: undefined,
-    }));
+    resetGameAtom();
     closeRoom();
   };
 

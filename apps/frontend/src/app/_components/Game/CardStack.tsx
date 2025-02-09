@@ -1,9 +1,8 @@
-import { cn } from '@battleground/ui';
 import type { TCard } from '@battleground/validators';
 import { useDataMessage, usePeerIds, useRoom } from '@huddle01/react';
 import { Role } from '@huddle01/server-sdk/auth';
 import { useGameAtom } from '~/app/_atoms/game.atom';
-import { CARD_COLOR_MAP } from '~/app/_constants';
+import Card from './Card';
 
 const CardStack = () => {
   const { state } = useRoom();
@@ -50,61 +49,48 @@ const CardStack = () => {
     <div className="grid grid-cols-2">
       <div className="flex flex-row justify-start gap-2.5 items-end">
         {cardsDeck.map(({ card, id }) => (
-          <div
+          <Card
             key={id}
-            className={cn(
-              'w-36 h-56 cursor-pointer rounded-lg text-black text-3xl font-bold flex items-center justify-center',
-              CARD_COLOR_MAP[card],
-              'transform transition-transform duration-200 ease-out hover:scale-105',
-            )}
+            id={id}
+            card={card}
             onClick={() => onPlayCardHandler(card, id)}
-          >
-            {card !== 'redacted' && <span>{card}</span>}
-          </div>
+            size="medium"
+          />
         ))}
       </div>
 
       <div className="flex flex-row justify-end items-end gap-2.5">
         <div className="flex flex-col gap-2.5 items-center justify-end">
           {archers.map(({ card, id }) => (
-            <div
+            <Card
               key={id}
-              className={cn(
-                'w-28 h-44 cursor-pointer rounded-lg text-black text-3xl font-bold flex items-center justify-center',
-                CARD_COLOR_MAP[card],
-                'transform transition-transform duration-200 ease-out hover:scale-105',
-              )}
-            >
-              <span>{card}</span>
-            </div>
+              id={id}
+              card={card}
+              onClick={() => onPlayCardHandler(card, id)}
+              size="small"
+            />
           ))}
         </div>
         <div className="flex flex-col gap-2.5 items-center justify-end">
           {swordsmen.map(({ card, id }) => (
-            <div
+            <Card
               key={id}
-              className={cn(
-                'w-28 h-44 cursor-pointer rounded-lg text-black text-3xl font-bold flex items-center justify-center',
-                CARD_COLOR_MAP[card],
-                'transform transition-transform duration-200 ease-out hover:scale-105',
-              )}
-            >
-              <span>{card}</span>
-            </div>
+              id={id}
+              card={card}
+              onClick={() => onPlayCardHandler(card, id)}
+              size="small"
+            />
           ))}
         </div>
         <div className="flex flex-col gap-2.5 items-center justify-end">
           {horsemen.map(({ card, id }) => (
-            <div
+            <Card
               key={id}
-              className={cn(
-                'w-28 h-44 cursor-pointer rounded-lg text-black text-3xl font-bold flex items-center justify-center',
-                CARD_COLOR_MAP[card],
-                'transform transition-transform duration-200 ease-out hover:scale-105',
-              )}
-            >
-              <span>{card}</span>
-            </div>
+              id={id}
+              card={card}
+              onClick={() => onPlayCardHandler(card, id)}
+              size="small"
+            />
           ))}
         </div>
       </div>

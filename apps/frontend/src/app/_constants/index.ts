@@ -24,3 +24,28 @@ export const CARD_COLOR_MAP: Record<TCard | 'redacted', string> = {
   H8: 'bg-stone-200',
   redacted: 'bg-gray-500',
 };
+
+export const CARD_BG_IMAGE_MAP: Record<TCard | 'redacted', string> = {
+  A2: '/cards/archer.png',
+  A3: '/cards/archer.png',
+  A4: '/cards/archer.png',
+  A5: '/cards/archer.png',
+  A6: '/cards/archer.png',
+  A7: '/cards/archer.png',
+  A8: '/cards/archer.png',
+  S2: '/cards/swordsman.png',
+  S3: '/cards/swordsman.png',
+  S4: '/cards/swordsman.png',
+  S5: '/cards/swordsman.png',
+  S6: '/cards/swordsman.png',
+  S7: '/cards/swordsman.png',
+  S8: '/cards/swordsman.png',
+  H2: '/cards/horseman.png',
+  H3: '/cards/horseman.png',
+  H4: '/cards/horseman.png',
+  H5: '/cards/horseman.png',
+  H6: '/cards/horseman.png',
+  H7: '/cards/horseman.png',
+  H8: '/cards/horseman.png',
+  redacted: '/cards/redacted.png',
+};
