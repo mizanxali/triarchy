@@ -18,8 +18,8 @@ const main = async () => {
     res.send('Room Joined!');
   });
 
-  app.listen(7878, () => {
-    console.log('Example app listening on port 7878!');
+  app.listen(process.env.PORT ?? 7878, () => {
+    console.log(`Example app listening on port ${process.env.PORT}!`);
   });
 };
 
