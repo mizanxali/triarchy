@@ -114,11 +114,7 @@ class GameExecutor {
           this.whiteWalletAddress = undefined;
         }
 
-        if (!this.blackPeerId || !this.whitePeerId) {
-          console.log('Closing room');
-          this.#client.room.close();
-          this.dispose();
-        }
+        if (!this.blackPeerId || !this.whitePeerId) this.dispose();
       } catch (error) {
         console.error('Error in peer-left handler:', error);
       }
@@ -132,32 +128,40 @@ class GameExecutor {
 
   // add cleanup method
   public dispose() {
-    if (this.newPeerHandler) {
-      this.#client.room.off('new-peer-joined', this.newPeerHandler);
-      this.newPeerHandler = undefined;
-    }
+    try {
+      console.log('Closing room');
 
-    if (this.receiveDataHandler) {
-      this.#client.localPeer.off('receive-data', this.receiveDataHandler);
-      this.receiveDataHandler = undefined;
-    }
+      if (this.newPeerHandler) {
+        this.#client.room.off('new-peer-joined', this.newPeerHandler);
+        this.newPeerHandler = undefined;
+      }
 
-    if (this.peerLeftHandler) {
-      this.#client.room.off('peer-left', this.peerLeftHandler);
-      this.peerLeftHandler = undefined;
-    }
+      if (this.receiveDataHandler) {
+        this.#client.localPeer.off('receive-data', this.receiveDataHandler);
+        this.receiveDataHandler = undefined;
+      }
 
-    // clear remaining state
-    this.blackPeerId = undefined;
-    this.whitePeerId = undefined;
-    this.blackWalletAddress = undefined;
-    this.whiteWalletAddress = undefined;
-    this.blackCards = [];
-    this.whiteCards = [];
-    this.blackActiveCard = undefined;
-    this.whiteActiveCard = undefined;
-    this.blackWonCards = [];
-    this.whiteWonCards = [];
+      if (this.peerLeftHandler) {
+        this.#client.room.off('peer-left', this.peerLeftHandler);
+        this.peerLeftHandler = undefined;
+      }
+
+      this.#client.room.close();
+
+      // clear remaining state
+      this.blackPeerId = undefined;
+      this.whitePeerId = undefined;
+      this.blackWalletAddress = undefined;
+      this.whiteWalletAddress = undefined;
+      this.blackCards = [];
+      this.whiteCards = [];
+      this.blackActiveCard = undefined;
+      this.whiteActiveCard = undefined;
+      this.blackWonCards = [];
+      this.whiteWonCards = [];
+    } catch (error) {
+      console.error('Error in dispose method:', error);
+    }
   }
 
   private generateInitialCards() {
@@ -436,7 +440,6 @@ class GameExecutor {
         ]);
 
         // close the room
-        this.#client.room.close();
         this.dispose();
 
         // update the database
@@ -478,7 +481,6 @@ class GameExecutor {
         ]);
 
         // close the room
-        this.#client.room.close();
         this.dispose();
 
         // update the database
