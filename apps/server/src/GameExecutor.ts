@@ -1,8 +1,9 @@
+import { eq } from '@battleground/db';
 import { db } from '@battleground/db/client';
 import { User } from '@battleground/db/schema';
 import type { TCard, TPeerMetadata } from '@battleground/validators';
-import { eq } from '@battleground/db';
 import type { HuddleClient } from '@huddle01/web-core';
+import type { LocalPeerEvents, RoomEvents } from '@huddle01/web-core/types';
 import { CARD_DECK } from './constants';
 
 class GameExecutor {
@@ -23,82 +24,140 @@ class GameExecutor {
   blackWonCards: TCard[] = [];
   whiteWonCards: TCard[] = [];
 
+  private newPeerHandler:
+    | ((data: RoomEvents['new-peer-joined'][0]) => void)
+    | undefined;
+  private receiveDataHandler:
+    | ((data: LocalPeerEvents['receive-data'][0]) => void)
+    | undefined;
+  private peerLeftHandler:
+    | ((data: RoomEvents['peer-left'][0]) => void)
+    | undefined;
+
   constructor(client: HuddleClient) {
     this.#client = client;
 
-    this.#client.room.on('new-peer-joined', (event) => {
-      if (!this.blackPeerId) {
-        console.log('Black player joined');
+    this.newPeerHandler = (event) => {
+      try {
+        if (!this.blackPeerId) {
+          console.log('Black player joined');
 
-        // set black player peerId
-        this.blackPeerId = event.peer.peerId;
+          // set black player peerId
+          this.blackPeerId = event.peer.peerId;
 
-        // set black player wallet address
-        const metadata = event.peer.getMetadata() as TPeerMetadata;
-        this.blackWalletAddress = metadata.displayName;
+          // set black player wallet address
+          const metadata = event.peer.getMetadata() as TPeerMetadata;
+          this.blackWalletAddress = metadata.displayName;
 
-        // set black player cards
-        this.blackCards = [...this.generateInitialCards()];
-      } else if (!this.whitePeerId) {
-        console.log('White player joined');
+          // set black player cards
+          this.blackCards = [...this.generateInitialCards()];
+        } else if (!this.whitePeerId) {
+          console.log('White player joined');
 
-        // set white player peerId
-        this.whitePeerId = event.peer.peerId;
+          // set white player peerId
+          this.whitePeerId = event.peer.peerId;
 
-        // set white player wallet address
-        const metadata = event.peer.getMetadata() as TPeerMetadata;
-        this.whiteWalletAddress = metadata.displayName;
+          // set white player wallet address
+          const metadata = event.peer.getMetadata() as TPeerMetadata;
+          this.whiteWalletAddress = metadata.displayName;
 
-        // set white player cards
-        this.whiteCards = [...this.generateInitialCards()];
+          // set white player cards
+          this.whiteCards = [...this.generateInitialCards()];
+        }
+
+        if (this.blackPeerId && this.whitePeerId) {
+          Promise.all([
+            this.sendData({
+              to: this.blackPeerId,
+              label: 'initial-cards',
+              payload: JSON.stringify(this.blackCards),
+            }),
+            this.sendData({
+              to: this.whitePeerId,
+              label: 'initial-cards',
+              payload: JSON.stringify(this.whiteCards),
+            }),
+          ]);
+        }
+      } catch (error) {
+        console.error('Error in new-peer-joined handler:', error);
       }
+    };
 
-      if (this.blackPeerId && this.whitePeerId) {
-        Promise.all([
-          this.sendData({
-            to: this.blackPeerId,
-            label: 'initial-cards',
-            payload: JSON.stringify(this.blackCards),
-          }),
-          this.sendData({
-            to: this.whitePeerId,
-            label: 'initial-cards',
-            payload: JSON.stringify(this.whiteCards),
-          }),
-        ]);
+    this.receiveDataHandler = (data) => {
+      try {
+        const { from, label, payload } = data;
+
+        switch (label) {
+          case 'ping':
+            this.receivedPing(from, payload);
+            break;
+
+          case 'card-played':
+            this.cardPlayed(from, payload);
+            break;
+        }
+      } catch (error) {
+        console.error('Error in receive-data handler:', error);
       }
-    });
+    };
 
-    this.#client.localPeer.on('receive-data', (data) => {
-      const { from, label, payload } = data;
+    this.peerLeftHandler = (event) => {
+      try {
+        if (event.peerId === this.blackPeerId) {
+          console.log('Black player left');
+          this.blackPeerId = undefined;
+          this.blackWalletAddress = undefined;
+        } else if (event.peerId === this.whitePeerId) {
+          console.log('White player left');
+          this.whitePeerId = undefined;
+          this.whiteWalletAddress = undefined;
+        }
 
-      switch (label) {
-        case 'ping':
-          this.receivedPing(from, payload);
-          break;
-
-        case 'card-played':
-          this.cardPlayed(from, payload);
-          break;
+        if (!this.blackPeerId || !this.whitePeerId) {
+          console.log('Closing room');
+          this.#client.room.close();
+          this.dispose();
+        }
+      } catch (error) {
+        console.error('Error in peer-left handler:', error);
       }
-    });
+    };
 
-    this.#client.room.on('peer-left', (event) => {
-      if (event.peerId === this.blackPeerId) {
-        console.log('Black player left');
-        this.blackPeerId = undefined;
-        this.blackWalletAddress = undefined;
-      } else if (event.peerId === this.whitePeerId) {
-        console.log('White player left');
-        this.whitePeerId = undefined;
-        this.whiteWalletAddress = undefined;
-      }
+    // add the event listeners
+    this.#client.room.on('new-peer-joined', this.newPeerHandler);
+    this.#client.localPeer.on('receive-data', this.receiveDataHandler);
+    this.#client.room.on('peer-left', this.peerLeftHandler);
+  }
 
-      if (!this.blackPeerId || !this.whitePeerId) {
-        console.log('Closing room');
-        this.#client.room.close();
-      }
-    });
+  // add cleanup method
+  public dispose() {
+    if (this.newPeerHandler) {
+      this.#client.room.off('new-peer-joined', this.newPeerHandler);
+      this.newPeerHandler = undefined;
+    }
+
+    if (this.receiveDataHandler) {
+      this.#client.localPeer.off('receive-data', this.receiveDataHandler);
+      this.receiveDataHandler = undefined;
+    }
+
+    if (this.peerLeftHandler) {
+      this.#client.room.off('peer-left', this.peerLeftHandler);
+      this.peerLeftHandler = undefined;
+    }
+
+    // clear remaining state
+    this.blackPeerId = undefined;
+    this.whitePeerId = undefined;
+    this.blackWalletAddress = undefined;
+    this.whiteWalletAddress = undefined;
+    this.blackCards = [];
+    this.whiteCards = [];
+    this.blackActiveCard = undefined;
+    this.whiteActiveCard = undefined;
+    this.blackWonCards = [];
+    this.whiteWonCards = [];
   }
 
   private generateInitialCards() {
@@ -378,6 +437,7 @@ class GameExecutor {
 
         // close the room
         this.#client.room.close();
+        this.dispose();
 
         // update the database
         await Promise.all([
@@ -419,6 +479,7 @@ class GameExecutor {
 
         // close the room
         this.#client.room.close();
+        this.dispose();
 
         // update the database
         await Promise.all([

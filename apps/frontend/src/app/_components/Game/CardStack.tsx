@@ -52,7 +52,7 @@ const CardStack = () => {
           <Card
             key={id}
             id={id}
-            card={card}
+            card={card === 'redacted' ? undefined : card}
             onClick={() => onPlayCardHandler(card, id)}
             size="medium"
           />

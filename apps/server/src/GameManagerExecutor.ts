@@ -35,31 +35,35 @@ class GameManagerExecutor {
   }
 
   async joinRoom(roomId: string) {
-    const client = new HuddleClient({
-      projectId: process.env.HUDDLE01_PROJECT_ID ?? '',
-      options: {
-        wsPolyfill: WebSocket,
-        handlerFactory: WeriftHandler.createFactory(weriftCapabilities),
-        autoConsume: false,
-      },
-    });
+    try {
+      const client = new HuddleClient({
+        projectId: process.env.HUDDLE01_PROJECT_ID ?? '',
+        options: {
+          wsPolyfill: WebSocket,
+          handlerFactory: WeriftHandler.createFactory(weriftCapabilities),
+          autoConsume: false,
+        },
+      });
 
-    const token = await this.createAccessToken(roomId);
+      const token = await this.createAccessToken(roomId);
 
-    if (!token) return;
+      if (!token) return;
 
-    await client.joinRoom({ roomId, token });
+      await client.joinRoom({ roomId, token });
 
-    console.log('GameExecutor joined', roomId);
+      console.log('GameExecutor joined', roomId);
 
-    const gameExecutor = new GameExecutor(client);
+      const gameExecutor = new GameExecutor(client);
 
-    this.gameExecutorMap.set(roomId, gameExecutor);
+      this.gameExecutorMap.set(roomId, gameExecutor);
 
-    client.room.on('room-closed', () => {
-      console.log('Room closed');
-      this.gameExecutorMap.delete(roomId);
-    });
+      client.room.on('room-closed', () => {
+        console.log('Room closed');
+        this.gameExecutorMap.delete(roomId);
+      });
+    } catch (error) {
+      console.error('Error joining room', error);
+    }
   }
 }
 
