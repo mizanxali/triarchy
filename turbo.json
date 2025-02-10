@@ -41,7 +41,10 @@
     "POSTGRES_URL",
     "AUTH_REDIRECT_PROXY_URL",
     "AUTH_SECRET",
-    "PORT"
+    "PORT",
+    "HUDDLE01_API_KEY",
+    "SERVER_URL",
+    "ADMIN_API_KEY"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",
