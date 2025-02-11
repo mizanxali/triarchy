@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { MedievalSharp } from 'next/font/google';
+import { MedievalSharp, Sancreek } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 
 import { cn } from '@battleground/ui';
@@ -35,13 +35,22 @@ const medieval = MedievalSharp({
   variable: '--font-medieval-sharp',
 });
 
+const sancreek = Sancreek({
+  weight: ['400'],
+  style: ['normal'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sancreek',
+});
+
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          'font-medieval-sharp min-h-screen text-white antialiased',
-          medieval.className,
+          'font-sancreek min-h-screen text-white antialiased',
+          sancreek.variable,
+          medieval.variable,
         )}
         style={{
           backgroundImage: 'url(/backgrounds/battleback5.png)',

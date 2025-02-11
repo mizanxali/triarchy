@@ -28,9 +28,8 @@ export default {
       fontFamily: {
         inter: ['var(--font-inter)', ...fontFamily.sans],
         sans: ['var(--font-geist-sans)', ...fontFamily.sans],
-        chakra: ['var(--font-chakra-petch)', ...fontFamily.sans],
-        mono: ['var(--font-proto-mono)', ...fontFamily.mono],
-        'space-grotesk': ['var(--font-space-grotesk)', ...fontFamily.sans],
+        sancreek: ['var(--font-sancreek)', ...fontFamily.sans],
+        medievalSharp: ['var(--font-medieval-sharp)', ...fontFamily.sans],
       },
       boxShadow: {
         1: '0px 9px 45px 0px (rgba(0, 0, 0, 0.12)), 0px 2px 6px 0px (rgba(0, 0, 0, 0.20))',

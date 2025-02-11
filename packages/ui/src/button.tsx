@@ -5,7 +5,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '@battleground/ui';
 
 const buttonVariants = cva(
-  'relative font-bold text-sm inline-flex items-center justify-center whitespace-nowrap rounded-xl transition-all duration-200 border-2 shadow-lg active:translate-y-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed',
+  'font-medievalSharp relative font-bold text-sm inline-flex items-center justify-center whitespace-nowrap rounded-xl transition-all duration-200 border-2 shadow-lg active:translate-y-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed',
   {
     variants: {
       variant: {
