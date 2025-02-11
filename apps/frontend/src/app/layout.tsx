@@ -11,6 +11,7 @@ import '~/app/globals.css';
 
 import { Web3Provider } from './_layouts/Web3Provider';
 import { MyHuddleProvider } from './_layouts/HuddleProvider';
+import Rules from './_components/common/Rules';
 
 export const viewport: Viewport = {
   themeColor: [{ media: '(prefers-color-scheme: dark)', color: 'black' }],
@@ -58,6 +59,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           backgroundPosition: 'center',
         }}
       >
+        <Rules />
         <Web3Provider>
           <SessionProvider>
             <MyHuddleProvider>

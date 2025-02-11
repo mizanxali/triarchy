@@ -15,7 +15,10 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
   const [createdGameCode, setCreatedGameCode] = useState('');
   const [gameCode, setGameCode] = useState('');
 
-  const { mutateAsync, isPending } = api.room.createRoom.useMutation({
+  const [isCreatingGame, setIsCreatingGame] = useState(false);
+  const [isJoiningGame, setIsJoiningGame] = useState(false);
+
+  const { mutateAsync } = api.room.createRoom.useMutation({
     onSuccess: async (roomId) => {
       setCreatedGameCode(roomId);
       await createAccessToken({ roomId });
@@ -31,6 +34,8 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
           roomId,
           token,
         });
+        setIsCreatingGame(false);
+        setIsJoiningGame(false);
       },
     });
 
@@ -43,13 +48,14 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
         <div className="w-full grid grid-cols-2">
           <div className="flex flex-col items-center justify-center">
             <Button
-              disabled={isPending}
+              disabled={isCreatingGame}
               onClick={async () => {
+                setIsCreatingGame(true);
                 await mutateAsync();
               }}
               variant={'primary'}
             >
-              {isPending ? 'Creating Game...' : 'Create Game'}
+              {isCreatingGame ? 'Creating Game...' : 'Create Game'}
             </Button>
           </div>
           <div className="flex-1 border-l-2 border-gray-600 flex flex-col items-center gap-4 p-4 w-full">
@@ -60,8 +66,9 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
               placeholder="Enter Game Code"
             />
             <Button
-              disabled={!gameCode}
+              disabled={!gameCode || isJoiningGame}
               onClick={async () => {
+                setIsJoiningGame(true);
                 await createAccessToken({ roomId: gameCode });
               }}
               variant={'primary'}
