@@ -1,24 +1,34 @@
 'use client';
 
-import { CircleHelp } from 'lucide-react';
 import { Button } from '@battleground/ui/button';
-import { useMiscAtom } from '~/app/_atoms/misc.atom';
+import { CircleHelp } from 'lucide-react';
 import { useState } from 'react';
+import { useGameAtomValue } from '~/app/_atoms/game.atom';
+import { useMiscAtom } from '~/app/_atoms/misc.atom';
+import MusicButton from '../Button/MusicButton';
 
 const Rules = () => {
   const [{ showRules }, setMisc] = useMiscAtom();
+  const { gameCode } = useGameAtomValue();
   const [activeTab, setActiveTab] = useState('howToPlay');
 
   if (!showRules)
     return (
-      <Button
-        className="fixed top-8 right-8"
-        variant={'primary'}
-        size="icon"
-        onClick={() => setMisc({ showRules: true })}
-      >
-        <CircleHelp size={26} />
-      </Button>
+      <div className="fixed top-8 right-8 flex gap-2">
+        {gameCode ? <MusicButton /> : null}
+        <Button
+          variant={'primary'}
+          size="icon"
+          onClick={() =>
+            setMisc((prev) => ({
+              ...prev,
+              showRules: true,
+            }))
+          }
+        >
+          <CircleHelp size={26} />
+        </Button>
+      </div>
     );
 
   return (
@@ -180,7 +190,7 @@ const Rules = () => {
             type="button"
             variant="primary"
             className="flex items-center justify-center mx-auto w-72"
-            onClick={() => setMisc({ showRules: false })}
+            onClick={() => setMisc((prev) => ({ ...prev, showRules: false }))}
           >
             Done
           </Button>
