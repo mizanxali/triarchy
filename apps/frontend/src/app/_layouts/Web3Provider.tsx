@@ -10,25 +10,16 @@ import { env } from '~/env';
 
 const config = createConfig(
   getDefaultConfig({
-    // Your dApps chains
     chains: [hudlChain],
-
     transports: {
-      // RPC URL for each chain
       [mainnet.id]: http(env.NEXT_PUBLIC_ALCHEMY_URL),
       [hudlChain.id]: http('https://huddle-testnet.rpc.caldera.xyz/http'),
     },
-
-    // Required API Keys
     walletConnectProjectId: env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
-
-    // Required App Info
-    appName: 'Huddle01 Node Dashboard',
-
-    // Optional App Info
-    appDescription: 'Huddle01 Node Dashboard',
-    appUrl: 'https://huddle01.network', // your app's url
-    appIcon: 'https://huddle01.network/favicon.ico', // your app's icon, no bigger than 1024x1024px (max. 1MB)
+    appName: 'Card Battle',
+    appDescription: 'Card Battle',
+    appUrl: 'https://card-battle-mu.vercel.app/',
+    appIcon: 'https://card-battle-mu.vercel.app/favicon.ico',
   }),
 );
 

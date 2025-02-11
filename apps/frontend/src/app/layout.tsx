@@ -18,14 +18,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.huddle01.network'),
-  title: 'Huddle01 | Network Dashboard',
-  description:
-    'Effortlessly Manage Node Keys & Earn Rewards Using Your Idle Bandwidth.',
-  twitter: {
-    card: 'summary_large_image',
-    site: '@huddle01com',
-    creator: '@huddle01com',
-  },
+  title: 'Card Battle',
+  description: 'Card Battle',
+  // twitter: {
+  //   card: 'summary_large_image',
+  //   site: '@huddle01com',
+  //   creator: '@huddle01com',
+  // },
 };
 
 const medieval = MedievalSharp({
