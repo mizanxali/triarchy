@@ -29,7 +29,7 @@
     "titleBar.inactiveForeground": "#020617"
   },
   "[solidity]": {
-    "editor.defaultFormatter": "NomicFoundation.hardhat-solidity"
+    "editor.defaultFormatter": "JuanBlanco.solidity"
   },
   "cSpell.words": [
     "mediasoup",
