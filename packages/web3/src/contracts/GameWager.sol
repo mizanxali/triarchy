@@ -29,6 +29,7 @@ contract GameWager {
     event GameCreated(string gameCode, address player1, uint256 wagerAmount);
     event PlayerJoined(string gameCode, address player2);
     event GameComplete(string gameCode, address winner, uint256 prizeMoney);
+    event GameCanceled(string gameCode);
     
     modifier gameExists(string memory gameCode) {
         require(games[gameCode].player1 != address(0), "Game does not exist");
@@ -108,5 +109,7 @@ contract GameWager {
         if (game.player2 != address(0)) {
             payable(game.player2).transfer(game.wagerAmount);
         }
+
+        emit GameCanceled(gameCode);
     }
 }
