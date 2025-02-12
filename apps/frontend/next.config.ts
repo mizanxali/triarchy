@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     '@battleground/api',
     '@battleground/auth',
-    '@battleground/db',
     '@battleground/ui',
     '@battleground/validators',
   ],

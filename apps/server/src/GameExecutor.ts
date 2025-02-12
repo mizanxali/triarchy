@@ -1,6 +1,3 @@
-import { eq } from '@battleground/db';
-import { db } from '@battleground/db/client';
-import { User } from '@battleground/db/schema';
 import type { TCard, TPeerMetadata } from '@battleground/validators';
 import type { HuddleClient } from '@huddle01/web-core';
 import type { LocalPeerEvents, RoomEvents } from '@huddle01/web-core/types';
@@ -442,12 +439,7 @@ class GameExecutor {
         // close the room
         this.dispose();
 
-        // update the database
-        await Promise.all([
-          this.updatePlayerStats(true, this.blackWalletAddress),
-          this.updatePlayerStats(false, this.whiteWalletAddress),
-        ]);
-
+        //TODO: update smart contract
         return;
       }
     }
@@ -483,36 +475,9 @@ class GameExecutor {
         // close the room
         this.dispose();
 
-        // update the database
-        await Promise.all([
-          this.updatePlayerStats(true, this.whiteWalletAddress),
-          this.updatePlayerStats(false, this.blackWalletAddress),
-        ]);
-
+        //TODO: update smart contract
         return;
       }
-    }
-  }
-
-  private async updatePlayerStats(didWin: boolean, walletAddress?: string) {
-    if (!walletAddress) return;
-
-    try {
-      const user = await db.query.User.findFirst({
-        where: (user, { eq }) => eq(user.walletAddress, walletAddress),
-      });
-
-      if (user) {
-        await db
-          .update(User)
-          .set({
-            gamesWon: didWin ? user.gamesWon + 1 : user.gamesWon,
-            gamesLost: didWin ? user.gamesLost : user.gamesLost + 1,
-          })
-          .where(eq(User.walletAddress, walletAddress));
-      }
-    } catch (err) {
-      console.error(err);
     }
   }
 

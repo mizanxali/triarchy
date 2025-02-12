@@ -1,12 +1,7 @@
 import { CredentialsSignin } from '@auth/core/errors';
 import Credentials from '@auth/core/providers/credentials';
-import { verifyMessage } from 'viem';
 import { z } from 'zod';
-
-import { eq } from '@battleground/db';
-import { db } from '@battleground/db/client';
-import { ChallengeStore, User } from '@battleground/db/schema';
-import { constructMessage } from '@battleground/web3';
+import { verifyChallengeToken } from '@battleground/web3/jwt';
 
 export class CustomCredsError extends CredentialsSignin {
   code = 'CustomCredsError err';
@@ -27,67 +22,28 @@ const WalletProvider = Credentials({
   credentials: {
     address: { label: 'Wallet Address', type: 'text' },
     signature: { label: 'Signature', type: 'text' },
+    token: { label: 'Challenge Token', type: 'text' },
   },
   authorize: async (credentials) => {
-    const { address, signature } = await CredsSchema.parseAsync(credentials);
+    const { address, signature, token } = await z
+      .object({
+        ...CredsSchema.shape,
+        token: z.string(),
+      })
+      .parseAsync(credentials);
 
     const walletAddress = address.toLowerCase();
 
-    const challengeData = await db.query.ChallengeStore.findFirst({
-      where: (challengeStore, { eq }) =>
-        eq(challengeStore.walletAddress, walletAddress),
-    });
+    const isValid = await verifyChallengeToken(token, signature, walletAddress);
 
-    if (!challengeData) {
-      throw new CustomCredsError('Challenge not found.');
+    if (!isValid) {
+      throw new CustomCredsError('Signature verification failed');
     }
 
-    const message = constructMessage({
-      walletAddress: challengeData.walletAddress,
-      issuedAt: challengeData.issuedAt,
-      expiresAt: challengeData.expiresAt,
-      nonce: challengeData.nonce,
-    });
-
-    const recoveredAddress = await verifyMessage({
-      address: walletAddress as `0x${string}`,
-      message,
-      signature,
-    });
-
-    if (!recoveredAddress)
-      throw new CustomCredsError('Signature verification failed.');
-
-    await db
-      .delete(ChallengeStore)
-      .where(eq(ChallengeStore.walletAddress, walletAddress));
-
-    let user = await db.query.User.findFirst({
-      where: (user, { eq }) => eq(user.walletAddress, walletAddress),
-      columns: {
-        id: true,
-        walletAddress: true,
-      },
-    });
-
-    if (!user) {
-      const [insertedUsers] = await db
-        .insert(User)
-        .values({
-          walletAddress,
-        })
-        .returning({
-          id: User.id,
-          walletAddress: User.walletAddress,
-        });
-      if (!insertedUsers) {
-        throw new CustomCredsError('Failed to insert user.');
-      }
-
-      user = insertedUsers;
-    }
-
-    return user;
+    return {
+      id: walletAddress,
+      walletAddress,
+    };
   },
 });
 

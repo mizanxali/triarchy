@@ -8,7 +8,8 @@
     "./abis": "./src/abis/index.ts",
     "./constants": "./src/constants/index.ts",
     "./client": "./src/client/index.ts",
-    "./utils": "./src/utils/index.ts"
+    "./utils": "./src/utils/index.ts",
+    "./jwt": "./src/utils/jwt.ts"
   },
   "license": "MIT",
   "scripts": {

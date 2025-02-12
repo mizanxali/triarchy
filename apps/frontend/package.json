@@ -13,7 +13,6 @@
   "dependencies": {
     "@battleground/api": "workspace:*",
     "@battleground/auth": "workspace:*",
-    "@battleground/db": "workspace:*",
     "@battleground/ui": "workspace:*",
     "@battleground/validators": "workspace:*",
     "@battleground/web3": "workspace:*",
