@@ -11,7 +11,6 @@ import { ZodError } from 'zod';
 
 import type { Session } from '@battleground/auth';
 import { auth } from '@battleground/auth';
-import { db } from '@battleground/db/client';
 import { env } from './env';
 
 /**
@@ -32,12 +31,10 @@ export const createTRPCContext = async (opts: {
 }) => {
   const context: {
     session: Session | null;
-    db: typeof db;
     token: string | null;
     isAdmin: boolean;
   } = {
     session: null,
-    db,
     token: null,
     isAdmin: false,
   };

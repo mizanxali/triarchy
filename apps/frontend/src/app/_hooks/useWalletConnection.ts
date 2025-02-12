@@ -1,7 +1,9 @@
 'use client';
 
 import { useToast } from '@battleground/ui/hooks/useToast';
+import { hudlChain } from '@battleground/web3/client';
 import { useModal } from 'connectkit';
+import { getSession } from 'next-auth/react';
 import { isRedirectError } from 'next/dist/client/components/redirect';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -11,15 +13,12 @@ import {
   useSignMessage,
   useSwitchChain,
 } from 'wagmi';
-import { login } from '~/app/_actions';
+import { generateLoginChallenge, login } from '~/app/_actions';
 import {
   useGetWalletConnectorIdAtomValue,
   useResetWalletConnectorIdAtomValue,
   useSetWalletConnectorIdAtomValue,
 } from '~/app/_atoms/wallet.atom';
-import { api } from '~/trpc/react';
-import { getSession } from 'next-auth/react';
-import { hudlChain } from '@battleground/web3/client';
 
 const useWalletConnection = (connectorId: string) => {
   const router = useRouter();
@@ -32,43 +31,6 @@ const useWalletConnection = (connectorId: string) => {
   const walletConnectorId = useGetWalletConnectorIdAtomValue();
   const setWalletConnectorIdAtomValue = useSetWalletConnectorIdAtomValue();
   const resetWalletConnectorIdAtomValue = useResetWalletConnectorIdAtomValue();
-  const { mutate: generateChallenge } = api.user.generateChallenge.useMutation({
-    onSuccess: async (message) => {
-      if (!address) return console.log('address not found in state');
-
-      const signature = await signMessageAsync({ account: address, message });
-      const loginResponse = await login({ address, signature });
-
-      setIsSignPending(false);
-
-      if (loginResponse?.message) {
-        await disconnectAsync();
-        setIsError(true);
-        // toast({
-        //   icon: toastIcons['error-dark'],
-        //   variant: 'error-dark',
-        //   title: loginResponse.message,
-        // });
-      } else {
-        // toast({
-        //   icon: toastIcons['success-dark'],
-        //   variant: 'success-dark',
-        //   title: 'Successfully connected wallet',
-        // });
-        await switchChainAsync({ chainId: hudlChain.id });
-        setIsError(false);
-        const session = await getSession();
-        router.refresh();
-      }
-      resetWalletConnectorIdAtomValue();
-    },
-    onError: async (error) => {
-      setIsError(true);
-      await handleError(error);
-      setIsSignPending(false);
-      resetWalletConnectorIdAtomValue();
-    },
-  });
 
   const [isError, setIsError] = useState(false);
   const [isSignPending, setIsSignPending] = useState(false);
@@ -85,11 +47,6 @@ const useWalletConnection = (connectorId: string) => {
           : 'Unknown error occurred';
 
       if (errorMessage) {
-        // toast({
-        //   icon: toastIcons['error-dark'],
-        //   variant: 'error-dark',
-        //   title: errorMessage,
-        // });
         await disconnectAsync();
       }
     },
@@ -103,16 +60,50 @@ const useWalletConnection = (connectorId: string) => {
 
     setIsSignPending(true);
 
-    generateChallenge({ walletAddress: address });
+    try {
+      // Get challenge token and message
+      const { token, message } = await generateLoginChallenge(address);
+
+      // Sign the message
+      const signature = await signMessageAsync({
+        account: address,
+        message,
+      });
+
+      // Login with signature and token
+      const loginResponse = await login({
+        address,
+        signature,
+        token,
+      });
+
+      setIsSignPending(false);
+
+      if (loginResponse?.message) {
+        await disconnectAsync();
+        setIsError(true);
+      } else {
+        await switchChainAsync({ chainId: hudlChain.id });
+        setIsError(false);
+        const session = await getSession();
+        router.refresh();
+      }
+      resetWalletConnectorIdAtomValue();
+    } catch (error) {
+      setIsError(true);
+      await handleError(error);
+      setIsSignPending(false);
+      resetWalletConnectorIdAtomValue();
+    }
   }, [
     address,
-    generateChallenge,
     signMessageAsync,
     disconnectAsync,
     toast,
     handleError,
     router,
     resetWalletConnectorIdAtomValue,
+    switchChainAsync,
   ]);
 
   // Handle modal state
