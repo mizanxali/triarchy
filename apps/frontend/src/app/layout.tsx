@@ -21,11 +21,6 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.huddle01.network'),
   title: 'Card Battle',
   description: 'Card Battle',
-  // twitter: {
-  //   card: 'summary_large_image',
-  //   site: '@huddle01com',
-  //   creator: '@huddle01com',
-  // },
 };
 
 const medieval = MedievalSharp({
@@ -54,7 +49,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           medieval.variable,
         )}
         style={{
-          backgroundImage: 'url(/backgrounds/battleback5.png)',
+          backgroundImage: 'url(/backgrounds/battleback10.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

@@ -40,8 +40,8 @@ const Rules = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          width: '800px',
-          height: '800px',
+          width: '740px',
+          height: '740px',
         }}
       >
         <h1 className="text-3xl">How to play?</h1>
@@ -155,15 +155,10 @@ const Rules = () => {
               <div className="mb-4">
                 <h3 className="font-semibold mb-2">Prize Distribution</h3>
                 <ul className="list-disc pl-6">
-                  <li>Winner receives total wagered ETH minus 20%</li>
-                  <li>20% fee is retained by the game creator</li>
+                  <li>Winner receives total wagered ETH</li>
                   <li>
-                    Example with 1 ETH each:
-                    <ul className="list-disc pl-6 mt-2">
-                      <li>Total pot: 2 ETH</li>
-                      <li>Winner receives: 1.6 ETH</li>
-                      <li>Game creator keeps: 0.4 ETH</li>
-                    </ul>
+                    If a player leaves game midway, the initial wager is
+                    returned to the other player
                   </li>
                 </ul>
               </div>
