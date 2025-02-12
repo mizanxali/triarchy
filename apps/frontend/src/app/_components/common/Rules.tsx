@@ -40,14 +40,14 @@ const Rules = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          width: '740px',
-          height: '740px',
+          width: '780px',
+          height: '780px',
         }}
       >
         <h1 className="text-3xl">How to play?</h1>
 
-        <div className="flex-1 w-full my-4">
-          <div className="flex items-center justify-center">
+        <div className="flex-1 w-full">
+          <div className="flex items-center justify-center my-4">
             <button
               type="button"
               onClick={() => setActiveTab('howToPlay')}
@@ -68,6 +68,13 @@ const Rules = () => {
               className={`px-4 py-2 ${activeTab === 'winning' ? 'text-yellow-600 border-b-2 border-yellow-600' : 'text-black-500'}`}
             >
               Winning
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('notes')}
+              className={`px-4 py-2 ${activeTab === 'notes' ? 'text-yellow-600 border-b-2 border-yellow-600' : 'text-black-500'}`}
+            >
+              Important Notes
             </button>
           </div>
 
@@ -155,25 +162,55 @@ const Rules = () => {
               <div className="mb-4">
                 <h3 className="font-semibold mb-2">Prize Distribution</h3>
                 <ul className="list-disc pl-6">
-                  <li>Winner receives total wagered ETH</li>
+                  <li>Winner receives 80% of total wagered ETH</li>
+                  <li>20% fee is retained by the game creator</li>
                   <li>
-                    If a player leaves game midway, the initial wager is
-                    returned to the other player
+                    Example with 1 ETH each:
+                    <ul className="list-disc pl-6 mt-2">
+                      <li>Total pot: 2 ETH</li>
+                      <li>Winner receives: 1.6 ETH</li>
+                      <li>Game creator keeps: 0.4 ETH</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'notes' && (
+            <div>
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Technical Requirements</h3>
+                <ul className="list-disc pl-6">
+                  <li>
+                    All wagers and rewards are processed through smart contracts
+                    on Huddle01 Testnet
+                  </li>
+                  <li>
+                    A compatible Web3 wallet with sufficient ETH balance is
+                    required
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Game Security</h3>
+                <ul className="list-disc pl-6">
+                  <li>Each game code is unique and can only be used once</li>
+                  <li>Smart contracts ensure fair and transparent gameplay</li>
+                  <li>
+                    If a player leaves or disconnects from the game midway, the
+                    wagered ETH is returned to the other player
                   </li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">Important Notes</h3>
+                <h3 className="font-semibold mb-2">Network Requirements</h3>
                 <ul className="list-disc pl-6">
-                  <li>
-                    All wagers and rewards handled automatically via smart
-                    contracts
-                  </li>
-                  <li>
-                    Ensure sufficient ETH in wallet before creating/joining
-                  </li>
-                  <li>Game codes are unique and can only be used once</li>
+                  <li>Stable internet connection is required for gameplay</li>
+                  <li>Huddle01 Testnet must be added to your wallet</li>
+                  <li>Transactions may take a few moments to process</li>
                 </ul>
               </div>
             </div>
