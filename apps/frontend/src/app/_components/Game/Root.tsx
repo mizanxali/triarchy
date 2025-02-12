@@ -60,9 +60,9 @@ const Root = ({ walletAddress }: Props) => {
   }) => {
     setGameAtom((prev) => ({
       ...prev,
-      cardsDeck: cards,
-      wonCards: wonCards,
-      opponentWonCards: opponentWonCards,
+      cardsDeck: [...cards],
+      wonCards: [...wonCards],
+      opponentWonCards: [...opponentWonCards],
       activeCard: undefined,
       opponentActiveCard: undefined,
     }));
@@ -79,9 +79,9 @@ const Root = ({ walletAddress }: Props) => {
   }) => {
     setGameAtom((prev) => ({
       ...prev,
-      cardsDeck: cards,
-      wonCards: wonCards,
-      opponentWonCards: opponentWonCards,
+      cardsDeck: [...cards],
+      wonCards: [...wonCards],
+      opponentWonCards: [...opponentWonCards],
       activeCard: undefined,
       opponentActiveCard: undefined,
     }));
@@ -98,9 +98,9 @@ const Root = ({ walletAddress }: Props) => {
   }) => {
     setGameAtom((prev) => ({
       ...prev,
-      cardsDeck: cards,
-      wonCards: wonCards,
-      opponentWonCards: opponentWonCards,
+      cardsDeck: [...cards],
+      wonCards: [...wonCards],
+      opponentWonCards: [...opponentWonCards],
       activeCard: undefined,
       opponentActiveCard: undefined,
     }));
@@ -113,19 +113,21 @@ const Root = ({ walletAddress }: Props) => {
 
   useDataMessage({
     onMessage: (payload, from, label) => {
+      const parsedPayload = JSON.parse(payload);
       if (label === 'initial-cards') {
-        onInitialCardsReceived(JSON.parse(payload));
+        onInitialCardsReceived(parsedPayload);
       } else if (label === 'turn-win') {
-        console.log('You won the turn!');
-        onTurnWin(JSON.parse(payload));
+        console.log('You won the turn!', parsedPayload);
+        onTurnWin(parsedPayload);
       } else if (label === 'turn-lose') {
-        console.log('You lost the turn!');
-        onTurnLose(JSON.parse(payload));
+        console.log('You lost the turn!', parsedPayload);
+        onTurnLose(parsedPayload);
       } else if (label === 'turn-draw') {
-        console.log('It was a draw!');
-        onTurnDraw(JSON.parse(payload));
+        console.log('It was a draw!', parsedPayload);
+        onTurnDraw(parsedPayload);
       } else if (label === 'opponent-card-played') {
-        onOpponentCardPlayed(JSON.parse(payload));
+        console.log('Opponent card played!', parsedPayload);
+        onOpponentCardPlayed(parsedPayload);
       } else if (label === 'game-win') {
         alert('You won the game!');
         onGameOver();

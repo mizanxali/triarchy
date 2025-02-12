@@ -28,7 +28,7 @@ const Card = ({ card, size, onClick, invisible }: Props) => {
         size === 'medium' ? 'w-32 h-[178px]' : '',
         size === 'large' ? 'w-40 h-[222px]' : '',
         'rounded-lg relative overflow-hidden',
-        invisible ? '' : 'invisible',
+        invisible ? 'invisible' : '',
         onClick ? 'cursor-pointer' : '',
       )}
       onClick={() => {

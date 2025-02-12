@@ -36,7 +36,10 @@ const CardDeck = () => {
     await sendData({
       to: [serverPeerId],
       label: 'card-played',
-      payload: JSON.stringify(card),
+      payload: JSON.stringify({
+        card,
+        id,
+      }),
     });
   };
 
@@ -54,6 +57,7 @@ const CardDeck = () => {
               card={card}
               onClick={() => onPlayCardHandler(card.card, card.id)}
               size="medium"
+              invisible={card.card === 'redacted'}
             />
           );
         })}

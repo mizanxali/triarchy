@@ -210,13 +210,17 @@ class GameExecutor {
       await this.sendData({
         to: this.whitePeerId,
         label: 'pong',
-        payload: message,
+        payload: JSON.stringify({
+          message,
+        }),
       });
     } else if (from === this.whitePeerId) {
       await this.sendData({
         to: this.blackPeerId,
         label: 'pong',
-        payload: message,
+        payload: JSON.stringify({
+          message,
+        }),
       });
     }
   }
@@ -432,32 +436,51 @@ class GameExecutor {
     ]);
   }
 
-  private async resetCardsAfterTurn() {
+  private resetCardsAfterTurn() {
     if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
-    // store the indices before removing cards
-    const blackIndex = this.blackCards.indexOf(this.blackActiveCard);
-    const whiteIndex = this.whiteCards.indexOf(this.whiteActiveCard);
+    const blackIndex = this.blackCards.findIndex(
+      (card) => card.id === this.blackActiveCard?.id,
+    );
+    const whiteIndex = this.whiteCards.findIndex(
+      (card) => card.id === this.whiteActiveCard?.id,
+    );
 
-    // remove first instance of the active card from each player's hand
+    if (blackIndex === -1 || whiteIndex === -1) {
+      console.error('Active card not found in player hands');
+      return;
+    }
+
+    if (CARD_DECK.length === 0) {
+      console.error('No cards left in deck');
+      return;
+    }
+
+    const newBlackCard = CARD_DECK[
+      Math.floor(Math.random() * CARD_DECK.length)
+    ] as TCard;
+    const newWhiteCard = CARD_DECK[
+      Math.floor(Math.random() * CARD_DECK.length)
+    ] as TCard;
+
+    console.log('New black card', newBlackCard);
+    console.log('New white card', newWhiteCard);
+
     this.blackCards.splice(blackIndex, 1);
     this.whiteCards.splice(whiteIndex, 1);
 
-    // add new cards at the same positions
     this.blackCards.splice(blackIndex, 0, {
-      card: CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
+      card: newBlackCard,
       id: uuidv4(),
     });
     this.whiteCards.splice(whiteIndex, 0, {
-      card: CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
+      card: newWhiteCard,
       id: uuidv4(),
     });
 
-    // reset active cards
     this.blackActiveCard = undefined;
     this.whiteActiveCard = undefined;
 
-    // check if game is over
     this.checkGameOver();
   }
 
@@ -481,12 +504,16 @@ class GameExecutor {
           this.sendData({
             to: this.blackPeerId,
             label: 'game-win',
-            payload: 'You win!',
+            payload: JSON.stringify({
+              message: 'You win!',
+            }),
           }),
           this.sendData({
             to: this.whitePeerId,
             label: 'game-lose',
-            payload: 'You lose!',
+            payload: JSON.stringify({
+              message: 'You lose!',
+            }),
           }),
         ]);
 
@@ -517,12 +544,16 @@ class GameExecutor {
           this.sendData({
             to: this.whitePeerId,
             label: 'game-win',
-            payload: 'You win!',
+            payload: JSON.stringify({
+              message: 'You win!',
+            }),
           }),
           this.sendData({
             to: this.blackPeerId,
             label: 'game-lose',
-            payload: 'You lose!',
+            payload: JSON.stringify({
+              message: 'You lose!',
+            }),
           }),
         ]);
 
