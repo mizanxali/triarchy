@@ -9,7 +9,7 @@ const CardStack = () => {
   const [serverPeerId] = usePeerIds({ roles: [Role.HOST] }).peerIds;
   const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
 
-  const [{ cardsDeck, wonCards }, setGameAtom] = useGameAtom();
+  const [{ cardsDeck }, setGameAtom] = useGameAtom();
 
   const { sendData } = useDataMessage();
 
@@ -37,16 +37,12 @@ const CardStack = () => {
     });
   };
 
-  if (state !== 'connected' || !opponentPeerId) {
-    return null;
-  }
-
-  const archers = wonCards.filter((card) => card.card.slice(0, 1) === 'A');
-  const swordsmen = wonCards.filter((card) => card.card.slice(0, 1) === 'S');
-  const horsemen = wonCards.filter((card) => card.card.slice(0, 1) === 'H');
+  // if (state !== 'connected' || !opponentPeerId) {
+  //   return null;
+  // }
 
   return (
-    <div className="grid grid-cols-2">
+    <div className="flex justify-center items-center">
       <div className="flex flex-row justify-start gap-2.5 items-end">
         {cardsDeck.map(({ card, id }) => (
           <Card
@@ -57,42 +53,6 @@ const CardStack = () => {
             size="medium"
           />
         ))}
-      </div>
-
-      <div className="flex flex-row justify-end items-end gap-2.5">
-        <div className="flex flex-col gap-2.5 items-center justify-end">
-          {archers.map(({ card, id }) => (
-            <Card
-              key={id}
-              id={id}
-              card={card}
-              onClick={() => onPlayCardHandler(card, id)}
-              size="small"
-            />
-          ))}
-        </div>
-        <div className="flex flex-col gap-2.5 items-center justify-end">
-          {swordsmen.map(({ card, id }) => (
-            <Card
-              key={id}
-              id={id}
-              card={card}
-              onClick={() => onPlayCardHandler(card, id)}
-              size="small"
-            />
-          ))}
-        </div>
-        <div className="flex flex-col gap-2.5 items-center justify-end">
-          {horsemen.map(({ card, id }) => (
-            <Card
-              key={id}
-              id={id}
-              card={card}
-              onClick={() => onPlayCardHandler(card, id)}
-              size="small"
-            />
-          ))}
-        </div>
       </div>
     </div>
   );

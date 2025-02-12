@@ -12,6 +12,10 @@ type GameAtom = {
     card: TCard;
     id: string;
   }[];
+  opponentWonCards: {
+    card: TCard;
+    id: string;
+  }[];
   activeCard?: TCard;
   opponentActiveCard?: TCard | 'redacted';
 };
@@ -20,6 +24,7 @@ const defaultGameAtom: GameAtom = {
   gameCode: undefined,
   cardsDeck: [],
   wonCards: [],
+  opponentWonCards: [],
   activeCard: undefined,
   opponentActiveCard: undefined,
 };
@@ -69,12 +74,30 @@ const dummyGameAtom: GameAtom = {
       card: 'H7',
       id: '6',
     },
+    {
+      card: 'A2',
+      id: '7',
+    },
+    {
+      card: 'S3',
+      id: '8',
+    },
+  ],
+  opponentWonCards: [
+    {
+      card: 'A2',
+      id: '1',
+    },
+    {
+      card: 'S3',
+      id: '2',
+    },
   ],
   activeCard: 'A2',
   opponentActiveCard: 'redacted',
 };
 
-const gameAtom = atomWithReset<GameAtom>(defaultGameAtom);
+const gameAtom = atomWithReset<GameAtom>(dummyGameAtom);
 
 export const useGameAtom = () => useAtom(gameAtom);
 export const useGameAtomValue = () => useAtomValue(gameAtom);

@@ -49,7 +49,8 @@ const Root = ({ walletAddress }: Props) => {
   const onTurnOver = ({
     cards,
     wonCards,
-  }: { cards: TCard[]; wonCards: TCard[] }) => {
+    opponentWonCards,
+  }: { cards: TCard[]; wonCards: TCard[]; opponentWonCards: TCard[] }) => {
     setGameAtom((prev) => ({
       ...prev,
       cardsDeck: cards.map((card) => ({
@@ -57,6 +58,10 @@ const Root = ({ walletAddress }: Props) => {
         id: uuidv4(),
       })),
       wonCards: wonCards.map((card) => ({
+        card,
+        id: uuidv4(),
+      })),
+      opponentWonCards: opponentWonCards.map((card) => ({
         card,
         id: uuidv4(),
       })),
@@ -72,7 +77,11 @@ const Root = ({ walletAddress }: Props) => {
     }));
   };
 
-  const onTurnWin = (data: { cards: TCard[]; wonCards: TCard[] }) => {
+  const onTurnWin = (data: {
+    cards: TCard[];
+    wonCards: TCard[];
+    opponentWonCards: TCard[];
+  }) => {
     // // fade out opponent active card
     // const element = document.getElementById('opponent-active-card');
     // if (element) {
@@ -87,7 +96,11 @@ const Root = ({ walletAddress }: Props) => {
     // }, 3000);
   };
 
-  const onTurnLose = (data: { cards: TCard[]; wonCards: TCard[] }) => {
+  const onTurnLose = (data: {
+    cards: TCard[];
+    wonCards: TCard[];
+    opponentWonCards: TCard[];
+  }) => {
     // fade out your active card
     // const element = document.getElementById('my-active-card');
     // if (element) {
@@ -102,7 +115,11 @@ const Root = ({ walletAddress }: Props) => {
     // }, 3000);
   };
 
-  const onTurnDraw = (data: { cards: TCard[]; wonCards: TCard[] }) => {
+  const onTurnDraw = (data: {
+    cards: TCard[];
+    wonCards: TCard[];
+    opponentWonCards: TCard[];
+  }) => {
     // fade out both active cards
     // const element1 = document.getElementById('my-active-card');
     // if (element1) {

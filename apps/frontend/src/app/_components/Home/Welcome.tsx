@@ -5,6 +5,7 @@ import { Input } from '@battleground/ui/input';
 import React, { useState } from 'react';
 import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
+import Rules from '../common/Rules';
 
 interface Props {
   walletAddress: string;
@@ -53,6 +54,9 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
 
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center">
+      <div className="fixed top-8 right-8">
+        <Rules />
+      </div>
       <div className="flex flex-col gap-6 justify-center items-center w-1/2">
         <h3 className="text-zinc-200 text-4xl font-medium text-center">
           Welcome {walletAddress}

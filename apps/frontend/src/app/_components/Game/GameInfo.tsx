@@ -6,6 +6,7 @@ import {
   useRoom,
 } from '@huddle01/react';
 import { Role } from '@huddle01/server-sdk/auth';
+import Rules from '../common/Rules';
 
 interface Props {
   gameCode: string;
@@ -17,21 +18,21 @@ const GameInfo = ({ gameCode }: Props) => {
   const { state } = useRoom();
 
   return (
-    <div className="flex flex-col gap-2 text-center items-center">
+    <div className="flex flex-col gap-2 text-center items-center text-black">
       <div>
         <div className="text-2xl font-semibold">Game Code: {gameCode}</div>
         <div className="text-base">Room State: {state}</div>
       </div>
       <div>
-        <div className="text-lg">You: {metadata?.displayName}</div>
-        {opponentPeerId ? (
-          <RemotePeerInfo remotePeerId={opponentPeerId} />
-        ) : (
+        {/* <div className="text-lg">You: {metadata?.displayName}</div> */}
+        {opponentPeerId ? // <RemotePeerInfo remotePeerId={opponentPeerId} />
+        null : (
           <div className="text-lg font-medium">
             <span>Waiting for opponent...</span>
           </div>
         )}
       </div>
+      <Rules />
     </div>
   );
 };

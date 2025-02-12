@@ -302,6 +302,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.blackCards,
           wonCards: this.blackWonCards,
+          opponentWonCards: this.whiteWonCards,
         }),
       }),
       this.sendData({
@@ -310,6 +311,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.whiteCards,
           wonCards: this.whiteWonCards,
+          opponentWonCards: this.blackWonCards,
         }),
       }),
     ]);
@@ -334,6 +336,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.whiteCards,
           wonCards: this.whiteWonCards,
+          opponentWonCards: this.blackWonCards,
         }),
       }),
       this.sendData({
@@ -342,6 +345,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.blackCards,
           wonCards: this.blackWonCards,
+          opponentWonCards: this.whiteWonCards,
         }),
       }),
     ]);
@@ -363,6 +367,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.blackCards,
           wonCards: this.blackWonCards,
+          opponentWonCards: this.whiteWonCards,
         }),
       }),
       this.sendData({
@@ -371,6 +376,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.whiteCards,
           wonCards: this.whiteWonCards,
+          opponentWonCards: this.blackWonCards,
         }),
       }),
     ]);

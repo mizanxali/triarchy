@@ -7,14 +7,14 @@ interface Props {
   id: string;
   card?: TCard | 'redacted';
   onClick?: (card: string, id: string) => void;
-  size?: 'small' | 'medium' | 'large';
+  size: 'small' | 'medium' | 'large';
 }
 
-const Card = ({ id, card, size = 'large', onClick }: Props) => {
+const Card = ({ id, card, size, onClick }: Props) => {
   const dimensions = {
-    small: { width: 128, height: 128 }, // w-32 h-32
-    medium: { width: 160, height: 160 }, // w-40 h-40
-    large: { width: 192, height: 192 }, // w-48 h-48
+    small: { width: 96, height: 133 },
+    medium: { width: 128, height: 178 },
+    large: { width: 160, height: 222 },
   };
 
   return (
@@ -22,12 +22,14 @@ const Card = ({ id, card, size = 'large', onClick }: Props) => {
       id={id}
       key={id}
       className={cn(
-        size === 'small' ? 'w-32 h-32' : '',
-        size === 'medium' ? 'w-40 h-40' : '',
-        size === 'large' ? 'w-48 h-48' : '',
-        'cursor-pointer rounded-lg relative overflow-hidden',
+        size === 'small' ? 'w-24 h-[133px]' : '',
+        size === 'medium' ? 'w-32 h-[178px]' : '',
+        size === 'large' ? 'w-40 h-[222px]' : '',
+        'rounded-lg relative overflow-hidden',
         card ? '' : 'invisible',
-        'transform transition-transform duration-200 ease-out hover:scale-105',
+        onClick
+          ? 'cursor-pointer transform transition-transform duration-200 ease-out hover:scale-105'
+          : '',
       )}
       onClick={() => {
         if (card && onClick) {

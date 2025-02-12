@@ -14,7 +14,7 @@ const Rules = () => {
 
   if (!showRules)
     return (
-      <div className="fixed top-8 right-8 flex gap-2">
+      <div className="flex gap-2">
         {gameCode ? <MusicButton /> : null}
         <Button
           variant={'primary'}
@@ -46,7 +46,7 @@ const Rules = () => {
       >
         <h1 className="text-3xl">How to play?</h1>
 
-        <div className="flex-1 w-full">
+        <div className="flex-1 w-full text-left">
           <div className="flex items-center justify-center my-4">
             <button
               type="button"
