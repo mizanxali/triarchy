@@ -27,16 +27,16 @@ const WinningCardStacks = ({ gameCode }: Props) => {
 
   const renderStack = (cards: { card: TCard; id: string }[]) => (
     <div className="relative">
-      {cards.map(({ card, id }, index) => (
+      {cards.map((card, index) => (
         <div
-          key={id}
+          key={card.id}
           className="absolute top-0"
           style={{
             top: `${index * 30}px`,
             zIndex: index,
           }}
         >
-          <Card id={id} card={card} size="small" />
+          <Card card={card} size="small" />
         </div>
       ))}
     </div>

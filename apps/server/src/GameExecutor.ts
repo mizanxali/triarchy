@@ -2,6 +2,7 @@ import type { TCard, TPeerMetadata } from '@battleground/validators';
 import type { HuddleClient } from '@huddle01/web-core';
 import type { LocalPeerEvents, RoomEvents } from '@huddle01/web-core/types';
 import { CARD_DECK } from './constants';
+import { v4 as uuidv4 } from 'uuid';
 
 class GameExecutor {
   #client: HuddleClient;
@@ -12,14 +13,36 @@ class GameExecutor {
   blackPeerId: string | undefined;
   whitePeerId: string | undefined;
 
-  blackCards: TCard[] = [];
-  whiteCards: TCard[] = [];
+  blackCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
+  whiteCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
 
-  blackActiveCard: TCard | undefined;
-  whiteActiveCard: TCard | undefined;
+  blackActiveCard:
+    | {
+        card: TCard;
+        id: string;
+      }
+    | undefined;
+  whiteActiveCard:
+    | {
+        card: TCard;
+        id: string;
+      }
+    | undefined;
 
-  blackWonCards: TCard[] = [];
-  whiteWonCards: TCard[] = [];
+  blackWonCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
+  whiteWonCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
 
   private newPeerHandler:
     | ((data: RoomEvents['new-peer-joined'][0]) => void)
@@ -91,7 +114,7 @@ class GameExecutor {
             break;
 
           case 'card-played':
-            this.cardPlayed(from, payload);
+            this.cardPlayed(from, JSON.parse(payload));
             break;
         }
       } catch (error) {
@@ -162,11 +185,17 @@ class GameExecutor {
   }
 
   private generateInitialCards() {
-    const initialCards: TCard[] = [];
+    const initialCards: {
+      card: TCard;
+      id: string;
+    }[] = [];
 
     for (let i = 0; i < 5; i++) {
       const randomIndex = Math.floor(Math.random() * CARD_DECK.length);
-      initialCards.push(CARD_DECK[randomIndex] as TCard);
+      initialCards.push({
+        card: CARD_DECK[randomIndex] as TCard,
+        id: uuidv4(),
+      });
     }
 
     return initialCards;
@@ -192,18 +221,33 @@ class GameExecutor {
     }
   }
 
-  private async cardPlayed(from: string, card: TCard) {
+  private async cardPlayed(
+    from: string,
+    {
+      card,
+      id,
+    }: {
+      card: TCard;
+      id: string;
+    },
+  ) {
     if (from === this.blackPeerId) {
       console.log('Black played', card);
       // set the active card for black
-      this.blackActiveCard = card;
+      this.blackActiveCard = {
+        card,
+        id,
+      };
 
       // if the other player has not played yet, send the redacted played card
       if (!this.whiteActiveCard) {
         this.sendData({
           to: this.whitePeerId,
           label: 'opponent-card-played',
-          payload: 'redacted',
+          payload: JSON.stringify({
+            card: 'redacted',
+            id,
+          }),
         });
       }
       // else send the actual played card
@@ -212,26 +256,32 @@ class GameExecutor {
           this.sendData({
             to: this.whitePeerId,
             label: 'opponent-card-played',
-            payload: card,
+            payload: JSON.stringify(this.blackActiveCard),
           }),
           this.sendData({
             to: this.blackPeerId,
             label: 'opponent-card-played',
-            payload: this.whiteActiveCard,
+            payload: JSON.stringify(this.whiteActiveCard),
           }),
         ]);
       }
     } else if (from === this.whitePeerId) {
       console.log('White played', card);
       // set the active card for white
-      this.whiteActiveCard = card;
+      this.whiteActiveCard = {
+        card,
+        id,
+      };
 
       // if the other player has not played yet, send the redacted played card
       if (!this.blackActiveCard) {
         this.sendData({
           to: this.blackPeerId,
           label: 'opponent-card-played',
-          payload: 'redacted',
+          payload: JSON.stringify({
+            card: 'redacted',
+            id,
+          }),
         });
       }
       // else send the actual played card
@@ -240,12 +290,12 @@ class GameExecutor {
           this.sendData({
             to: this.blackPeerId,
             label: 'opponent-card-played',
-            payload: card,
+            payload: JSON.stringify(this.whiteActiveCard),
           }),
           this.sendData({
             to: this.whitePeerId,
             label: 'opponent-card-played',
-            payload: this.blackActiveCard,
+            payload: JSON.stringify(this.blackActiveCard),
           }),
         ]);
       }
@@ -256,11 +306,11 @@ class GameExecutor {
       await this.sleep(2000);
 
       // compare cards
-      const blackCardSuit = this.blackActiveCard.slice(0, 1);
-      const whiteCardSuit = this.whiteActiveCard.slice(0, 1);
+      const blackCardSuit = this.blackActiveCard.card.slice(0, 1);
+      const whiteCardSuit = this.whiteActiveCard.card.slice(0, 1);
 
-      const blackCardValue = this.blackActiveCard.slice(1);
-      const whiteCardValue = this.whiteActiveCard.slice(1);
+      const blackCardValue = this.blackActiveCard.card.slice(1);
+      const whiteCardValue = this.whiteActiveCard.card.slice(1);
 
       if (blackCardSuit === whiteCardSuit) {
         // compare values
@@ -394,16 +444,14 @@ class GameExecutor {
     this.whiteCards.splice(whiteIndex, 1);
 
     // add new cards at the same positions
-    this.blackCards.splice(
-      blackIndex,
-      0,
-      CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
-    );
-    this.whiteCards.splice(
-      whiteIndex,
-      0,
-      CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
-    );
+    this.blackCards.splice(blackIndex, 0, {
+      card: CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
+      id: uuidv4(),
+    });
+    this.whiteCards.splice(whiteIndex, 0, {
+      card: CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
+      id: uuidv4(),
+    });
 
     // reset active cards
     this.blackActiveCard = undefined;
@@ -416,7 +464,7 @@ class GameExecutor {
   private async checkGameOver() {
     if (this.blackWonCards.length >= 3) {
       // check if there are 3 cards with same suit or 3 cards with all different suits
-      const suits = this.blackWonCards.map((card) => card.slice(0, 1));
+      const suits = this.blackWonCards.map((card) => card.card.slice(0, 1));
 
       if (
         suits.filter((suit) => suit === 'A').length === 3 ||
@@ -452,7 +500,7 @@ class GameExecutor {
 
     if (this.whiteWonCards.length >= 3) {
       // check if there are 3 cards with same suit or 3 cards with all different suits
-      const suits = this.whiteWonCards.map((card) => card.slice(0, 1));
+      const suits = this.whiteWonCards.map((card) => card.card.slice(0, 1));
 
       if (
         suits.filter((suit) => suit === 'A').length === 3 ||

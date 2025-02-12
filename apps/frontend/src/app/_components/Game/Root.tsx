@@ -4,7 +4,6 @@ import { useDataMessage, useRoom } from '@huddle01/react';
 import Welcome from '../Home/Welcome';
 import GameWrapper from './GameWrapper';
 import { useGameAtom, useGameResetAtom } from '~/app/_atoms/game.atom';
-import { v4 as uuidv4 } from 'uuid';
 import type { TCard } from '@battleground/validators';
 
 interface Props {
@@ -36,110 +35,75 @@ const Root = ({ walletAddress }: Props) => {
     },
   });
 
-  const onInitialCardsReceived = (cards: TCard[]) => {
+  const onInitialCardsReceived = (cards: { card: TCard; id: string }[]) => {
     setGameAtom((prev) => ({
       ...prev,
-      cardsDeck: cards.map((card) => ({
-        card,
-        id: uuidv4(),
-      })),
+      cardsDeck: cards,
     }));
   };
 
-  const onTurnOver = ({
-    cards,
-    wonCards,
-    opponentWonCards,
-  }: { cards: TCard[]; wonCards: TCard[]; opponentWonCards: TCard[] }) => {
-    setGameAtom((prev) => ({
-      ...prev,
-      cardsDeck: cards.map((card) => ({
-        card,
-        id: uuidv4(),
-      })),
-      wonCards: wonCards.map((card) => ({
-        card,
-        id: uuidv4(),
-      })),
-      opponentWonCards: opponentWonCards.map((card) => ({
-        card,
-        id: uuidv4(),
-      })),
-      activeCard: undefined,
-      opponentActiveCard: undefined,
-    }));
-  };
-
-  const onOpponentCardPlayed = (card: TCard) => {
+  const onOpponentCardPlayed = (card: { card: TCard; id: string }) => {
     setGameAtom((prev) => ({
       ...prev,
       opponentActiveCard: card,
     }));
   };
 
-  const onTurnWin = (data: {
-    cards: TCard[];
-    wonCards: TCard[];
-    opponentWonCards: TCard[];
+  const onTurnWin = ({
+    cards,
+    wonCards,
+    opponentWonCards,
+  }: {
+    cards: { card: TCard; id: string }[];
+    wonCards: { card: TCard; id: string }[];
+    opponentWonCards: { card: TCard; id: string }[];
   }) => {
-    // // fade out opponent active card
-    // const element = document.getElementById('opponent-active-card');
-    // if (element) {
-    //   if (element.style.transform === 'scale(0)') {
-    //     element.style.transform = 'scale(1)';
-    //   } else {
-    //     element.style.transform = 'scale(0)';
-    //   }
-    // }
-    // setTimeout(() => {
-    onTurnOver(data);
-    // }, 3000);
+    setGameAtom((prev) => ({
+      ...prev,
+      cardsDeck: cards,
+      wonCards: wonCards,
+      opponentWonCards: opponentWonCards,
+      activeCard: undefined,
+      opponentActiveCard: undefined,
+    }));
   };
 
-  const onTurnLose = (data: {
-    cards: TCard[];
-    wonCards: TCard[];
-    opponentWonCards: TCard[];
+  const onTurnLose = ({
+    cards,
+    wonCards,
+    opponentWonCards,
+  }: {
+    cards: { card: TCard; id: string }[];
+    wonCards: { card: TCard; id: string }[];
+    opponentWonCards: { card: TCard; id: string }[];
   }) => {
-    // fade out your active card
-    // const element = document.getElementById('my-active-card');
-    // if (element) {
-    //   if (element.style.transform === 'scale(0)') {
-    //     element.style.transform = 'scale(1)';
-    //   } else {
-    //     element.style.transform = 'scale(0)';
-    //   }
-    // }
-    // setTimeout(() => {
-    onTurnOver(data);
-    // }, 3000);
+    setGameAtom((prev) => ({
+      ...prev,
+      cardsDeck: cards,
+      wonCards: wonCards,
+      opponentWonCards: opponentWonCards,
+      activeCard: undefined,
+      opponentActiveCard: undefined,
+    }));
   };
 
-  const onTurnDraw = (data: {
-    cards: TCard[];
-    wonCards: TCard[];
-    opponentWonCards: TCard[];
+  const onTurnDraw = ({
+    cards,
+    wonCards,
+    opponentWonCards,
+  }: {
+    cards: { card: TCard; id: string }[];
+    wonCards: { card: TCard; id: string }[];
+    opponentWonCards: { card: TCard; id: string }[];
   }) => {
-    // fade out both active cards
-    // const element1 = document.getElementById('my-active-card');
-    // if (element1) {
-    //   if (element1.style.transform === 'scale(0)') {
-    //     element1.style.transform = 'scale(1)';
-    //   } else {
-    //     element1.style.transform = 'scale(0)';
-    //   }
-    // }
-    // const element2 = document.getElementById('opponent-active-card');
-    // if (element2) {
-    //   if (element2.style.transform === 'scale(0)') {
-    //     element2.style.transform = 'scale(1)';
-    //   } else {
-    //     element2.style.transform = 'scale(0)';
-    //   }
-    // }
-    // setTimeout(() => {
-    onTurnOver(data);
-    // }, 3000);
+    setGameAtom((prev) => ({
+      ...prev,
+      cardsDeck: cards,
+      wonCards: wonCards,
+      opponentWonCards: opponentWonCards,
+      activeCard: undefined,
+      opponentActiveCard: undefined,
+    }));
   };
 
   const onGameOver = () => {
@@ -161,7 +125,7 @@ const Root = ({ walletAddress }: Props) => {
         console.log('It was a draw!');
         onTurnDraw(JSON.parse(payload));
       } else if (label === 'opponent-card-played') {
-        onOpponentCardPlayed(payload as TCard);
+        onOpponentCardPlayed(JSON.parse(payload));
       } else if (label === 'game-win') {
         alert('You won the game!');
         onGameOver();

@@ -214,6 +214,9 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
+      uuid:
+        specifier: ^11.0.5
+        version: 11.0.5
       viem:
         specifier: ^2.21.52
         version: 2.21.52(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.1)

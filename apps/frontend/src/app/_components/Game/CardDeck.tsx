@@ -4,7 +4,7 @@ import { Role } from '@huddle01/server-sdk/auth';
 import { useGameAtom } from '~/app/_atoms/game.atom';
 import Card from './Card';
 
-const CardStack = () => {
+const CardDeck = () => {
   const { state } = useRoom();
   const [serverPeerId] = usePeerIds({ roles: [Role.HOST] }).peerIds;
   const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
@@ -27,35 +27,39 @@ const CardStack = () => {
         }
         return cardObj;
       }),
-      activeCard: card,
+      activeCard: {
+        card,
+        id,
+      },
     }));
 
     await sendData({
       to: [serverPeerId],
       label: 'card-played',
-      payload: card,
+      payload: JSON.stringify(card),
     });
   };
 
-  // if (state !== 'connected' || !opponentPeerId) {
-  //   return null;
-  // }
+  if (state !== 'connected' || !opponentPeerId) {
+    return null;
+  }
 
   return (
     <div className="flex justify-center items-center">
       <div className="flex flex-row justify-start gap-2.5 items-end">
-        {cardsDeck.map(({ card, id }) => (
-          <Card
-            key={id}
-            id={id}
-            card={card === 'redacted' ? undefined : card}
-            onClick={() => onPlayCardHandler(card, id)}
-            size="medium"
-          />
-        ))}
+        {cardsDeck.map((card) => {
+          return (
+            <Card
+              key={card.id}
+              card={card}
+              onClick={() => onPlayCardHandler(card.card, card.id)}
+              size="medium"
+            />
+          );
+        })}
       </div>
     </div>
   );
 };
 
-export default CardStack;
+export default CardDeck;

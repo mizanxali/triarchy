@@ -1,6 +1,7 @@
 import type { TCard } from '@battleground/validators';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atomWithReset, useResetAtom } from 'jotai/utils';
+import { v4 as uuidv4 } from 'uuid';
 
 type GameAtom = {
   gameCode?: string;
@@ -16,8 +17,14 @@ type GameAtom = {
     card: TCard;
     id: string;
   }[];
-  activeCard?: TCard;
-  opponentActiveCard?: TCard | 'redacted';
+  activeCard?: {
+    card: TCard;
+    id: string;
+  };
+  opponentActiveCard?: {
+    card: TCard | 'redacted';
+    id: string;
+  };
 };
 
 const defaultGameAtom: GameAtom = {
@@ -34,70 +41,76 @@ const dummyGameAtom: GameAtom = {
   cardsDeck: [
     {
       card: 'A2',
-      id: '1',
+      id: uuidv4(),
     },
     {
       card: 'S3',
-      id: '2',
+      id: uuidv4(),
     },
     {
       card: 'H4',
-      id: '3',
+      id: uuidv4(),
     },
     {
       card: 'A5',
-      id: '4',
+      id: uuidv4(),
     },
     {
       card: 'H7',
-      id: '6',
+      id: uuidv4(),
     },
   ],
   wonCards: [
     {
       card: 'A2',
-      id: '1',
+      id: uuidv4(),
     },
     {
       card: 'S3',
-      id: '2',
+      id: uuidv4(),
     },
     {
       card: 'H4',
-      id: '3',
+      id: uuidv4(),
     },
     {
       card: 'A5',
-      id: '4',
+      id: uuidv4(),
     },
     {
       card: 'H7',
-      id: '6',
+      id: uuidv4(),
     },
     {
       card: 'A2',
-      id: '7',
+      id: uuidv4(),
     },
     {
       card: 'S3',
-      id: '8',
+      id: uuidv4(),
     },
   ],
   opponentWonCards: [
     {
       card: 'A2',
-      id: '1',
+      id: uuidv4(),
     },
     {
       card: 'S3',
-      id: '2',
+      id: uuidv4(),
     },
   ],
-  activeCard: 'A2',
-  opponentActiveCard: 'redacted',
+  activeCard: {
+    card: 'A2',
+    id: uuidv4(),
+  },
+  opponentActiveCard: {
+    card: 'redacted',
+    id: uuidv4(),
+  },
 };
 
-const gameAtom = atomWithReset<GameAtom>(dummyGameAtom);
+const gameAtom = atomWithReset<GameAtom>(defaultGameAtom);
 
 export const useGameAtom = () => useAtom(gameAtom);
 export const useGameAtomValue = () => useAtomValue(gameAtom);
