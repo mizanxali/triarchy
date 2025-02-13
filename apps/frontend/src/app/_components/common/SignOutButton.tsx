@@ -5,12 +5,12 @@ import { ExitIcon } from '@radix-ui/react-icons';
 import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useDisconnect } from 'wagmi';
+import { useDisconnect } from '@reown/appkit/react';
 import { logout } from '~/app/_actions';
 
 const SignOutButton = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
-  const { disconnectAsync } = useDisconnect();
+  const { disconnect: disconnectAsync } = useDisconnect();
   const router = useRouter();
 
   const disconnect = async () => {

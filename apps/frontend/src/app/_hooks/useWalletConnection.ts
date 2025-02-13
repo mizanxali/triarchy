@@ -2,7 +2,7 @@
 
 import { useToast } from '@battleground/ui/hooks/useToast';
 import { hudlChain } from '@battleground/web3/client';
-import { useModal } from 'connectkit';
+import { useAppKitState } from '@reown/appkit/react';
 import { getSession } from 'next-auth/react';
 import { isRedirectError } from 'next/dist/client/components/redirect';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ import {
 
 const useWalletConnection = (connectorId: string) => {
   const router = useRouter();
-  const { open } = useModal();
+  const { open } = useAppKitState();
   const { toast } = useToast();
   const { address } = useAccount();
   const { disconnectAsync } = useDisconnect();
