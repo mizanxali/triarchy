@@ -27,11 +27,11 @@ async function createChallengeToken(
   walletAddress: string,
 ): Promise<{ token: string; message: string }> {
   const nonce = crypto.randomUUID();
-  const message = constructChallengeMessage(walletAddress.toLowerCase(), nonce);
+  const message = constructChallengeMessage(walletAddress, nonce);
 
   // Create a JWT containing the challenge data
   const token = await new SignJWT({
-    walletAddress: walletAddress.toLowerCase(),
+    walletAddress: walletAddress,
     nonce,
     message,
     type: 'challenge',
@@ -80,7 +80,7 @@ async function verifyChallengeToken(
     }
 
     // Check if the wallet address matches
-    if (payload.walletAddress !== walletAddress.toLowerCase()) {
+    if (payload.walletAddress !== walletAddress) {
       throw new CustomCredsError('Wallet address mismatch');
     }
 

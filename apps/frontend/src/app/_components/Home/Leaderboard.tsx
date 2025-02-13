@@ -13,10 +13,13 @@ import { ListOrdered, ShieldCloseIcon } from 'lucide-react';
 import { useGameAtomValue } from '~/app/_atoms/game.atom';
 import { useMiscAtom } from '~/app/_atoms/misc.atom';
 import { api } from '~/trpc/react';
+import { useSession } from 'next-auth/react';
+import { cn } from '@battleground/ui';
 
 const Leaderboard = () => {
   const [{ showLeaderboard }, setMisc] = useMiscAtom();
   const { gameCode } = useGameAtomValue();
+  const { data: session } = useSession();
 
   const { data: leaderboard } = api.user.fetchLeaderboard.useQuery();
 
@@ -79,40 +82,75 @@ const Leaderboard = () => {
         <Table className="w-full flex-1 mb-10 mt-4">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-black font-extrabold">
+              <TableHead className="text-left text-black font-extrabold">
                 Wallet Address
               </TableHead>
-              <TableHead className="w-[60px] text-black font-extrabold">
+              <TableHead className="text-center w-[50px] text-black font-extrabold">
                 Wins
               </TableHead>
-              <TableHead className="w-[60px] text-black font-extrabold">
+              <TableHead className="text-center w-[50px] text-black font-extrabold">
                 Losses
               </TableHead>
-              <TableHead className="text-right w-[90px] text-black font-extrabold">
-                Total Won
-              </TableHead>
-              <TableHead className="text-right w-[90px] text-black font-extrabold">
+              <TableHead className="text-center w-[110px] text-black font-extrabold">
                 Total Wagered
+              </TableHead>
+              <TableHead className="text-right w-[80px] text-black font-extrabold">
+                Total Won
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {leaderboard.map((user) => (
-              <TableRow>
-                <TableCell className="text-black font-medium">
+              <TableRow key={user.walletAddress}>
+                <TableCell
+                  className={cn(
+                    'text-left',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
                   {user.walletAddress}
                 </TableCell>
-                <TableCell className="text-black font-medium">
+                <TableCell
+                  className={cn(
+                    'text-center',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
                   {user.wins}
                 </TableCell>
-                <TableCell className="text-black font-medium">
+                <TableCell
+                  className={cn(
+                    'text-center',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
                   {user.losses}
                 </TableCell>
-                <TableCell className="text-right text-black font-medium">
-                  {user.totalWon}
-                </TableCell>
-                <TableCell className="text-right text-black font-medium">
+                <TableCell
+                  className={cn(
+                    'text-center',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
                   {user.totalWagered}
+                </TableCell>
+                <TableCell
+                  className={cn(
+                    'text-right',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
+                  {user.totalWon}
                 </TableCell>
               </TableRow>
             ))}

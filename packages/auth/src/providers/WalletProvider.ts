@@ -32,17 +32,15 @@ const WalletProvider = Credentials({
       })
       .parseAsync(credentials);
 
-    const walletAddress = address.toLowerCase();
-
-    const isValid = await verifyChallengeToken(token, signature, walletAddress);
+    const isValid = await verifyChallengeToken(token, signature, address);
 
     if (!isValid) {
       throw new CustomCredsError('Signature verification failed');
     }
 
     return {
-      id: walletAddress,
-      walletAddress,
+      id: address,
+      walletAddress: address,
     };
   },
 });

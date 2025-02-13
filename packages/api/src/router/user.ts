@@ -9,7 +9,7 @@ import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
 
 export const userRouter = {
   generateChallenge: publicProcedure
-    .input(z.object({ walletAddress: z.string().toLowerCase() }))
+    .input(z.object({ walletAddress: z.string() }))
     .mutation(async ({ input }) => {
       return createChallengeToken(input.walletAddress);
     }),
@@ -23,10 +23,10 @@ export const userRouter = {
 
     const playerStats = leaderboard.map((player) => ({
       walletAddress: player.playerAddress,
-      wins: Number(formatEther(player.wins)),
-      losses: Number(formatEther(player.losses)),
-      totalWon: Number(formatEther(player.totalWon)),
-      totalWagered: Number(formatEther(player.totalWagered)),
+      wins: Number(player.wins),
+      losses: Number(player.losses),
+      totalWon: Number(formatEther(player.totalWon)).toFixed(4),
+      totalWagered: Number(formatEther(player.totalWagered)).toFixed(4),
     }));
 
     const sortedLeaderboard = playerStats.sort((a, b) => b.wins - a.wins);

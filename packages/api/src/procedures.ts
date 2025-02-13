@@ -39,7 +39,7 @@ export const protectedProcedure = t.procedure
           ...ctx.session,
           user: {
             ...ctx.session.user,
-            walletAddress: ctx.session.user.walletAddress.toLowerCase(),
+            walletAddress: ctx.session.user.walletAddress,
           },
         },
       },
