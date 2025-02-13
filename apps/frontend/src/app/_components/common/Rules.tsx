@@ -14,7 +14,7 @@ const Rules = () => {
 
   if (!showRules)
     return (
-      <div className="fixed top-8 right-8 flex gap-2">
+      <div className="flex gap-2">
         {gameCode ? <MusicButton /> : null}
         <Button
           variant={'primary'}
@@ -40,14 +40,14 @@ const Rules = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          width: '800px',
-          height: '800px',
+          width: '780px',
+          height: '780px',
         }}
       >
         <h1 className="text-3xl">How to play?</h1>
 
-        <div className="flex-1 w-full my-4">
-          <div className="flex items-center justify-center">
+        <div className="flex-1 w-full text-left">
+          <div className="flex items-center justify-center my-4">
             <button
               type="button"
               onClick={() => setActiveTab('howToPlay')}
@@ -68,6 +68,13 @@ const Rules = () => {
               className={`px-4 py-2 ${activeTab === 'winning' ? 'text-yellow-600 border-b-2 border-yellow-600' : 'text-black-500'}`}
             >
               Winning
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('notes')}
+              className={`px-4 py-2 ${activeTab === 'notes' ? 'text-yellow-600 border-b-2 border-yellow-600' : 'text-black-500'}`}
+            >
+              Important Notes
             </button>
           </div>
 
@@ -155,7 +162,7 @@ const Rules = () => {
               <div className="mb-4">
                 <h3 className="font-semibold mb-2">Prize Distribution</h3>
                 <ul className="list-disc pl-6">
-                  <li>Winner receives total wagered ETH minus 20%</li>
+                  <li>Winner receives 80% of total wagered ETH</li>
                   <li>20% fee is retained by the game creator</li>
                   <li>
                     Example with 1 ETH each:
@@ -167,18 +174,43 @@ const Rules = () => {
                   </li>
                 </ul>
               </div>
+            </div>
+          )}
 
-              <div>
-                <h3 className="font-semibold mb-2">Important Notes</h3>
+          {activeTab === 'notes' && (
+            <div>
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Technical Requirements</h3>
                 <ul className="list-disc pl-6">
                   <li>
-                    All wagers and rewards handled automatically via smart
-                    contracts
+                    All wagers and rewards are processed through smart contracts
+                    on Huddle01 Testnet
                   </li>
                   <li>
-                    Ensure sufficient ETH in wallet before creating/joining
+                    A compatible Web3 wallet with sufficient ETH balance is
+                    required
                   </li>
-                  <li>Game codes are unique and can only be used once</li>
+                </ul>
+              </div>
+
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Game Security</h3>
+                <ul className="list-disc pl-6">
+                  <li>Each game code is unique and can only be used once</li>
+                  <li>Smart contracts ensure fair and transparent gameplay</li>
+                  <li>
+                    If a player leaves or disconnects from the game midway, the
+                    wagered ETH is returned to the other player
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Network Requirements</h3>
+                <ul className="list-disc pl-6">
+                  <li>Stable internet connection is required for gameplay</li>
+                  <li>Huddle01 Testnet must be added to your wallet</li>
+                  <li>Transactions may take a few moments to process</li>
                 </ul>
               </div>
             </div>

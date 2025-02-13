@@ -1,10 +1,8 @@
-import { eq } from '@battleground/db';
-import { db } from '@battleground/db/client';
-import { User } from '@battleground/db/schema';
 import type { TCard, TPeerMetadata } from '@battleground/validators';
 import type { HuddleClient } from '@huddle01/web-core';
 import type { LocalPeerEvents, RoomEvents } from '@huddle01/web-core/types';
 import { CARD_DECK } from './constants';
+import { v4 as uuidv4 } from 'uuid';
 
 class GameExecutor {
   #client: HuddleClient;
@@ -15,14 +13,36 @@ class GameExecutor {
   blackPeerId: string | undefined;
   whitePeerId: string | undefined;
 
-  blackCards: TCard[] = [];
-  whiteCards: TCard[] = [];
+  blackCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
+  whiteCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
 
-  blackActiveCard: TCard | undefined;
-  whiteActiveCard: TCard | undefined;
+  blackActiveCard:
+    | {
+        card: TCard;
+        id: string;
+      }
+    | undefined;
+  whiteActiveCard:
+    | {
+        card: TCard;
+        id: string;
+      }
+    | undefined;
 
-  blackWonCards: TCard[] = [];
-  whiteWonCards: TCard[] = [];
+  blackWonCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
+  whiteWonCards: {
+    card: TCard;
+    id: string;
+  }[] = [];
 
   private newPeerHandler:
     | ((data: RoomEvents['new-peer-joined'][0]) => void)
@@ -94,7 +114,7 @@ class GameExecutor {
             break;
 
           case 'card-played':
-            this.cardPlayed(from, payload);
+            this.cardPlayed(from, JSON.parse(payload));
             break;
         }
       } catch (error) {
@@ -165,11 +185,17 @@ class GameExecutor {
   }
 
   private generateInitialCards() {
-    const initialCards: TCard[] = [];
+    const initialCards: {
+      card: TCard;
+      id: string;
+    }[] = [];
 
     for (let i = 0; i < 5; i++) {
       const randomIndex = Math.floor(Math.random() * CARD_DECK.length);
-      initialCards.push(CARD_DECK[randomIndex] as TCard);
+      initialCards.push({
+        card: CARD_DECK[randomIndex] as TCard,
+        id: uuidv4(),
+      });
     }
 
     return initialCards;
@@ -184,29 +210,48 @@ class GameExecutor {
       await this.sendData({
         to: this.whitePeerId,
         label: 'pong',
-        payload: message,
+        payload: JSON.stringify({
+          message,
+        }),
       });
     } else if (from === this.whitePeerId) {
       await this.sendData({
         to: this.blackPeerId,
         label: 'pong',
-        payload: message,
+        payload: JSON.stringify({
+          message,
+        }),
       });
     }
   }
 
-  private async cardPlayed(from: string, card: TCard) {
+  private async cardPlayed(
+    from: string,
+    {
+      card,
+      id,
+    }: {
+      card: TCard;
+      id: string;
+    },
+  ) {
     if (from === this.blackPeerId) {
       console.log('Black played', card);
       // set the active card for black
-      this.blackActiveCard = card;
+      this.blackActiveCard = {
+        card,
+        id,
+      };
 
       // if the other player has not played yet, send the redacted played card
       if (!this.whiteActiveCard) {
         this.sendData({
           to: this.whitePeerId,
           label: 'opponent-card-played',
-          payload: 'redacted',
+          payload: JSON.stringify({
+            card: 'redacted',
+            id,
+          }),
         });
       }
       // else send the actual played card
@@ -215,26 +260,32 @@ class GameExecutor {
           this.sendData({
             to: this.whitePeerId,
             label: 'opponent-card-played',
-            payload: card,
+            payload: JSON.stringify(this.blackActiveCard),
           }),
           this.sendData({
             to: this.blackPeerId,
             label: 'opponent-card-played',
-            payload: this.whiteActiveCard,
+            payload: JSON.stringify(this.whiteActiveCard),
           }),
         ]);
       }
     } else if (from === this.whitePeerId) {
       console.log('White played', card);
       // set the active card for white
-      this.whiteActiveCard = card;
+      this.whiteActiveCard = {
+        card,
+        id,
+      };
 
       // if the other player has not played yet, send the redacted played card
       if (!this.blackActiveCard) {
         this.sendData({
           to: this.blackPeerId,
           label: 'opponent-card-played',
-          payload: 'redacted',
+          payload: JSON.stringify({
+            card: 'redacted',
+            id,
+          }),
         });
       }
       // else send the actual played card
@@ -243,12 +294,12 @@ class GameExecutor {
           this.sendData({
             to: this.blackPeerId,
             label: 'opponent-card-played',
-            payload: card,
+            payload: JSON.stringify(this.whiteActiveCard),
           }),
           this.sendData({
             to: this.whitePeerId,
             label: 'opponent-card-played',
-            payload: this.blackActiveCard,
+            payload: JSON.stringify(this.blackActiveCard),
           }),
         ]);
       }
@@ -259,11 +310,11 @@ class GameExecutor {
       await this.sleep(2000);
 
       // compare cards
-      const blackCardSuit = this.blackActiveCard.slice(0, 1);
-      const whiteCardSuit = this.whiteActiveCard.slice(0, 1);
+      const blackCardSuit = this.blackActiveCard.card.slice(0, 1);
+      const whiteCardSuit = this.whiteActiveCard.card.slice(0, 1);
 
-      const blackCardValue = this.blackActiveCard.slice(1);
-      const whiteCardValue = this.whiteActiveCard.slice(1);
+      const blackCardValue = this.blackActiveCard.card.slice(1);
+      const whiteCardValue = this.whiteActiveCard.card.slice(1);
 
       if (blackCardSuit === whiteCardSuit) {
         // compare values
@@ -305,6 +356,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.blackCards,
           wonCards: this.blackWonCards,
+          opponentWonCards: this.whiteWonCards,
         }),
       }),
       this.sendData({
@@ -313,6 +365,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.whiteCards,
           wonCards: this.whiteWonCards,
+          opponentWonCards: this.blackWonCards,
         }),
       }),
     ]);
@@ -337,6 +390,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.whiteCards,
           wonCards: this.whiteWonCards,
+          opponentWonCards: this.blackWonCards,
         }),
       }),
       this.sendData({
@@ -345,6 +399,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.blackCards,
           wonCards: this.blackWonCards,
+          opponentWonCards: this.whiteWonCards,
         }),
       }),
     ]);
@@ -366,6 +421,7 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.blackCards,
           wonCards: this.blackWonCards,
+          opponentWonCards: this.whiteWonCards,
         }),
       }),
       this.sendData({
@@ -374,46 +430,64 @@ class GameExecutor {
         payload: JSON.stringify({
           cards: this.whiteCards,
           wonCards: this.whiteWonCards,
+          opponentWonCards: this.blackWonCards,
         }),
       }),
     ]);
   }
 
-  private async resetCardsAfterTurn() {
+  private resetCardsAfterTurn() {
     if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
-    // store the indices before removing cards
-    const blackIndex = this.blackCards.indexOf(this.blackActiveCard);
-    const whiteIndex = this.whiteCards.indexOf(this.whiteActiveCard);
+    const blackIndex = this.blackCards.findIndex(
+      (card) => card.id === this.blackActiveCard?.id,
+    );
+    const whiteIndex = this.whiteCards.findIndex(
+      (card) => card.id === this.whiteActiveCard?.id,
+    );
 
-    // remove first instance of the active card from each player's hand
+    if (blackIndex === -1 || whiteIndex === -1) {
+      console.error('Active card not found in player hands');
+      return;
+    }
+
+    if (CARD_DECK.length === 0) {
+      console.error('No cards left in deck');
+      return;
+    }
+
+    const newBlackCard = CARD_DECK[
+      Math.floor(Math.random() * CARD_DECK.length)
+    ] as TCard;
+    const newWhiteCard = CARD_DECK[
+      Math.floor(Math.random() * CARD_DECK.length)
+    ] as TCard;
+
+    console.log('New black card', newBlackCard);
+    console.log('New white card', newWhiteCard);
+
     this.blackCards.splice(blackIndex, 1);
     this.whiteCards.splice(whiteIndex, 1);
 
-    // add new cards at the same positions
-    this.blackCards.splice(
-      blackIndex,
-      0,
-      CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
-    );
-    this.whiteCards.splice(
-      whiteIndex,
-      0,
-      CARD_DECK[Math.floor(Math.random() * CARD_DECK.length)] as TCard,
-    );
+    this.blackCards.splice(blackIndex, 0, {
+      card: newBlackCard,
+      id: uuidv4(),
+    });
+    this.whiteCards.splice(whiteIndex, 0, {
+      card: newWhiteCard,
+      id: uuidv4(),
+    });
 
-    // reset active cards
     this.blackActiveCard = undefined;
     this.whiteActiveCard = undefined;
 
-    // check if game is over
     this.checkGameOver();
   }
 
   private async checkGameOver() {
     if (this.blackWonCards.length >= 3) {
       // check if there are 3 cards with same suit or 3 cards with all different suits
-      const suits = this.blackWonCards.map((card) => card.slice(0, 1));
+      const suits = this.blackWonCards.map((card) => card.card.slice(0, 1));
 
       if (
         suits.filter((suit) => suit === 'A').length === 3 ||
@@ -430,31 +504,30 @@ class GameExecutor {
           this.sendData({
             to: this.blackPeerId,
             label: 'game-win',
-            payload: 'You win!',
+            payload: JSON.stringify({
+              message: 'You win!',
+            }),
           }),
           this.sendData({
             to: this.whitePeerId,
             label: 'game-lose',
-            payload: 'You lose!',
+            payload: JSON.stringify({
+              message: 'You lose!',
+            }),
           }),
         ]);
 
         // close the room
         this.dispose();
 
-        // update the database
-        await Promise.all([
-          this.updatePlayerStats(true, this.blackWalletAddress),
-          this.updatePlayerStats(false, this.whiteWalletAddress),
-        ]);
-
+        //TODO: update smart contract
         return;
       }
     }
 
     if (this.whiteWonCards.length >= 3) {
       // check if there are 3 cards with same suit or 3 cards with all different suits
-      const suits = this.whiteWonCards.map((card) => card.slice(0, 1));
+      const suits = this.whiteWonCards.map((card) => card.card.slice(0, 1));
 
       if (
         suits.filter((suit) => suit === 'A').length === 3 ||
@@ -471,48 +544,25 @@ class GameExecutor {
           this.sendData({
             to: this.whitePeerId,
             label: 'game-win',
-            payload: 'You win!',
+            payload: JSON.stringify({
+              message: 'You win!',
+            }),
           }),
           this.sendData({
             to: this.blackPeerId,
             label: 'game-lose',
-            payload: 'You lose!',
+            payload: JSON.stringify({
+              message: 'You lose!',
+            }),
           }),
         ]);
 
         // close the room
         this.dispose();
 
-        // update the database
-        await Promise.all([
-          this.updatePlayerStats(true, this.whiteWalletAddress),
-          this.updatePlayerStats(false, this.blackWalletAddress),
-        ]);
-
+        //TODO: update smart contract
         return;
       }
-    }
-  }
-
-  private async updatePlayerStats(didWin: boolean, walletAddress?: string) {
-    if (!walletAddress) return;
-
-    try {
-      const user = await db.query.User.findFirst({
-        where: (user, { eq }) => eq(user.walletAddress, walletAddress),
-      });
-
-      if (user) {
-        await db
-          .update(User)
-          .set({
-            gamesWon: didWin ? user.gamesWon + 1 : user.gamesWon,
-            gamesLost: didWin ? user.gamesLost : user.gamesLost + 1,
-          })
-          .where(eq(User.walletAddress, walletAddress));
-      }
-    } catch (err) {
-      console.error(err);
     }
   }
 

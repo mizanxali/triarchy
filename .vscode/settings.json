@@ -32,11 +32,12 @@
     "editor.defaultFormatter": "JuanBlanco.solidity"
   },
   "cSpell.words": [
+    "gameplay",
     "mediasoup",
-    "mizan",
     "packetization",
     "sancreek",
     "uuidv",
+    "wagmi",
     "Werift"
   ]
 }

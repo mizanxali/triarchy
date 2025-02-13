@@ -2,28 +2,55 @@
 
 import { hudlChain } from '@battleground/web3/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConnectKitProvider, getDefaultConfig } from 'connectkit';
-import { createConfig, http, WagmiProvider } from 'wagmi';
+import { createAppKit } from '@reown/appkit/react';
+import { WagmiProvider, type Config } from 'wagmi';
+import { cookieStorage, createStorage, http } from '@wagmi/core';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { mainnet } from 'wagmi/chains';
 
 import { env } from '~/env';
 
-const config = createConfig(
-  getDefaultConfig({
-    chains: [hudlChain],
-    transports: {
-      [mainnet.id]: http(env.NEXT_PUBLIC_ALCHEMY_URL),
-      [hudlChain.id]: http('https://huddle-testnet.rpc.caldera.xyz/http'),
-    },
-    walletConnectProjectId: env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
-    appName: 'Card Battle',
-    appDescription: 'Card Battle',
-    appUrl: 'https://card-battle-mu.vercel.app/',
-    appIcon: 'https://card-battle-mu.vercel.app/favicon.ico',
-  }),
-);
-
 const queryClient = new QueryClient();
+
+const metadata = {
+  name: 'Card Battle',
+  description: 'Card Battle',
+  url: 'https://card-battle-mu.vercel.app/',
+  icons: ['https://card-battle-mu.vercel.app/favicon.ico'],
+};
+
+export const wagmiAdapter = new WagmiAdapter({
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
+  ssr: true,
+  projectId: env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+  // @ts-ignore
+  networks: [hudlChain],
+  transports: {
+    [mainnet.id]: http(env.NEXT_PUBLIC_ALCHEMY_URL),
+    [hudlChain.id]: http('https://huddle-testnet.rpc.caldera.xyz/http'),
+  },
+});
+
+createAppKit({
+  adapters: [wagmiAdapter],
+  projectId: env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+  // @ts-ignore
+  networks: [hudlChain],
+  // @ts-ignore
+  defaultNetwork: hudlChain,
+  metadata: metadata,
+  excludeWalletIds: [
+    'a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393',
+  ],
+  enableWalletConnect: false,
+  features: {
+    socials: false,
+    email: false,
+    onramp: false,
+  },
+});
 
 interface Props {
   children: React.ReactNode;
@@ -31,10 +58,8 @@ interface Props {
 
 export const Web3Provider = ({ children }: Props) => {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <ConnectKitProvider>{children}</ConnectKitProvider>
-      </QueryClientProvider>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig as Config}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   );
 };

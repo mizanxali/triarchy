@@ -18,7 +18,6 @@
   "dependencies": {
     "@auth/core": "0.37.2",
     "@auth/drizzle-adapter": "1.7.4",
-    "@battleground/db": "workspace:*",
     "@battleground/web3": "workspace:*",
     "@t3-oss/env-nextjs": "^0.11.1",
     "next": "15.0.1",

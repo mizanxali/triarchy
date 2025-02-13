@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@battleground/auth": "workspace:*",
-    "@battleground/db": "workspace:*",
     "@battleground/validators": "workspace:*",
     "@battleground/web3": "workspace:*",
     "@huddle01/server-sdk": "^2.5.6",

@@ -4,17 +4,20 @@ import { isMobileDevice } from '../_helpers';
 
 export const useMobile = () => {
   const { width } = useWindowSize();
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState<boolean>(true);
 
   const isMob = width <= 480;
 
   useEffect(() => {
     if (isMobileDevice() || isMob) {
       setIsMobile(true);
+      setIsLoading(false);
     } else {
       setIsMobile(false);
+      setIsLoading(false);
     }
   }, [isMob]);
 
-  return { isMobile };
+  return { isMobile, isLoading };
 };
