@@ -20,3 +20,8 @@ export const walletClient = createWalletClient({
   chain: hudlChain,
   transport: http(),
 });
+
+export const getAccountFromPrivateKey = (privateKey: `0x${string}`) => {
+  const account = privateKeyToAccount(privateKey);
+  return account;
+};

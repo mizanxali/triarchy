@@ -3,11 +3,15 @@ import { Input } from '@battleground/ui/input';
 import React, { useState } from 'react';
 import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
-import { useReadContract, useWriteContract } from 'wagmi';
+import {
+  useReadContract,
+  useWatchContractEvent,
+  useWriteContract,
+} from 'wagmi';
 import { GameWagerABI } from '@battleground/web3/abis';
 import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
 import { publicClient } from '@battleground/web3/client';
-import { parseEther } from 'viem';
+import { formatEther, parseEther } from 'viem';
 
 interface Props {
   walletAddress: string;
@@ -16,7 +20,7 @@ interface Props {
 
 const Welcome = ({ walletAddress, joinRoom }: Props) => {
   const [createdGameCode, setCreatedGameCode] = useState('');
-  const [gameCode, setGameCode] = useState('');
+  const [enteredGameCode, setEnteredGameCode] = useState('');
   const [wagerAmount, setWagerAmount] = useState('');
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [isJoiningGame, setIsJoiningGame] = useState(false);
@@ -26,14 +30,21 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
     abi: GameWagerABI,
     address: GAME_WAGER_ADDRESS,
     functionName: 'getGame',
-    args: [gameCode],
+    args: [enteredGameCode],
     query: {
       enabled: false,
     },
   });
 
+  const { mutateAsync: gameCreated } = api.room.gameCreated.useMutation({
+    onSuccess: async ({ roomId }) => {
+      console.log('Server notified of game creation', roomId);
+      await createAccessToken({ roomId });
+    },
+  });
+
   const { mutateAsync: createRoom } = api.room.createRoom.useMutation({
-    onSuccess: async (roomId) => {
+    onSuccess: async ({ roomId }) => {
       setCreatedGameCode(roomId);
 
       const txnHash = await writeContractAsync({
@@ -55,14 +66,17 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
         throw new Error('Create Game Transaction failed');
       }
 
-      await createAccessToken({ roomId });
+      await gameCreated({ roomId, wagerAmount });
+
+      console.log('Game created', receipt);
     },
   });
 
   const { mutateAsync: createAccessToken } =
     api.room.createAccessToken.useMutation({
       onSuccess: async (token) => {
-        const roomId = createdGameCode.length > 0 ? createdGameCode : gameCode;
+        const roomId =
+          createdGameCode.length > 0 ? createdGameCode : enteredGameCode;
         if (roomId.length === 0) return;
         await joinRoom({
           roomId,
@@ -81,11 +95,11 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
 
     setIsCreatingGame(true);
 
-    await createRoom();
+    await createRoom({ wagerAmount });
   };
 
   const onJoinGameHandler = async () => {
-    if (gameCode === '') {
+    if (enteredGameCode === '') {
       alert('Game code cannot be empty');
       return;
     }
@@ -103,7 +117,7 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
       abi: GameWagerABI,
       address: GAME_WAGER_ADDRESS,
       functionName: 'joinGame',
-      args: [gameCode],
+      args: [enteredGameCode],
       value: gameInfo.data.wagerAmount,
     });
 
@@ -118,7 +132,7 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
       throw new Error('Join Game Transaction failed');
     }
 
-    await createAccessToken({ roomId: gameCode });
+    await createAccessToken({ roomId: enteredGameCode });
   };
 
   return (
@@ -149,12 +163,12 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
           <div className="flex-1 border-l-2 border-gray-600 flex flex-col items-center gap-4 p-4 w-full">
             <Input
               className="w-3/4"
-              value={gameCode}
-              onChange={(e) => setGameCode(e.target.value)}
+              value={enteredGameCode}
+              onChange={(e) => setEnteredGameCode(e.target.value)}
               placeholder="Enter Game Code"
             />
             <Button
-              disabled={!gameCode || isJoiningGame}
+              disabled={!enteredGameCode || isJoiningGame}
               onClick={onJoinGameHandler}
               variant={'primary'}
             >

@@ -1,9 +1,7 @@
 import { HuddleClient } from '@huddle01/web-core';
 import { GameExecutor } from './GameExecutor';
-
 import { AccessToken, Role } from '@huddle01/server-sdk/auth';
 import { WebSocket } from 'ws';
-
 import { WeriftHandler } from 'mediasoup-client-werift';
 import { weriftCapabilities } from './constants';
 
@@ -34,7 +32,7 @@ class GameManagerExecutor {
     }
   }
 
-  async joinRoom(roomId: string) {
+  async joinRoom(roomId: string, wagerAmount: string) {
     try {
       const client = new HuddleClient({
         projectId: process.env.HUDDLE01_PROJECT_ID ?? '',
@@ -53,7 +51,7 @@ class GameManagerExecutor {
 
       console.log('GameExecutor joined', roomId);
 
-      const gameExecutor = new GameExecutor(client);
+      const gameExecutor = new GameExecutor(client, roomId, wagerAmount);
 
       this.gameExecutorMap.set(roomId, gameExecutor);
 
@@ -66,5 +64,4 @@ class GameManagerExecutor {
     }
   }
 }
-
 export { GameManagerExecutor };

@@ -13,7 +13,9 @@ const main = async () => {
 
   app.get('/:roomId', async (req, res) => {
     const roomId = req.params.roomId;
-    await gameManagerExecutor.joinRoom(roomId);
+    const wagerAmount = req.query.wagerAmount as string;
+
+    await gameManagerExecutor.joinRoom(roomId, wagerAmount);
 
     res.send('Room Joined!');
   });

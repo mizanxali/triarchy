@@ -6,41 +6,52 @@ import { AccessToken, Role } from '@huddle01/server-sdk/auth';
 import { z } from 'zod';
 
 export const roomRouter = {
-  createRoom: protectedProcedure.mutation(async () => {
-    try {
-      const res = await fetch(
-        'https://api.huddle01.com/api/v2/sdk/rooms/create-room',
-        {
-          method: 'POST',
-          headers: new Headers({
-            'Content-Type': 'application/json',
-            'x-api-key': env.HUDDLE01_API_KEY,
-          }),
-          body: JSON.stringify({
-            title: 'Card Battle Room',
-            hostWallets: [],
-          }),
-          cache: 'no-store',
-        },
-      );
+  createRoom: protectedProcedure
+    .input(
+      z.object({
+        wagerAmount: z.string(),
+      }),
+    )
+    .output(
+      z.object({
+        roomId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const res = await fetch(
+          'https://api.huddle01.com/api/v2/sdk/rooms/create-room',
+          {
+            method: 'POST',
+            headers: new Headers({
+              'Content-Type': 'application/json',
+              'x-api-key': env.HUDDLE01_API_KEY,
+            }),
+            body: JSON.stringify({
+              title: 'Card Battle Room',
+              hostWallets: [],
+            }),
+            cache: 'no-store',
+          },
+        );
 
-      const data = await res.json();
+        const data = await res.json();
 
-      const roomId: string = data.data.roomId;
+        const roomId: string = data.data.roomId;
 
-      await fetch(`${env.SERVER_URL}/${roomId}`);
-
-      return roomId;
-    } catch (error) {
-      console.error('Error details:', error);
-      if (error instanceof TRPCError) throw error;
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create room',
-        cause: error,
-      });
-    }
-  }),
+        return {
+          roomId,
+        };
+      } catch (error) {
+        console.error('Error details:', error);
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create room',
+          cause: error,
+        });
+      }
+    }),
 
   createAccessToken: protectedProcedure
     .input(
@@ -77,6 +88,39 @@ export const roomRouter = {
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to create access token',
           cause: error,
+        });
+      }
+    }),
+
+  gameCreated: protectedProcedure
+    .input(
+      z.object({
+        roomId: z.string(),
+        wagerAmount: z.string(),
+      }),
+    )
+    .output(
+      z.object({
+        roomId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      console.log('Game created', input);
+
+      try {
+        await fetch(
+          `${env.SERVER_URL}/${input.roomId}?wagerAmount=${input.wagerAmount}`,
+        );
+
+        return {
+          roomId: input.roomId,
+        };
+      } catch (error) {
+        console.error('Error details:', error);
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to notify game created',
         });
       }
     }),

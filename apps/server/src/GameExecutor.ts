@@ -3,9 +3,18 @@ import type { HuddleClient } from '@huddle01/web-core';
 import type { LocalPeerEvents, RoomEvents } from '@huddle01/web-core/types';
 import { CARD_DECK } from './constants';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  getAccountFromPrivateKey,
+  walletClient,
+} from '@battleground/web3/client';
+import { GameWagerABI } from '@battleground/web3/abis';
+import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
 
 class GameExecutor {
   #client: HuddleClient;
+
+  gameCode: string | undefined;
+  wagerAmount: string | undefined;
 
   blackWalletAddress: string | undefined;
   whiteWalletAddress: string | undefined;
@@ -54,8 +63,16 @@ class GameExecutor {
     | ((data: RoomEvents['peer-left'][0]) => void)
     | undefined;
 
-  constructor(client: HuddleClient) {
+  constructor(client: HuddleClient, gameCode: string, wagerAmount: string) {
+    console.log(
+      'GameExecutor created with gameCode and wagerAmount: ',
+      gameCode,
+      wagerAmount,
+    );
+
     this.#client = client;
+    this.gameCode = gameCode;
+    this.wagerAmount = wagerAmount;
 
     this.newPeerHandler = (event) => {
       try {
@@ -122,19 +139,21 @@ class GameExecutor {
       }
     };
 
-    this.peerLeftHandler = (event) => {
+    this.peerLeftHandler = ({ peerId }) => {
       try {
-        if (event.peerId === this.blackPeerId) {
-          console.log('Black player left');
-          this.blackPeerId = undefined;
-          this.blackWalletAddress = undefined;
-        } else if (event.peerId === this.whitePeerId) {
-          console.log('White player left');
-          this.whitePeerId = undefined;
-          this.whiteWalletAddress = undefined;
+        console.log('Player left: ', peerId);
+
+        let compensatedPlayer = undefined;
+
+        if (this.whitePeerId && peerId === this.blackPeerId) {
+          compensatedPlayer = this.whiteWalletAddress;
+        } else if (this.blackPeerId && peerId === this.whitePeerId) {
+          compensatedPlayer = this.blackWalletAddress;
         }
 
-        if (!this.blackPeerId || !this.whitePeerId) this.dispose();
+        console.log('Compensated player: ', compensatedPlayer);
+
+        if (compensatedPlayer) this.cancelGame(compensatedPlayer);
       } catch (error) {
         console.error('Error in peer-left handler:', error);
       }
@@ -169,6 +188,8 @@ class GameExecutor {
       this.#client.room.close();
 
       // clear remaining state
+      this.gameCode = undefined;
+      this.wagerAmount = undefined;
       this.blackPeerId = undefined;
       this.whitePeerId = undefined;
       this.blackWalletAddress = undefined;
@@ -517,10 +538,28 @@ class GameExecutor {
           }),
         ]);
 
+        // call the completeGame function on the smart contract
+        if (this.wagerAmount && this.gameCode) {
+          const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+
+          const adminAccount = getAccountFromPrivateKey(
+            adminPrivateKey as `0x${string}`,
+          );
+
+          const txnHash = await walletClient.writeContract({
+            account: adminAccount,
+            abi: GameWagerABI,
+            address: GAME_WAGER_ADDRESS,
+            functionName: 'completeGame',
+            args: [this.gameCode, this.blackWalletAddress as `0x${string}`],
+          });
+
+          console.log('Black player rewarded: ', txnHash);
+        }
+
         // close the room
         this.dispose();
 
-        //TODO: update smart contract
         return;
       }
     }
@@ -557,13 +596,55 @@ class GameExecutor {
           }),
         ]);
 
+        // call the completeGame function on the smart contract
+        if (this.wagerAmount && this.gameCode) {
+          const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+
+          const adminAccount = getAccountFromPrivateKey(
+            adminPrivateKey as `0x${string}`,
+          );
+
+          const txnHash = await walletClient.writeContract({
+            account: adminAccount,
+            abi: GameWagerABI,
+            address: GAME_WAGER_ADDRESS,
+            functionName: 'completeGame',
+            args: [this.gameCode, this.whiteWalletAddress as `0x${string}`],
+          });
+
+          console.log('White player rewarded: ', txnHash);
+        }
+
         // close the room
         this.dispose();
 
-        //TODO: update smart contract
         return;
       }
     }
+  }
+
+  private async cancelGame(compensatedPlayer: string) {
+    // call the cancelGame function on the smart contract
+    if (this.gameCode) {
+      const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+
+      const adminAccount = getAccountFromPrivateKey(
+        adminPrivateKey as `0x${string}`,
+      );
+
+      const txnHash = await walletClient.writeContract({
+        account: adminAccount,
+        abi: GameWagerABI,
+        address: GAME_WAGER_ADDRESS,
+        functionName: 'cancelGame',
+        args: [this.gameCode, compensatedPlayer as `0x${string}`],
+      });
+
+      console.log('Game cancelled: ', txnHash);
+    }
+
+    // close the room
+    this.dispose();
   }
 
   private async sendData({
