@@ -63,6 +63,7 @@ const Root = ({ walletAddress }: Props) => {
       opponentWonCards: [...opponentWonCards],
       activeCard: undefined,
       opponentActiveCard: undefined,
+      isPlayable: false,
     }));
   };
 
@@ -82,6 +83,7 @@ const Root = ({ walletAddress }: Props) => {
       opponentWonCards: [...opponentWonCards],
       activeCard: undefined,
       opponentActiveCard: undefined,
+      isPlayable: true,
     }));
   };
 
@@ -101,6 +103,7 @@ const Root = ({ walletAddress }: Props) => {
       opponentWonCards: [...opponentWonCards],
       activeCard: undefined,
       opponentActiveCard: undefined,
+      isPlayable: true,
     }));
   };
 

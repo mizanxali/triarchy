@@ -25,6 +25,7 @@ type GameAtom = {
     card: TCard | 'redacted';
     id: string;
   };
+  isPlayable: boolean;
 };
 
 const defaultGameAtom: GameAtom = {
@@ -34,6 +35,7 @@ const defaultGameAtom: GameAtom = {
   opponentWonCards: [],
   activeCard: undefined,
   opponentActiveCard: undefined,
+  isPlayable: true,
 };
 
 const dummyGameAtom: GameAtom = {
@@ -108,6 +110,7 @@ const dummyGameAtom: GameAtom = {
     card: 'redacted',
     id: uuidv4(),
   },
+  isPlayable: false,
 };
 
 const gameAtom = atomWithReset<GameAtom>(defaultGameAtom);

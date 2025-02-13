@@ -52,14 +52,16 @@ const Card = ({ card, size, onClick, invisible }: Props) => {
           transition={{ duration: 0.2 }}
           className="w-full h-full"
         >
-          <Image
-            src={CARD_BG_IMAGE_MAP[card.card]}
-            alt={card.card}
-            width={dimensions[size].width}
-            height={dimensions[size].height}
-            priority={true}
-            className="rounded-lg"
-          />
+          <div className="absolute inset-0 brightness-[0.88]">
+            <Image
+              src={CARD_BG_IMAGE_MAP[card.card]}
+              alt={card.card}
+              width={dimensions[size].width}
+              height={dimensions[size].height}
+              priority={true}
+              className="rounded-lg"
+            />
+          </div>
         </motion.div>
       )}
     </motion.div>

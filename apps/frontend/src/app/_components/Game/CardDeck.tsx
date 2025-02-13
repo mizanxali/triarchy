@@ -9,12 +9,12 @@ const CardDeck = () => {
   const [serverPeerId] = usePeerIds({ roles: [Role.HOST] }).peerIds;
   const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
 
-  const [{ cardsDeck }, setGameAtom] = useGameAtom();
+  const [{ cardsDeck, isPlayable }, setGameAtom] = useGameAtom();
 
   const { sendData } = useDataMessage();
 
   const onPlayCardHandler = async (card: TCard | 'redacted', id: string) => {
-    if (!serverPeerId || card === 'redacted') return;
+    if (!serverPeerId || card === 'redacted' || !isPlayable) return;
 
     setGameAtom((prev) => ({
       ...prev,
