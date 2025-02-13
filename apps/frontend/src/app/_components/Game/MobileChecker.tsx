@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import WalletConnect from '../Button/WalletConnect';
 import { OctagonAlert } from 'lucide-react';
 import { Loader } from '@battleground/ui/loader';
+import Rules from '../common/Rules';
 
 const MobileChecker = () => {
   const { isMobile, isLoading } = useMobile();
@@ -31,14 +32,20 @@ const MobileChecker = () => {
       </div>
     );
 
-  if (!session)
-    return (
-      <div className="w-full h-screen flex justify-center items-center">
-        <WalletConnect />
+  return (
+    <>
+      <div className="fixed top-8 right-8 z-10">
+        <Rules />
       </div>
-    );
-
-  return <Root walletAddress={session.user.walletAddress} />;
+      {session ? (
+        <Root walletAddress={session.user.walletAddress} />
+      ) : (
+        <div className="w-full h-screen flex justify-center items-center">
+          <WalletConnect />
+        </div>
+      )}
+    </>
+  );
 };
 
 export default MobileChecker;
