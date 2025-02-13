@@ -1,17 +1,13 @@
 import { Button } from '@battleground/ui/button';
 import { Input } from '@battleground/ui/input';
-import React, { useState } from 'react';
+import { GameWagerABI } from '@battleground/web3/abis';
+import { publicClient } from '@battleground/web3/client';
+import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
+import { useState } from 'react';
+import { parseEther } from 'viem';
+import { useReadContract, useWriteContract } from 'wagmi';
 import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
-import {
-  useReadContract,
-  useWatchContractEvent,
-  useWriteContract,
-} from 'wagmi';
-import { GameWagerABI } from '@battleground/web3/abis';
-import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
-import { publicClient } from '@battleground/web3/client';
-import { formatEther, parseEther } from 'viem';
 
 interface Props {
   walletAddress: string;
@@ -39,6 +35,10 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
   const { mutateAsync: gameCreated } = api.room.gameCreated.useMutation({
     onSuccess: async ({ roomId }) => {
       await createAccessToken({ roomId });
+    },
+    onError: (error) => {
+      console.error(error);
+      setIsCreatingGame(false);
     },
   });
 
@@ -69,6 +69,10 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
 
       await gameCreated({ roomId, wagerAmount });
     },
+    onError: (error) => {
+      console.error(error);
+      setIsCreatingGame(false);
+    },
   });
 
   const { mutateAsync: createAccessToken } =
@@ -84,54 +88,69 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
         setIsCreatingGame(false);
         setIsJoiningGame(false);
       },
+      onError: (error) => {
+        console.error(error);
+        setIsCreatingGame(false);
+        setIsJoiningGame(false);
+      },
     });
 
   const onCreateGameHandler = async () => {
-    if (wagerAmount === '' || wagerAmount === '0') {
-      alert('Wager amount cannot be 0');
-      return;
+    try {
+      if (wagerAmount === '' || wagerAmount === '0') {
+        alert('Wager amount cannot be 0');
+        return;
+      }
+
+      setIsCreatingGame(true);
+
+      await createRoom({ wagerAmount });
+    } catch (error) {
+      console.error(error);
+      setIsCreatingGame(false);
     }
-
-    setIsCreatingGame(true);
-
-    await createRoom({ wagerAmount });
   };
 
   const onJoinGameHandler = async () => {
-    if (enteredGameCode === '') {
-      alert('Game code cannot be empty');
-      return;
+    try {
+      if (enteredGameCode === '') {
+        alert('Game code cannot be empty');
+        return;
+      }
+
+      setIsJoiningGame(true);
+
+      const gameInfo = await fetchGameInfo();
+
+      if (!gameInfo.data) {
+        alert('Game not found');
+        return;
+      }
+
+      const txnHash = await writeContractAsync({
+        abi: GameWagerABI,
+        address: GAME_WAGER_ADDRESS,
+        functionName: 'joinGame',
+        args: [enteredGameCode],
+        value: gameInfo.data.wagerAmount,
+      });
+
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txnHash,
+        retryCount: 3,
+        retryDelay: 1000,
+      });
+
+      if (receipt.status !== 'success') {
+        console.error({ receipt });
+        throw new Error('Join Game Transaction failed');
+      }
+
+      await createAccessToken({ roomId: enteredGameCode });
+    } catch (error) {
+      console.error(error);
+      setIsJoiningGame(false);
     }
-
-    setIsJoiningGame(true);
-
-    const gameInfo = await fetchGameInfo();
-
-    if (!gameInfo.data) {
-      alert('Game not found');
-      return;
-    }
-
-    const txnHash = await writeContractAsync({
-      abi: GameWagerABI,
-      address: GAME_WAGER_ADDRESS,
-      functionName: 'joinGame',
-      args: [enteredGameCode],
-      value: gameInfo.data.wagerAmount,
-    });
-
-    const receipt = await publicClient.waitForTransactionReceipt({
-      hash: txnHash,
-      retryCount: 3,
-      retryDelay: 1000,
-    });
-
-    if (receipt.status !== 'success') {
-      console.error({ receipt });
-      throw new Error('Join Game Transaction failed');
-    }
-
-    await createAccessToken({ roomId: enteredGameCode });
   };
 
   return (
