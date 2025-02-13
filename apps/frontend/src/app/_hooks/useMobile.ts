@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useWindowSize } from 'usehooks-ts';
-import { isMobileDevice } from '../_helpers';
+import { isMobileDevice } from '../utils';
 
 export const useMobile = () => {
   const { width } = useWindowSize();
