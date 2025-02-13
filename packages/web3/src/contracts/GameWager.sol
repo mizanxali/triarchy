@@ -149,6 +149,8 @@ contract GameWager {
         game.isActive = false;
         game.isComplete = true;
 
+        playerTotalWagered[compensatedPlayer] -= game.wagerAmount;
+
         payable(compensatedPlayer).transfer(game.wagerAmount);
 
         emit GameCanceled(gameCode);
