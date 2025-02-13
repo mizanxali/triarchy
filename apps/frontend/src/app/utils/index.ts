@@ -1,9 +1,9 @@
 import type { TCard } from '@battleground/validators';
 import { v4 as uuidv4 } from 'uuid';
-export const getTodaysDate = (date: Date = new Date()) =>
+const getTodaysDate = (date: Date = new Date()) =>
   `${date.toLocaleDateString('en-US', { weekday: 'long' })}, ${date.getDate()}${['st', 'nd', 'rd'][((date.getDate() + 90) % 10) - 1] || 'th'} ${date.toLocaleDateString('en-US', { month: 'short' })}, ${date.getFullYear()}`;
 
-export const isValidLogoUrl = (url: string) => {
+const isValidLogoUrl = (url: string) => {
   if (/^https:\/\/huddle01\.mypinata\.cloud\/ipfs\/[a-zA-Z0-9]+$/.test(url))
     return true;
 
@@ -29,23 +29,23 @@ export const isValidLogoUrl = (url: string) => {
   }
 };
 
-export const isValidEthereumAddress = (address: string) => {
+const isValidEthereumAddress = (address: string) => {
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
-export const truncateAddress = (text: string) => {
+const truncateAddress = (text: string) => {
   return `${text.slice(0, 5)}....${text.slice(-5)}`;
 };
 
-export const getFormattedDateTime = (date: Date): string => {
+const getFormattedDateTime = (date: Date): string => {
   return `${date.getDate()} ${date.toLocaleString('en-US', { month: 'short' })}, '${date.getFullYear().toString().slice(-2)} ${date.toLocaleTimeString('en-US')}`;
 };
 
-export const getFormattedDate = (date: Date): string => {
+const getFormattedDate = (date: Date): string => {
   return `${date.getDate()} ${date.toLocaleString('en-US', { month: 'short' })}, '${date.getFullYear().toString().slice(-2)}`;
 };
 
-export const getTimeDifference = (timestamp: string) => {
+const getTimeDifference = (timestamp: string) => {
   const givenDate = new Date(timestamp);
   const currentDate = new Date();
   const diffInMs = currentDate.getTime() - givenDate.getTime();

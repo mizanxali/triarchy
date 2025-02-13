@@ -12,6 +12,6 @@ const defaultMiscAtom: MiscAtom = {
 const miscAtom = atomWithReset<MiscAtom>(defaultMiscAtom);
 
 export const useMiscAtom = () => useAtom(miscAtom);
-export const useMiscAtomValue = () => useAtomValue(miscAtom);
-export const useMiscSetAtom = () => useSetAtom(miscAtom);
-export const useMiscResetAtom = () => useResetAtom(miscAtom);
+const useMiscAtomValue = () => useAtomValue(miscAtom);
+const useMiscSetAtom = () => useSetAtom(miscAtom);
+const useMiscResetAtom = () => useResetAtom(miscAtom);

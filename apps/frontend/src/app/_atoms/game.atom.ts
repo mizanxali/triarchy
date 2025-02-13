@@ -117,5 +117,5 @@ const gameAtom = atomWithReset<GameAtom>(defaultGameAtom);
 
 export const useGameAtom = () => useAtom(gameAtom);
 export const useGameAtomValue = () => useAtomValue(gameAtom);
-export const useGameSetAtom = () => useSetAtom(gameAtom);
+const useGameSetAtom = () => useSetAtom(gameAtom);
 export const useGameResetAtom = () => useResetAtom(gameAtom);

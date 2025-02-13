@@ -4,6 +4,6 @@ import { atomWithStorage, useResetAtom } from 'jotai/utils';
 const musicEnabledAtom = atomWithStorage('musicEnabled', true);
 
 export const useMusicAtom = () => useAtom(musicEnabledAtom);
-export const useMusicAtomValue = () => useAtomValue(musicEnabledAtom);
-export const useMusicSetAtom = () => useSetAtom(musicEnabledAtom);
-export const useMusicResetAtom = () => useResetAtom(musicEnabledAtom);
+const useMusicAtomValue = () => useAtomValue(musicEnabledAtom);
+const useMusicSetAtom = () => useSetAtom(musicEnabledAtom);
+const useMusicResetAtom = () => useResetAtom(musicEnabledAtom);

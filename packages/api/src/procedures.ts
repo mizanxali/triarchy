@@ -47,7 +47,7 @@ export const protectedProcedure = t.procedure
   });
 
 // Admin procedures are only available to users with the isAdmin flag set to true
-export const adminProcedure = t.procedure
+const adminProcedure = t.procedure
   .use(timingMiddleware)
   .use(async ({ ctx, next }) => {
     if (!ctx.isAdmin) {

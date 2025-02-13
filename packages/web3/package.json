@@ -23,6 +23,10 @@
     "typescript": "catalog:"
   },
   "dependencies": {
-    "viem": "^2.21.52"
+    "@auth/core": "0.37.2",
+    "@t3-oss/env-nextjs": "^0.11.1",
+    "jose": "^5.9.6",
+    "viem": "^2.21.52",
+    "zod": "catalog:"
   }
 }

@@ -9,7 +9,7 @@ export const useGetWalletConnectorIdAtomValue = () =>
 export const useSetWalletConnectorIdAtomValue = () =>
   useSetAtom(walletConnectorId);
 
-export const useWalletConnectorIdAtomValue = () => useAtom(walletConnectorId);
+const useWalletConnectorIdAtomValue = () => useAtom(walletConnectorId);
 
 export const useResetWalletConnectorIdAtomValue = () =>
   useResetAtom(walletConnectorId);

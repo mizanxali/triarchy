@@ -1,12 +1,12 @@
 'use client';
 
 import { Button } from '@battleground/ui/button';
-import { ExitIcon } from '@radix-ui/react-icons';
 import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useDisconnect } from '@reown/appkit/react';
 import { logout } from '~/app/_actions';
+import { LogOut } from 'lucide-react';
 
 const SignOutButton = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -27,7 +27,7 @@ const SignOutButton = () => {
         variant="destructive"
         disabled={isDisconnecting}
         onClick={disconnect}
-        prefixIcon={<ExitIcon />}
+        prefixIcon={<LogOut />}
       >
         {isDisconnecting ? 'Signing Out...' : 'Sign Out'}
       </Button>

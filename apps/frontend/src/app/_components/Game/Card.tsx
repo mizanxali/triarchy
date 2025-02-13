@@ -1,7 +1,7 @@
 import { cn } from '@battleground/ui';
 import type { TCard } from '@battleground/validators';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { CARD_BG_IMAGE_MAP } from '~/app/_constants';
 
 interface Props {

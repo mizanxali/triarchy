@@ -20,7 +20,7 @@ const metadata = {
   icons: ['https://card-battle-mu.vercel.app/favicon.ico'],
 };
 
-export const wagmiAdapter = new WagmiAdapter({
+const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
     storage: cookieStorage,
   }),

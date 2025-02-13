@@ -1,6 +1,5 @@
 'use client';
 
-import { useToast } from '@battleground/ui/hooks/useToast';
 import { hudlChain } from '@battleground/web3/client';
 import { useAppKitState } from '@reown/appkit/react';
 import { getSession } from 'next-auth/react';
@@ -23,7 +22,6 @@ import {
 const useWalletConnection = (connectorId: string) => {
   const router = useRouter();
   const { open } = useAppKitState();
-  const { toast } = useToast();
   const { address } = useAccount();
   const { disconnectAsync } = useDisconnect();
   const { signMessageAsync, isSuccess } = useSignMessage();
@@ -50,7 +48,7 @@ const useWalletConnection = (connectorId: string) => {
         await disconnectAsync();
       }
     },
-    [disconnectAsync, toast],
+    [disconnectAsync],
   );
 
   const signMessage = useCallback(async () => {
@@ -85,7 +83,7 @@ const useWalletConnection = (connectorId: string) => {
       } else {
         await switchChainAsync({ chainId: hudlChain.id });
         setIsError(false);
-        const session = await getSession();
+        await getSession();
         router.refresh();
       }
       resetWalletConnectorIdAtomValue();
@@ -99,7 +97,6 @@ const useWalletConnection = (connectorId: string) => {
     address,
     signMessageAsync,
     disconnectAsync,
-    toast,
     handleError,
     router,
     resetWalletConnectorIdAtomValue,

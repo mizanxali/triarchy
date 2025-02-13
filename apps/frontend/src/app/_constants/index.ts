@@ -1,6 +1,6 @@
 import type { TCard } from '@battleground/validators';
 
-export const CARD_COLOR_MAP: Record<TCard | 'redacted', string> = {
+const CARD_COLOR_MAP: Record<TCard | 'redacted', string> = {
   A2: 'bg-red-200',
   A3: 'bg-orange-200',
   A4: 'bg-amber-200',

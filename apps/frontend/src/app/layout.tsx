@@ -3,7 +3,6 @@ import { MedievalSharp, Sancreek } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 
 import { cn } from '@battleground/ui';
-import { Toaster } from '@battleground/ui/toaster';
 
 import { TRPCReactProvider } from '~/trpc/react';
 
@@ -67,7 +66,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
               <TRPCReactProvider>
                 <div className="relative z-10">{props.children}</div>
               </TRPCReactProvider>
-              <Toaster />
             </MyHuddleProvider>
           </SessionProvider>
         </Web3Provider>
