@@ -24,8 +24,8 @@ const ActiveCards = () => {
   return (
     <div className="flex-1 w-full flex justify-between items-center py-10">
       <div className="flex-1 flex justify-end items-center px-20">
-        <div className="flex-1 flex flex-col justify-center items-center gap-2">
-          <div>You</div>
+        <div className="flex-1 flex flex-col justify-center items-start gap-2">
+          <div className="text-yellow-600 text-3xl">You</div>
           <div className="text-lg">{metadata?.displayName}</div>
         </div>
         <AnimatePresence mode="wait">
@@ -56,11 +56,9 @@ const ActiveCards = () => {
             />
           )}
         </AnimatePresence>
-        <div className="flex-1 flex flex-col justify-center items-center gap-2">
-          <div>Opponent</div>
-          {opponentPeerId ? (
-            <RemotePeerInfo remotePeerId={opponentPeerId} />
-          ) : null}
+        <div className="flex-1 flex flex-col justify-center items-end gap-2">
+          <div className="text-yellow-600 text-3xl">Opponent</div>
+          <RemotePeerInfo remotePeerId={opponentPeerId} />
         </div>
       </div>
     </div>

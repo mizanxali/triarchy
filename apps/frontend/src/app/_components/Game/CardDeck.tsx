@@ -31,6 +31,7 @@ const CardDeck = () => {
         card,
         id,
       },
+      isPlayable: false,
     }));
 
     await sendData({
