@@ -25,6 +25,8 @@ contract GameWager {
 
     mapping(string => Game) public games;
     string[] public allGameCodes;
+    mapping(address => uint256) public playerWins;
+    mapping(address => uint256) public playerLosses;
 
     event GameCreated(string gameCode, address player1, uint256 wagerAmount);
     event PlayerJoined(string gameCode, address player2);
@@ -105,6 +107,9 @@ contract GameWager {
         game.isComplete = true;
         game.winner = winner;
 
+        playerWins[winner]++;
+        playerLosses[winner == game.player1 ? game.player2 : game.player1]++;
+
         uint256 totalWager = game.wagerAmount * 2;
         uint256 prizeMoney = (totalWager * 80) / 100;
         payable(winner).transfer(prizeMoney);
@@ -130,6 +135,12 @@ contract GameWager {
         payable(compensatedPlayer).transfer(game.wagerAmount);
 
         emit GameCanceled(gameCode);
+    }
+
+    function getPlayerStats(
+        address player
+    ) external view returns (uint256 wins, uint256 losses) {
+        return (playerWins[player], playerLosses[player]);
     }
 
     function withdraw() external onlyOwner {
