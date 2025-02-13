@@ -27,6 +27,8 @@ contract GameWager {
     string[] public allGameCodes;
     mapping(address => uint256) public playerWins;
     mapping(address => uint256) public playerLosses;
+    mapping(address => uint256) public playerTotalWon;
+    mapping(address => uint256) public playerTotalWagered;
 
     event GameCreated(string gameCode, address player1, uint256 wagerAmount);
     event PlayerJoined(string gameCode, address player2);
@@ -67,6 +69,7 @@ contract GameWager {
         });
 
         allGameCodes.push(gameCode);
+        playerTotalWagered[msg.sender] += msg.value;
 
         emit GameCreated(gameCode, msg.sender, msg.value);
     }
@@ -85,6 +88,7 @@ contract GameWager {
         );
 
         game.player2 = msg.sender;
+        playerTotalWagered[msg.sender] += msg.value;
 
         emit PlayerJoined(gameCode, msg.sender);
     }
@@ -108,10 +112,14 @@ contract GameWager {
         game.winner = winner;
 
         playerWins[winner]++;
-        playerLosses[winner == game.player1 ? game.player2 : game.player1]++;
+        address loser = winner == game.player1 ? game.player2 : game.player1;
+        playerLosses[loser]++;
 
         uint256 totalWager = game.wagerAmount * 2;
         uint256 prizeMoney = (totalWager * 80) / 100;
+
+        playerTotalWon[winner] += prizeMoney;
+
         payable(winner).transfer(prizeMoney);
 
         emit GameComplete(gameCode, winner, prizeMoney);
@@ -139,8 +147,22 @@ contract GameWager {
 
     function getPlayerStats(
         address player
-    ) external view returns (uint256 wins, uint256 losses) {
-        return (playerWins[player], playerLosses[player]);
+    )
+        external
+        view
+        returns (
+            uint256 wins,
+            uint256 losses,
+            uint256 ethWon,
+            uint256 ethWagered
+        )
+    {
+        return (
+            playerWins[player],
+            playerLosses[player],
+            playerTotalWon[player],
+            playerTotalWagered[player]
+        );
     }
 
     function withdraw() external onlyOwner {
