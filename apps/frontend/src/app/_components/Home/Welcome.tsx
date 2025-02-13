@@ -1,5 +1,3 @@
-'use client';
-
 import { Button } from '@battleground/ui/button';
 import { Input } from '@battleground/ui/input';
 import React, { useState } from 'react';

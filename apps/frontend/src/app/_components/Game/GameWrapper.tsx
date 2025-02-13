@@ -1,5 +1,3 @@
-'use client';
-
 import ActiveCards from './ActiveCards';
 import CardDeck from './CardDeck';
 import WinningCardStacks from './WinningCardStacks';

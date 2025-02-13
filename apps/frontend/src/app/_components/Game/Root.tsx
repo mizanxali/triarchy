@@ -1,5 +1,3 @@
-'use client';
-
 import { useDataMessage, useRoom } from '@huddle01/react';
 import Welcome from '../Home/Welcome';
 import GameWrapper from './GameWrapper';
