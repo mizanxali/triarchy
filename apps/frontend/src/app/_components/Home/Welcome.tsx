@@ -38,7 +38,6 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
 
   const { mutateAsync: gameCreated } = api.room.gameCreated.useMutation({
     onSuccess: async ({ roomId }) => {
-      console.log('Server notified of game creation', roomId);
       await createAccessToken({ roomId });
     },
   });
@@ -61,14 +60,14 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
         retryDelay: 1000,
       });
 
+      console.log(receipt);
+
       if (receipt.status !== 'success') {
         console.error({ receipt });
         throw new Error('Create Game Transaction failed');
       }
 
       await gameCreated({ roomId, wagerAmount });
-
-      console.log('Game created', receipt);
     },
   });
 

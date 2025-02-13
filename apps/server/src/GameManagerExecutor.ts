@@ -49,8 +49,6 @@ class GameManagerExecutor {
 
       await client.joinRoom({ roomId, token });
 
-      console.log('GameExecutor joined', roomId);
-
       const gameExecutor = new GameExecutor(client, roomId, wagerAmount);
 
       this.gameExecutorMap.set(roomId, gameExecutor);

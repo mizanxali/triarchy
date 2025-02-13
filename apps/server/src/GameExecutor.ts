@@ -65,7 +65,7 @@ class GameExecutor {
 
   constructor(client: HuddleClient, gameCode: string, wagerAmount: string) {
     console.log(
-      'GameExecutor created with gameCode and wagerAmount: ',
+      'GameExecutor created with gameCode and wagerAmount',
       gameCode,
       wagerAmount,
     );
@@ -141,7 +141,7 @@ class GameExecutor {
 
     this.peerLeftHandler = ({ peerId }) => {
       try {
-        console.log('Player left: ', peerId);
+        console.log('Player left', peerId);
 
         let compensatedPlayer = undefined;
 
@@ -151,7 +151,7 @@ class GameExecutor {
           compensatedPlayer = this.blackWalletAddress;
         }
 
-        console.log('Compensated player: ', compensatedPlayer);
+        console.log('Compensated player', compensatedPlayer);
 
         if (compensatedPlayer) this.cancelGame(compensatedPlayer);
       } catch (error) {
@@ -554,7 +554,7 @@ class GameExecutor {
             args: [this.gameCode, this.blackWalletAddress as `0x${string}`],
           });
 
-          console.log('Black player rewarded: ', txnHash);
+          console.log('Black player rewarded:', txnHash);
         }
 
         // close the room
@@ -612,7 +612,7 @@ class GameExecutor {
             args: [this.gameCode, this.whiteWalletAddress as `0x${string}`],
           });
 
-          console.log('White player rewarded: ', txnHash);
+          console.log('White player rewarded', txnHash);
         }
 
         // close the room
@@ -640,7 +640,7 @@ class GameExecutor {
         args: [this.gameCode, compensatedPlayer as `0x${string}`],
       });
 
-      console.log('Game cancelled: ', txnHash);
+      console.log('Game canceled', txnHash);
     }
 
     // close the room

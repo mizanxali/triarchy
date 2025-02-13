@@ -105,8 +105,6 @@ export const roomRouter = {
       }),
     )
     .mutation(async ({ input }) => {
-      console.log('Game created', input);
-
       try {
         await fetch(
           `${env.SERVER_URL}/${input.roomId}?wagerAmount=${input.wagerAmount}`,
