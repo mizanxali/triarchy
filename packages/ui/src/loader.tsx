@@ -15,7 +15,7 @@ const Loader: React.FC<Props> = ({ size = 'medium' }) => {
   return (
     <div className="flex items-center justify-center">
       <LucidLoader
-        className={`animate-spin text-zinc-400 ${sizeClasses[size]}`}
+        className={`animate-spin text-yellow-600 ${sizeClasses[size]}`}
       />
     </div>
   );
