@@ -8,6 +8,7 @@ import { parseEther } from 'viem';
 import { useReadContract, useWriteContract } from 'wagmi';
 import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
+import CardCarousel from './CardCarousel';
 import PlayerStats from './PlayerStats';
 
 interface Props {
@@ -199,6 +200,7 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
         </div>
         <SignOutButton />
       </div>
+      <CardCarousel />
     </div>
   );
 };

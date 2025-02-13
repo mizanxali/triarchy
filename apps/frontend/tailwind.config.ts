@@ -4,8 +4,6 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 import baseConfig from '@battleground/tailwind-config/web';
 
 export default {
-  // We need to append the path to the UI package to the content array so that
-  // those classes are included correctly.
   content: [...baseConfig.content, '../../packages/ui/src/*.{ts,tsx}'],
   presets: [baseConfig],
   theme: {
@@ -34,6 +32,15 @@ export default {
       boxShadow: {
         1: '0px 9px 45px 0px (rgba(0, 0, 0, 0.12)), 0px 2px 6px 0px (rgba(0, 0, 0, 0.20))',
         2: '0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.18), 0px 2px 1px 0px rgba(0, 0, 0, 0.1), 0px 3px 1px 0px rgba(0, 0, 0, 0.02), 0px 5px 1px 0px rgba(0, 0, 0, 0), 0px 0px 0px 4px rgba(121, 121, 123, 0.24)',
+      },
+      keyframes: {
+        slide: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+      },
+      animation: {
+        slide: 'slide 40s linear infinite',
       },
     },
   },
