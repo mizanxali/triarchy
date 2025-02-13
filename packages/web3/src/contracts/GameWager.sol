@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 contract GameWager {
     address public owner;
     uint256 public houseFeePercent = 20;
+    address[] public players;
+    mapping(address => bool) public isPlayer;
 
     constructor() {
         owner = msg.sender;
@@ -22,6 +24,14 @@ contract GameWager {
         bool isActive;
         bool isComplete;
         address winner;
+    }
+
+    struct PlayerWinStats {
+        address playerAddress;
+        uint256 wins;
+        uint256 losses;
+        uint256 totalWon;
+        uint256 totalWagered;
     }
 
     mapping(string => Game) public games;
@@ -43,6 +53,13 @@ contract GameWager {
         _;
     }
 
+    function _addPlayer(address player) internal {
+        if (!isPlayer[player]) {
+            isPlayer[player] = true;
+            players.push(player);
+        }
+    }
+
     function setHouseFeePercent(uint256 newFeePercent) external onlyOwner {
         require(newFeePercent <= 100, "Fee cannot exceed 100%");
         uint256 oldFee = houseFeePercent;
@@ -60,6 +77,26 @@ contract GameWager {
         return allGameCodes;
     }
 
+    function getAllPlayerStats()
+        external
+        view
+        returns (PlayerWinStats[] memory)
+    {
+        PlayerWinStats[] memory allWins = new PlayerWinStats[](players.length);
+
+        for (uint i = 0; i < players.length; i++) {
+            allWins[i] = PlayerWinStats({
+                playerAddress: players[i],
+                wins: playerWins[players[i]],
+                losses: playerLosses[players[i]],
+                totalWon: playerTotalWon[players[i]],
+                totalWagered: playerTotalWagered[players[i]]
+            });
+        }
+
+        return allWins;
+    }
+
     function createGame(string memory gameCode) external payable {
         require(msg.value > 0, "Wager amount must be greater than 0");
         require(bytes(gameCode).length == 12, "Invalid game code");
@@ -67,6 +104,8 @@ contract GameWager {
             games[gameCode].player1 == address(0),
             "Game code already exists"
         );
+
+        _addPlayer(msg.sender);
 
         games[gameCode] = Game({
             gameCode: gameCode,
@@ -96,6 +135,8 @@ contract GameWager {
             msg.value == game.wagerAmount,
             "Must match the exact wager amount"
         );
+
+        _addPlayer(msg.sender);
 
         game.player2 = msg.sender;
         playerTotalWagered[msg.sender] += msg.value;

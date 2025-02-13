@@ -127,9 +127,9 @@ export const ABI = [
   {
     inputs: [
       {
-        internalType: 'string',
+        internalType: 'uint256',
         name: '',
-        type: 'string',
+        type: 'uint256',
       },
     ],
     name: 'allGameCodes',
@@ -193,6 +193,55 @@ export const ABI = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    name: 'games',
+    outputs: [
+      {
+        internalType: 'string',
+        name: 'gameCode',
+        type: 'string',
+      },
+      {
+        internalType: 'address',
+        name: 'player1',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'player2',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: 'wagerAmount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'bool',
+        name: 'isActive',
+        type: 'bool',
+      },
+      {
+        internalType: 'bool',
+        name: 'isComplete',
+        type: 'bool',
+      },
+      {
+        internalType: 'address',
+        name: 'winner',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'getAllGameCodes',
     outputs: [
@@ -200,6 +249,46 @@ export const ABI = [
         internalType: 'string[]',
         name: '',
         type: 'string[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getAllPlayerStats',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'playerAddress',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'wins',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'losses',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'totalWon',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'totalWagered',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct GameWager.PlayerWinStats[]',
+        name: '',
+        type: 'tuple[]',
       },
     ],
     stateMutability: 'view',
@@ -311,6 +400,25 @@ export const ABI = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'isPlayer',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'string',
         name: 'gameCode',
         type: 'string',
@@ -324,6 +432,101 @@ export const ABI = [
   {
     inputs: [],
     name: 'owner',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'playerLosses',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'playerTotalWagered',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'playerTotalWon',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'playerWins',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    name: 'players',
     outputs: [
       {
         internalType: 'address',

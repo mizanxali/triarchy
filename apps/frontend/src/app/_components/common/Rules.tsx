@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@battleground/ui/button';
-import { CircleHelp } from 'lucide-react';
+import { CircleHelp, ShieldCloseIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useGameAtomValue } from '~/app/_atoms/game.atom';
 import { useMiscAtom } from '~/app/_atoms/misc.atom';
@@ -39,7 +39,22 @@ const Rules = () => {
     );
 
   return (
-    <div className="fixed inset-0 bg-[#09090BCC] backdrop-blur-md h-full w-full flex items-center justify-center z-20">
+    <div
+      className="fixed inset-0 bg-[#09090BCC] backdrop-blur-md h-full w-full flex items-center justify-center z-20"
+      onClick={() => {
+        setMisc((prev) => ({ ...prev, showRules: false }));
+      }}
+    >
+      <div className="fixed top-8 left-8">
+        <Button
+          type="button"
+          size="icon"
+          className=""
+          onClick={() => setMisc((prev) => ({ ...prev, showRules: false }))}
+        >
+          <ShieldCloseIcon size={20} />
+        </Button>
+      </div>
       <div
         className="rounded-md p-24 text-black flex flex-col items-center justify-between"
         style={{
@@ -47,8 +62,11 @@ const Rules = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          width: '740px',
-          height: '740px',
+          width: '680px',
+          height: '680px',
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
         }}
       >
         <h1 className="text-3xl font-black">How to play?</h1>
@@ -228,17 +246,6 @@ const Rules = () => {
               </div>
             </div>
           )}
-        </div>
-
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            type="button"
-            variant="primary"
-            className="flex items-center justify-center mx-auto w-72"
-            onClick={() => setMisc((prev) => ({ ...prev, showRules: false }))}
-          >
-            Done
-          </Button>
         </div>
       </div>
     </div>

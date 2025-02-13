@@ -3,10 +3,12 @@ import { atomWithReset, useResetAtom } from 'jotai/utils';
 
 type MiscAtom = {
   showRules: boolean;
+  showLeaderboard: boolean;
 };
 
 const defaultMiscAtom: MiscAtom = {
   showRules: false,
+  showLeaderboard: false,
 };
 
 const miscAtom = atomWithReset<MiscAtom>(defaultMiscAtom);

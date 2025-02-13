@@ -10,6 +10,7 @@ import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
 import CardCarousel from './CardCarousel';
 import PlayerStats from './PlayerStats';
+import Leaderboard from './Leaderboard';
 
 interface Props {
   walletAddress: string;
@@ -200,7 +201,10 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
             </Button>
           </div>
         </div>
-        <SignOutButton />
+        <div className="flex flex-col gap-2 items-center">
+          <Leaderboard />
+          <SignOutButton />
+        </div>
       </div>
       <CardCarousel />
     </div>

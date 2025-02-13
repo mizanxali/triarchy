@@ -21,7 +21,7 @@ export const HUDL_RPC_URLS = {
   testnet: true,
 } as const;
 
-export const GAME_WAGER_ADDRESS = '0xFb3dd9524F1fCFC25Bee724F51262293F767da92';
+export const GAME_WAGER_ADDRESS = '0xf9f14af5039f903DDde3A6837f6e570EAD2322A8';
 
 export const HUDDLE_EXPLORER_URL =
   'https://huddle-testnet.explorer.caldera.xyz';
