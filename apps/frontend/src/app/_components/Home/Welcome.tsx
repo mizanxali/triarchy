@@ -8,6 +8,7 @@ import { parseEther } from 'viem';
 import { useReadContract, useWriteContract } from 'wagmi';
 import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
+import PlayerStats from './PlayerStats';
 
 interface Props {
   walletAddress: string;
@@ -156,10 +157,11 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
   return (
     <div className="w-full h-screen flex flex-col items-center">
       <h1 className="text-9xl uppercase mt-20 text-yellow-600">Triumvirate</h1>
-      <div className="flex-1 flex flex-col gap-20 pt-16 items-center w-1/2">
+      <div className="flex-1 flex flex-col gap-12 pt-16 items-center w-1/2">
         <h3 className="text-zinc-200 text-4xl font-medium text-center">
           Welcome {walletAddress}
         </h3>
+        <PlayerStats walletAddress={walletAddress} />
         <div className="w-full grid grid-cols-2">
           <div className="flex-1 flex flex-col items-center gap-4 p-4 w-full">
             <Input

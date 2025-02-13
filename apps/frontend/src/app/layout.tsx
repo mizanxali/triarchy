@@ -44,20 +44,29 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          'font-sancreek min-h-screen text-white antialiased',
+          'font-sancreek min-h-screen text-white antialiased relative',
           sancreek.variable,
           medieval.variable,
         )}
         style={{
-          backgroundImage: 'url(/backgrounds/battleback10.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          position: 'relative',
         }}
       >
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'url(/backgrounds/battleback8.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'brightness(0.6)',
+          }}
+        />
         <Web3Provider>
           <SessionProvider>
             <MyHuddleProvider>
-              <TRPCReactProvider>{props.children}</TRPCReactProvider>
+              <TRPCReactProvider>
+                <div className="relative z-10">{props.children}</div>
+              </TRPCReactProvider>
               <Toaster />
             </MyHuddleProvider>
           </SessionProvider>

@@ -32,7 +32,7 @@ const Rules = () => {
     );
 
   return (
-    <div className="fixed inset-0 bg-[#09090BCC] backdrop-blur-md h-full w-full flex items-center justify-center z-10">
+    <div className="fixed inset-0 bg-[#09090BCC] backdrop-blur-md h-full w-full flex items-center justify-center z-20">
       <div
         className="rounded-md p-24 text-black flex flex-col items-center justify-between"
         style={{

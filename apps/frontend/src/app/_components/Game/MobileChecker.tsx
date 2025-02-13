@@ -37,7 +37,7 @@ const MobileChecker = () => {
   return (
     <>
       {gameCode ? null : (
-        <div className="fixed top-8 right-8 z-10">
+        <div className="fixed top-8 right-8 z-20">
           <Rules />
         </div>
       )}
