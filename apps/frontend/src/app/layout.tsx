@@ -18,8 +18,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.huddle01.network'),
-  title: 'Card Battle',
-  description: 'Card Battle',
+  title: 'Triumvirate',
+  description:
+    'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',
 };
 
 const medieval = MedievalSharp({

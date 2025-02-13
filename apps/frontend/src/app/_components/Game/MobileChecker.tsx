@@ -44,7 +44,17 @@ const MobileChecker = () => {
       {session ? (
         <Root walletAddress={session.user.walletAddress} />
       ) : (
-        <div className="w-full h-screen flex justify-center items-center">
+        <div className="w-1/2 mx-auto text-center h-screen flex flex-col items-center">
+          <h1 className="text-9xl uppercase mt-20 text-yellow-600">
+            Triumvirate
+          </h1>
+          <div className="text-3xl mt-16">
+            Master the trinity of combat in this tactical card game where
+            superior numbers meet strategic counters in a battle for supremacy.
+          </div>
+          <div className="text-2xl mt-16 mb-8">
+            Connect your wallet to get started.
+          </div>
           <WalletConnect />
         </div>
       )}

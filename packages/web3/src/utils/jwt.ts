@@ -52,7 +52,7 @@ function constructChallengeMessage(
   walletAddress: string,
   nonce: string,
 ): string {
-  return `Welcome to Battleground!
+  return `Welcome to Triumvirate!
 
 Please sign this message to verify your wallet ownership.
 This request will not trigger a blockchain transaction or cost any gas fees.

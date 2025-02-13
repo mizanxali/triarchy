@@ -28,7 +28,7 @@ export const roomRouter = {
               'x-api-key': env.HUDDLE01_API_KEY,
             }),
             body: JSON.stringify({
-              title: 'Card Battle Room',
+              title: 'Triumvirate Room',
               hostWallets: [],
             }),
             cache: 'no-store',

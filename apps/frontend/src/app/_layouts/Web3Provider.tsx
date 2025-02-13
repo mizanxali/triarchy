@@ -13,8 +13,9 @@ import { env } from '~/env';
 const queryClient = new QueryClient();
 
 const metadata = {
-  name: 'Card Battle',
-  description: 'Card Battle',
+  name: 'Triumvirate',
+  description:
+    'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',
   url: 'https://card-battle-mu.vercel.app/',
   icons: ['https://card-battle-mu.vercel.app/favicon.ico'],
 };

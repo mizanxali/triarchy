@@ -154,8 +154,9 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center">
-      <div className="flex flex-col gap-6 justify-center items-center w-1/2">
+    <div className="w-full h-screen flex flex-col items-center">
+      <h1 className="text-9xl uppercase mt-20 text-yellow-600">Triumvirate</h1>
+      <div className="flex-1 flex flex-col gap-20 pt-16 items-center w-1/2">
         <h3 className="text-zinc-200 text-4xl font-medium text-center">
           Welcome {walletAddress}
         </h3>
