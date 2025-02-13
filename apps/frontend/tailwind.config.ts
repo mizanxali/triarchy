@@ -28,6 +28,7 @@ export default {
         sans: ['var(--font-geist-sans)', ...fontFamily.sans],
         sancreek: ['var(--font-sancreek)', ...fontFamily.sans],
         medievalSharp: ['var(--font-medieval-sharp)', ...fontFamily.sans],
+        cairo: ['var(--font-cairo)', ...fontFamily.sans],
       },
       boxShadow: {
         1: '0px 9px 45px 0px (rgba(0, 0, 0, 0.12)), 0px 2px 6px 0px (rgba(0, 0, 0, 0.20))',

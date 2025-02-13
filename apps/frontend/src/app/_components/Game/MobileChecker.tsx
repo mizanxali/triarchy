@@ -45,7 +45,7 @@ const MobileChecker = () => {
         <Root walletAddress={session.user.walletAddress} />
       ) : (
         <div className="w-1/2 mx-auto text-center h-screen flex flex-col items-center">
-          <h1 className="text-9xl uppercase mt-20 text-yellow-600">
+          <h1 className="text-9xl uppercase mt-20 text-yellow-600 font-sancreek">
             Triumvirate
           </h1>
           <div className="text-3xl mt-16">

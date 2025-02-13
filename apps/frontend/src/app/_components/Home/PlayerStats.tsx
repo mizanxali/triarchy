@@ -22,22 +22,26 @@ const PlayerStats = ({ walletAddress }: { walletAddress: string }) => {
   return (
     <div className="grid grid-cols-4 gap-4">
       <div className="flex flex-col items-center gap-2">
-        <div className="text-xl">Total Wins</div>
-        <div className="text-4xl text-yellow-600">{totalWins.toString()}</div>
+        <div className="text-xl font-bold">Total Wins</div>
+        <div className="text-4xl text-yellow-600 font-extrabold">
+          {totalWins.toString()}
+        </div>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <div className="text-xl">Total Losses</div>
-        <div className="text-4xl text-yellow-600">{totalLosses.toString()}</div>
+        <div className="text-xl font-bold">Total Losses</div>
+        <div className="text-4xl text-yellow-600 font-extrabold">
+          {totalLosses.toString()}
+        </div>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <div className="text-xl">Total ETH Wagered</div>
-        <div className="text-4xl text-yellow-600">
+        <div className="text-xl font-bold">Total ETH Wagered</div>
+        <div className="text-4xl text-yellow-600 font-extrabold">
           {Number(formatEther(ethWagered)).toFixed(4)}
         </div>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <div className="text-xl">Total ETH Won</div>
-        <div className="text-4xl text-yellow-600">
+        <div className="text-xl font-bold">Total ETH Won</div>
+        <div className="text-4xl text-yellow-600 font-extrabold">
           {Number(formatEther(ethWon)).toFixed(4)}
         </div>
       </div>

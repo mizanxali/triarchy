@@ -1,6 +1,7 @@
 import { usePeerIds, useRoom } from '@huddle01/react';
 import { Role } from '@huddle01/server-sdk/auth';
 import Rules from '../common/Rules';
+import CopyButton from '../Button/CopyButton';
 
 interface Props {
   gameCode: string;
@@ -8,19 +9,18 @@ interface Props {
 
 const GameInfo = ({ gameCode }: Props) => {
   const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
-  const { state } = useRoom();
 
   return (
-    <div className="flex flex-col gap-2 text-center items-center text-white">
-      <div>
-        <div className="text-2xl font-semibold">
+    <div className="flex flex-col gap-4 text-center items-center text-white mt-6">
+      <div className="flex flex-row gap-2.5 items-center">
+        <div className="text-3xl font-semibold">
           Game Code: <span className="text-yellow-600">{gameCode}</span>
         </div>
-        <div className="text-base">Room State: {state}</div>
+        <CopyButton text={gameCode} />
       </div>
       <div>
         {opponentPeerId ? null : (
-          <div className="text-lg font-medium">
+          <div className="text-xl font-medium">
             <span>Waiting for opponent...</span>
           </div>
         )}

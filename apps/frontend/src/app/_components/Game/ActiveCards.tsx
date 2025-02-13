@@ -25,8 +25,8 @@ const ActiveCards = () => {
     <div className="flex-1 w-full flex justify-between items-center py-10">
       <div className="flex-1 flex justify-end items-center px-20">
         <div className="flex-1 flex flex-col justify-center items-start gap-2">
-          <div className="text-yellow-600 text-3xl">You</div>
-          <div className="text-lg">{metadata?.displayName}</div>
+          <div className="text-yellow-600 text-3xl font-bold">You</div>
+          <div className="text-lg font-medium">{metadata?.displayName}</div>
         </div>
         <AnimatePresence mode="wait">
           {activeCard ? (
@@ -57,7 +57,7 @@ const ActiveCards = () => {
           )}
         </AnimatePresence>
         <div className="flex-1 flex flex-col justify-center items-end gap-2">
-          <div className="text-yellow-600 text-3xl">Opponent</div>
+          <div className="text-yellow-600 text-3xl font-bold">Opponent</div>
           <RemotePeerInfo remotePeerId={opponentPeerId} />
         </div>
       </div>
@@ -76,5 +76,7 @@ const RemotePeerInfo = ({
     peerId: remotePeerId,
   });
 
-  return <div className="text-lg">{remotePeerMetadata?.displayName}</div>;
+  return (
+    <div className="text-lg font-medium">{remotePeerMetadata?.displayName}</div>
+  );
 };

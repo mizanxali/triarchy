@@ -210,13 +210,17 @@ class GameExecutor {
       card: TCard;
       id: string;
     }[] = [];
+    const usedIndices = new Set<number>();
 
-    for (let i = 0; i < 5; i++) {
+    while (initialCards.length < 5) {
       const randomIndex = Math.floor(Math.random() * CARD_DECK.length);
-      initialCards.push({
-        card: CARD_DECK[randomIndex] as TCard,
-        id: uuidv4(),
-      });
+      if (!usedIndices.has(randomIndex)) {
+        usedIndices.add(randomIndex);
+        initialCards.push({
+          card: CARD_DECK[randomIndex] as TCard,
+          id: uuidv4(),
+        });
+      }
     }
 
     return initialCards;
