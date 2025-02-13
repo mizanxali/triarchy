@@ -3,6 +3,11 @@ import { Input } from '@battleground/ui/input';
 import React, { useState } from 'react';
 import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
+import { useReadContract, useWriteContract } from 'wagmi';
+import { GameWagerABI } from '@battleground/web3/abis';
+import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
+import { publicClient } from '@battleground/web3/client';
+import { parseEther } from 'viem';
 
 interface Props {
   walletAddress: string;
@@ -12,14 +17,44 @@ interface Props {
 const Welcome = ({ walletAddress, joinRoom }: Props) => {
   const [createdGameCode, setCreatedGameCode] = useState('');
   const [gameCode, setGameCode] = useState('');
-  const [wagerAmount, setWagerAmount] = useState(0);
-
+  const [wagerAmount, setWagerAmount] = useState('');
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [isJoiningGame, setIsJoiningGame] = useState(false);
 
-  const { mutateAsync } = api.room.createRoom.useMutation({
+  const { writeContractAsync } = useWriteContract();
+  const { refetch: fetchGameInfo } = useReadContract({
+    abi: GameWagerABI,
+    address: GAME_WAGER_ADDRESS,
+    functionName: 'getGame',
+    args: [gameCode],
+    query: {
+      enabled: false,
+    },
+  });
+
+  const { mutateAsync: createRoom } = api.room.createRoom.useMutation({
     onSuccess: async (roomId) => {
       setCreatedGameCode(roomId);
+
+      const txnHash = await writeContractAsync({
+        abi: GameWagerABI,
+        address: GAME_WAGER_ADDRESS,
+        functionName: 'createGame',
+        args: [roomId],
+        value: parseEther(wagerAmount),
+      });
+
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txnHash,
+        retryCount: 3,
+        retryDelay: 1000,
+      });
+
+      if (receipt.status !== 'success') {
+        console.error({ receipt });
+        throw new Error('Create Game Transaction failed');
+      }
+
       await createAccessToken({ roomId });
     },
   });
@@ -39,13 +74,50 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
     });
 
   const onCreateGameHandler = async () => {
-    console.log('wagerAmount', wagerAmount);
+    if (wagerAmount === '' || wagerAmount === '0') {
+      alert('Wager amount cannot be 0');
+      return;
+    }
+
     setIsCreatingGame(true);
-    await mutateAsync();
+
+    await createRoom();
   };
 
   const onJoinGameHandler = async () => {
+    if (gameCode === '') {
+      alert('Game code cannot be empty');
+      return;
+    }
+
     setIsJoiningGame(true);
+
+    const gameInfo = await fetchGameInfo();
+
+    if (!gameInfo.data) {
+      alert('Game not found');
+      return;
+    }
+
+    const txnHash = await writeContractAsync({
+      abi: GameWagerABI,
+      address: GAME_WAGER_ADDRESS,
+      functionName: 'joinGame',
+      args: [gameCode],
+      value: gameInfo.data.wagerAmount,
+    });
+
+    const receipt = await publicClient.waitForTransactionReceipt({
+      hash: txnHash,
+      retryCount: 3,
+      retryDelay: 1000,
+    });
+
+    if (receipt.status !== 'success') {
+      console.error({ receipt });
+      throw new Error('Join Game Transaction failed');
+    }
+
     await createAccessToken({ roomId: gameCode });
   };
 
@@ -59,13 +131,15 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
           <div className="flex-1 flex flex-col items-center gap-4 p-4 w-full">
             <Input
               className="w-3/4"
-              value={wagerAmount === 0 ? '' : wagerAmount}
-              onChange={(e) => setWagerAmount(Number(e.target.value))}
+              value={wagerAmount}
+              onChange={(e) => setWagerAmount(e.target.value)}
               placeholder="Enter Wager Amount (ETH)"
               type="number"
             />
             <Button
-              disabled={isCreatingGame}
+              disabled={
+                isCreatingGame || wagerAmount === '' || wagerAmount === '0'
+              }
               onClick={onCreateGameHandler}
               variant={'primary'}
             >
@@ -84,7 +158,7 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
               onClick={onJoinGameHandler}
               variant={'primary'}
             >
-              Join Game
+              {isJoiningGame ? 'Joining Game...' : 'Join Game'}
             </Button>
           </div>
         </div>

@@ -8,10 +8,12 @@ import WalletConnect from '../Button/WalletConnect';
 import { OctagonAlert } from 'lucide-react';
 import { Loader } from '@battleground/ui/loader';
 import Rules from '../common/Rules';
+import { useGameAtom } from '~/app/_atoms/game.atom';
 
 const MobileChecker = () => {
   const { isMobile, isLoading } = useMobile();
   const { data: session, status } = useSession();
+  const [{ gameCode }] = useGameAtom();
 
   if (isLoading || status === 'loading')
     return (
@@ -34,9 +36,11 @@ const MobileChecker = () => {
 
   return (
     <>
-      <div className="fixed top-8 right-8 z-10">
-        <Rules />
-      </div>
+      {gameCode ? null : (
+        <div className="fixed top-8 right-8 z-10">
+          <Rules />
+        </div>
+      )}
       {session ? (
         <Root walletAddress={session.user.walletAddress} />
       ) : (

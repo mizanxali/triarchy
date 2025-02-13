@@ -1,5 +1,3 @@
-import { ABI as PoolABI } from './pool';
-import { ABI as PoolManagerABI } from './poolManager';
-import { ABI as LicenseABI } from './license';
+import { ABI as GameWagerABI } from './gameWager';
 
-export { PoolABI, PoolManagerABI, LicenseABI };
+export { GameWagerABI };
