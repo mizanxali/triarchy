@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 contract GameWager {
     address public owner;
+    uint256 public houseFeePercent = 20;
 
     constructor() {
         owner = msg.sender;
@@ -35,10 +36,18 @@ contract GameWager {
     event GameComplete(string gameCode, address winner, uint256 prizeMoney);
     event GameCanceled(string gameCode);
     event WithdrawComplete(address owner, uint256 amount);
+    event HouseFeeUpdated(uint256 oldFee, uint256 newFee);
 
     modifier gameExists(string memory gameCode) {
         require(games[gameCode].player1 != address(0), "Game does not exist");
         _;
+    }
+
+    function setHouseFeePercent(uint256 newFeePercent) external onlyOwner {
+        require(newFeePercent <= 100, "Fee cannot exceed 100%");
+        uint256 oldFee = houseFeePercent;
+        houseFeePercent = newFeePercent;
+        emit HouseFeeUpdated(oldFee, newFeePercent);
     }
 
     function getGame(
@@ -53,6 +62,7 @@ contract GameWager {
 
     function createGame(string memory gameCode) external payable {
         require(msg.value > 0, "Wager amount must be greater than 0");
+        require(bytes(gameCode).length == 12, "Invalid game code");
         require(
             games[gameCode].player1 == address(0),
             "Game code already exists"
@@ -107,6 +117,9 @@ contract GameWager {
             "Winner must be one of the players"
         );
 
+        uint256 totalWager = game.wagerAmount * 2;
+        uint256 prizeMoney = (totalWager * (100 - houseFeePercent)) / 100;
+
         game.isActive = false;
         game.isComplete = true;
         game.winner = winner;
@@ -114,10 +127,6 @@ contract GameWager {
         playerWins[winner]++;
         address loser = winner == game.player1 ? game.player2 : game.player1;
         playerLosses[loser]++;
-
-        uint256 totalWager = game.wagerAmount * 2;
-        uint256 prizeMoney = (totalWager * 80) / 100;
-
         playerTotalWon[winner] += prizeMoney;
 
         payable(winner).transfer(prizeMoney);
