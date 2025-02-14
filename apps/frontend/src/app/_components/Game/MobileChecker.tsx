@@ -63,7 +63,7 @@ const MobileChecker = () => {
           </div>
         </div>
       )}
-      <CardCarousel />
+      {gameCode ? null : <CardCarousel />}
     </>
   );
 };
