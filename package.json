@@ -2,8 +2,7 @@
   "name": "card-battle",
   "private": true,
   "engines": {
-    "node": ">=20.18.1",
-    "pnpm": "^10.3.0"
+    "node": ">=20.18.1"
   },
   "packageManager": "pnpm@10.3.0",
   "scripts": {
