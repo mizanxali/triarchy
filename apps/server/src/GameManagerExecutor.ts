@@ -64,15 +64,18 @@ class GameManagerExecutor {
 
       this.gameExecutorMap.set(roomId, gameExecutor);
 
-      client.room.on('room-closed', () => {
+      const roomClosedListener = () => {
         this.#logger.info({
           message: 'Room closed',
           args: {
             roomId,
           },
         });
+        client.room.off('room-closed', roomClosedListener);
         this.gameExecutorMap.delete(roomId);
-      });
+      };
+
+      client.room.on('room-closed', roomClosedListener);
     } catch (error) {
       this.#logger.error({
         message: 'Error in joinRoom',
