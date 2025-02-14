@@ -100,6 +100,9 @@ class GameExecutor {
           // set black player cards
           this.blackCards = [...this.generateInitialCards()];
         } else if (!this.whitePeerId) {
+          // set white player peerId
+          this.whitePeerId = event.peer.peerId;
+
           this.#logger.info({
             message: 'White player joined',
             args: {
@@ -107,9 +110,6 @@ class GameExecutor {
               whitePeerId: this.whitePeerId,
             },
           });
-
-          // set white player peerId
-          this.whitePeerId = event.peer.peerId;
 
           // set white player wallet address
           const metadata = event.peer.getMetadata() as TPeerMetadata;
