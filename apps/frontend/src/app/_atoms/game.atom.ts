@@ -35,7 +35,7 @@ const defaultGameAtom: GameAtom = {
   opponentWonCards: [],
   activeCard: undefined,
   opponentActiveCard: undefined,
-  isPlayable: true,
+  isPlayable: false,
 };
 
 const dummyGameAtom: GameAtom = {
