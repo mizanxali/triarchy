@@ -9,9 +9,11 @@ import {
 } from '@battleground/web3/client';
 import { GameWagerABI } from '@battleground/web3/abis';
 import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
+import Logger from './logger';
 
 class GameExecutor {
   #client: HuddleClient;
+  #logger: typeof Logger;
 
   gameCode: string | undefined;
   wagerAmount: string | undefined;
@@ -64,23 +66,32 @@ class GameExecutor {
     | undefined;
 
   constructor(client: HuddleClient, gameCode: string, wagerAmount: string) {
-    console.log(
-      'GameExecutor created with gameCode and wagerAmount',
-      gameCode,
-      wagerAmount,
-    );
-
     this.#client = client;
+    this.#logger = Logger;
     this.gameCode = gameCode;
     this.wagerAmount = wagerAmount;
+
+    this.#logger.info({
+      message: 'GameExecutor created',
+      args: {
+        gameCode,
+        wagerAmount,
+      },
+    });
 
     this.newPeerHandler = (event) => {
       try {
         if (!this.blackPeerId) {
-          console.log('Black player joined');
-
           // set black player peerId
           this.blackPeerId = event.peer.peerId;
+
+          this.#logger.info({
+            message: 'Black player joined',
+            args: {
+              gameCode: this.gameCode,
+              blackPeerId: this.blackPeerId,
+            },
+          });
 
           // set black player wallet address
           const metadata = event.peer.getMetadata() as TPeerMetadata;
@@ -89,7 +100,13 @@ class GameExecutor {
           // set black player cards
           this.blackCards = [...this.generateInitialCards()];
         } else if (!this.whitePeerId) {
-          console.log('White player joined');
+          this.#logger.info({
+            message: 'White player joined',
+            args: {
+              gameCode: this.gameCode,
+              whitePeerId: this.whitePeerId,
+            },
+          });
 
           // set white player peerId
           this.whitePeerId = event.peer.peerId;
@@ -117,7 +134,13 @@ class GameExecutor {
           ]);
         }
       } catch (error) {
-        console.error('Error in new-peer-joined handler:', error);
+        this.#logger.error({
+          message: 'Error in newPeerHandler',
+          args: {
+            gameCode: this.gameCode,
+            error,
+          },
+        });
         this.sendError(error);
       }
     };
@@ -136,15 +159,19 @@ class GameExecutor {
             break;
         }
       } catch (error) {
-        console.error('Error in receive-data handler:', error);
+        this.#logger.error({
+          message: 'Error in receiveDataHandler',
+          args: {
+            gameCode: this.gameCode,
+            error,
+          },
+        });
         this.sendError(error);
       }
     };
 
     this.peerLeftHandler = ({ peerId }) => {
       try {
-        console.log('Player left', peerId);
-
         let compensatedPlayer = undefined;
 
         if (this.whitePeerId && peerId === this.blackPeerId) {
@@ -153,11 +180,24 @@ class GameExecutor {
           compensatedPlayer = this.blackWalletAddress;
         }
 
-        console.log('Compensated player', compensatedPlayer);
+        this.#logger.info({
+          message: 'Player left the game',
+          args: {
+            gameCode: this.gameCode,
+            peerId,
+            compensatedPlayer,
+          },
+        });
 
         if (compensatedPlayer) this.cancelGame(compensatedPlayer);
       } catch (error) {
-        console.error('Error in peer-left handler:', error);
+        this.#logger.error({
+          message: 'Error in peerLeftHandler',
+          args: {
+            gameCode: this.gameCode,
+            error,
+          },
+        });
         this.sendError(error);
       }
     };
@@ -171,7 +211,12 @@ class GameExecutor {
   // add cleanup method
   public dispose() {
     try {
-      console.log('Closing room');
+      this.#logger.info({
+        message: 'GameExecutor disposed',
+        args: {
+          gameCode: this.gameCode,
+        },
+      });
 
       if (this.newPeerHandler) {
         this.#client.room.off('new-peer-joined', this.newPeerHandler);
@@ -204,7 +249,13 @@ class GameExecutor {
       this.blackWonCards = [];
       this.whiteWonCards = [];
     } catch (error) {
-      console.error('Error in dispose method:', error);
+      this.#logger.error({
+        message: 'Error in dispose',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
@@ -254,7 +305,13 @@ class GameExecutor {
         });
       }
     } catch (error) {
-      console.error('Error in receivedPing method:', error);
+      this.#logger.error({
+        message: 'Error in receivedPing',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
@@ -271,7 +328,13 @@ class GameExecutor {
   ) {
     try {
       if (from === this.blackPeerId) {
-        console.log('Black played', card);
+        this.#logger.info({
+          message: 'Black player played a card',
+          args: {
+            gameCode: this.gameCode,
+            card,
+          },
+        });
         // set the active card for black
         this.blackActiveCard = {
           card,
@@ -305,7 +368,13 @@ class GameExecutor {
           ]);
         }
       } else if (from === this.whitePeerId) {
-        console.log('White played', card);
+        this.#logger.info({
+          message: 'White player played a card',
+          args: {
+            gameCode: this.gameCode,
+            card,
+          },
+        });
         // set the active card for white
         this.whiteActiveCard = {
           card,
@@ -371,14 +440,25 @@ class GameExecutor {
         }
       }
     } catch (error) {
-      console.error('Error in cardPlayed method:', error);
+      this.#logger.error({
+        message: 'Error in cardPlayed',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
 
   private async blackWinsTurn() {
     try {
-      console.log('Black wins');
+      this.#logger.info({
+        message: 'Black player wins the turn',
+        args: {
+          gameCode: this.gameCode,
+        },
+      });
 
       if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
@@ -410,14 +490,25 @@ class GameExecutor {
         }),
       ]);
     } catch (error) {
-      console.error('Error in blackWinsTurn method:', error);
+      this.#logger.error({
+        message: 'Error in blackWinsTurn',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
 
   private async whiteWinsTurn() {
     try {
-      console.log('White wins');
+      this.#logger.info({
+        message: 'White player wins the turn',
+        args: {
+          gameCode: this.gameCode,
+        },
+      });
 
       if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
@@ -449,14 +540,25 @@ class GameExecutor {
         }),
       ]);
     } catch (error) {
-      console.error('Error in whiteWinsTurn method:', error);
+      this.#logger.error({
+        message: 'Error in whiteWinsTurn',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
 
   private async turnDrawn() {
     try {
-      console.log('Turn drawn');
+      this.#logger.info({
+        message: 'Turn drawn',
+        args: {
+          gameCode: this.gameCode,
+        },
+      });
 
       if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
@@ -485,7 +587,13 @@ class GameExecutor {
         }),
       ]);
     } catch (error) {
-      console.error('Error in turnDrawn method:', error);
+      this.#logger.error({
+        message: 'Error in turnDrawn',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
@@ -512,8 +620,14 @@ class GameExecutor {
         Math.floor(Math.random() * CARD_DECK.length)
       ] as TCard;
 
-      console.log('New black card', newBlackCard);
-      console.log('New white card', newWhiteCard);
+      this.#logger.info({
+        message: 'Cards reset after turn',
+        args: {
+          gameCode: this.gameCode,
+          newBlackCard,
+          newWhiteCard,
+        },
+      });
 
       this.blackCards.splice(blackIndex, 1);
       this.whiteCards.splice(whiteIndex, 1);
@@ -532,7 +646,13 @@ class GameExecutor {
 
       this.checkGameOver();
     } catch (error) {
-      console.error('Error in resetCardsAfterTurn method:', error);
+      this.#logger.error({
+        message: 'Error in resetCardsAfterTurn',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
@@ -549,7 +669,12 @@ class GameExecutor {
           suits.filter((suit) => suit === 'S').length === 3 ||
           new Set(suits).size === 3
         ) {
-          console.log('Black wins the game');
+          this.#logger.info({
+            message: 'Black player wins the game',
+            args: {
+              gameCode: this.gameCode,
+            },
+          });
 
           // wait for 1 second before sending the win message
           await this.sleep(1000);
@@ -587,7 +712,13 @@ class GameExecutor {
               args: [this.gameCode, this.blackWalletAddress as `0x${string}`],
             });
 
-            console.log('Black player rewarded:', txnHash);
+            this.#logger.info({
+              message: 'Black player received reward',
+              args: {
+                gameCode: this.gameCode,
+                txnHash,
+              },
+            });
           }
 
           // close the room
@@ -607,7 +738,12 @@ class GameExecutor {
           suits.filter((suit) => suit === 'S').length === 3 ||
           new Set(suits).size === 3
         ) {
-          console.log('White wins the game');
+          this.#logger.info({
+            message: 'White player wins the game',
+            args: {
+              gameCode: this.gameCode,
+            },
+          });
 
           // wait for 2 seconds before sending the win message
           await this.sleep(2000);
@@ -645,7 +781,13 @@ class GameExecutor {
               args: [this.gameCode, this.whiteWalletAddress as `0x${string}`],
             });
 
-            console.log('White player rewarded', txnHash);
+            this.#logger.info({
+              message: 'White player received reward',
+              args: {
+                gameCode: this.gameCode,
+                txnHash,
+              },
+            });
           }
 
           // close the room
@@ -655,7 +797,13 @@ class GameExecutor {
         }
       }
     } catch (error) {
-      console.error('Error in checkGameOver method:', error);
+      this.#logger.error({
+        message: 'GameExecutor - checkGameOver',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
@@ -678,13 +826,25 @@ class GameExecutor {
           args: [this.gameCode, compensatedPlayer as `0x${string}`],
         });
 
-        console.log('Game canceled', txnHash);
+        this.#logger.info({
+          message: 'Game cancelled',
+          args: {
+            gameCode: this.gameCode,
+            txnHash,
+          },
+        });
       }
 
       // close the room
       this.dispose();
     } catch (error) {
-      console.error('Error in cancelGame method:', error);
+      this.#logger.error({
+        message: 'Error in cancelGame',
+        args: {
+          gameCode: this.gameCode,
+          error,
+        },
+      });
       this.sendError(error);
     }
   }
@@ -697,7 +857,15 @@ class GameExecutor {
     try {
       if (!to) return;
 
-      console.log('sendData called ', to, label);
+      this.#logger.info({
+        message: 'sendData',
+        args: {
+          gameCode: this.gameCode,
+          to,
+          label,
+          payload,
+        },
+      });
 
       await this.#client.localPeer.sendData({
         to: [to],
@@ -705,7 +873,13 @@ class GameExecutor {
         payload,
       });
     } catch (err) {
-      console.error('Error sending data:', err);
+      this.#logger.error({
+        message: 'Error in sendData',
+        args: {
+          gameCode: this.gameCode,
+          err,
+        },
+      });
     }
   }
 
@@ -724,7 +898,13 @@ class GameExecutor {
         payload: JSON.stringify(error),
       });
     } catch (err) {
-      console.error('Error sending error kek:', err);
+      this.#logger.error({
+        message: 'Error in sendError',
+        args: {
+          gameCode: this.gameCode,
+          err,
+        },
+      });
     }
   }
 }

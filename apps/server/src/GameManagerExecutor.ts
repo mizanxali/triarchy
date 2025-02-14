@@ -4,12 +4,18 @@ import { AccessToken, Role } from '@huddle01/server-sdk/auth';
 import { WebSocket } from 'ws';
 import { WeriftHandler } from 'mediasoup-client-werift';
 import { weriftCapabilities } from './constants';
+import Logger from './logger';
 
 class GameManagerExecutor {
   gameExecutorMap: Map<string, GameExecutor> = new Map();
+  #logger: typeof Logger;
 
   constructor() {
-    console.log('GameManagerExecutor created');
+    this.#logger = Logger;
+    this.#logger.info({
+      message: 'GameManagerExecutor created',
+      args: {},
+    });
   }
 
   private async createAccessToken(roomId: string) {
@@ -28,7 +34,12 @@ class GameManagerExecutor {
 
       return token.toJwt();
     } catch (error) {
-      console.error('Error creating access token', error);
+      this.#logger.error({
+        message: 'Error in createAccessToken',
+        args: {
+          error,
+        },
+      });
     }
   }
 
@@ -54,11 +65,21 @@ class GameManagerExecutor {
       this.gameExecutorMap.set(roomId, gameExecutor);
 
       client.room.on('room-closed', () => {
-        console.log('Room closed');
+        this.#logger.info({
+          message: 'Room closed',
+          args: {
+            roomId,
+          },
+        });
         this.gameExecutorMap.delete(roomId);
       });
     } catch (error) {
-      console.error('Error joining room', error);
+      this.#logger.error({
+        message: 'Error in joinRoom',
+        args: {
+          error,
+        },
+      });
     }
   }
 }
