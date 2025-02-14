@@ -16,7 +16,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.huddle01.network'),
+  metadataBase: new URL('https://play-triumvirate.vercel.app'),
   title: 'Triumvirate',
   description:
     'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',

@@ -16,8 +16,8 @@ const metadata = {
   name: 'Triumvirate',
   description:
     'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',
-  url: 'https://card-battle-mu.vercel.app/',
-  icons: ['https://card-battle-mu.vercel.app/favicon.ico'],
+  url: 'https://play-triumvirate.vercel.app/',
+  icons: ['https://play-triumvirate.vercel.app/favicon.ico'],
 };
 
 const wagmiAdapter = new WagmiAdapter({
