@@ -9,6 +9,8 @@ import { OctagonAlert } from 'lucide-react';
 import { Loader } from '@battleground/ui/loader';
 import Rules from '../common/Rules';
 import { useGameAtom } from '~/app/_atoms/game.atom';
+import Leaderboard from '../Home/Leaderboard';
+import CardCarousel from '../Home/CardCarousel';
 
 const MobileChecker = () => {
   const { isMobile, isLoading } = useMobile();
@@ -56,8 +58,12 @@ const MobileChecker = () => {
             Connect your wallet to get started.
           </div>
           <WalletConnect />
+          <div className="mt-8">
+            <Leaderboard />
+          </div>
         </div>
       )}
+      <CardCarousel />
     </>
   );
 };

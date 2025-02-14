@@ -15,6 +15,7 @@ import { useMiscAtom } from '~/app/_atoms/misc.atom';
 import { api } from '~/trpc/react';
 import { useSession } from 'next-auth/react';
 import { cn } from '@battleground/ui';
+import { useEffect } from 'react';
 
 const Leaderboard = () => {
   const [{ showLeaderboard }, setMisc] = useMiscAtom();
@@ -22,6 +23,16 @@ const Leaderboard = () => {
   const { data: session } = useSession();
 
   const { data: leaderboard } = api.user.fetchLeaderboard.useQuery();
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMisc((prev) => ({ ...prev, showLeaderboard: false }));
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
 
   if (!leaderboard) return null;
 

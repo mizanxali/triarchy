@@ -2,7 +2,7 @@
 
 import { Button } from '@battleground/ui/button';
 import { CircleHelp, ShieldCloseIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameAtomValue } from '~/app/_atoms/game.atom';
 import { useMiscAtom } from '~/app/_atoms/misc.atom';
 import MusicButton from '../Button/MusicButton';
@@ -11,6 +11,16 @@ const Rules = () => {
   const [{ showRules }, setMisc] = useMiscAtom();
   const { gameCode } = useGameAtomValue();
   const [activeTab, setActiveTab] = useState(gameCode ? 'rules' : 'startHere');
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMisc((prev) => ({ ...prev, showRules: false }));
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
 
   if (!showRules)
     return (

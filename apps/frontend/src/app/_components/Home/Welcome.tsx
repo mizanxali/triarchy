@@ -8,7 +8,6 @@ import { parseEther } from 'viem';
 import { useReadContract, useWriteContract } from 'wagmi';
 import { api } from '~/trpc/react';
 import SignOutButton from '../common/SignOutButton';
-import CardCarousel from './CardCarousel';
 import PlayerStats from './PlayerStats';
 import Leaderboard from './Leaderboard';
 
@@ -158,10 +157,10 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
 
   return (
     <div className="w-full h-screen flex flex-col items-center">
-      <h1 className="text-9xl uppercase mt-20 text-yellow-600 font-sancreek">
+      <h1 className="text-9xl uppercase mt-16 text-yellow-600 font-sancreek">
         Triumvirate
       </h1>
-      <div className="flex-1 flex flex-col gap-10 pt-16 items-center w-3/4">
+      <div className="flex-1 flex flex-col gap-8 pt-8 items-center w-3/4">
         <h3 className="text-zinc-200 text-4xl font-medium text-center">
           {walletAddress}
         </h3>
@@ -175,6 +174,52 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
               placeholder="Enter Wager Amount (ETH)"
               type="number"
             />
+            <div className="flex items-center gap-2 my-2">
+              <Button
+                variant={'secondary'}
+                size="sm"
+                type="button"
+                onClick={() => setWagerAmount('0.0001')}
+                className="text-zinc-200 text-xs"
+              >
+                0.0001 ETH
+              </Button>
+              <Button
+                variant={'secondary'}
+                size="sm"
+                type="button"
+                onClick={() => setWagerAmount('0.001')}
+                className="text-zinc-200 text-xs"
+              >
+                0.001 ETH
+              </Button>
+              <Button
+                variant={'secondary'}
+                size="sm"
+                type="button"
+                onClick={() => setWagerAmount('0.01')}
+                className="text-zinc-200 text-xs"
+              >
+                0.01 ETH
+              </Button>
+              <Button
+                variant={'secondary'}
+                size="sm"
+                type="button"
+                onClick={() => setWagerAmount('0.1')}
+                className="text-zinc-200 text-xs"
+              >
+                0.1 ETH
+              </Button>
+              <Button
+                variant={'secondary'}
+                size="sm"
+                type="button"
+                onClick={() => setWagerAmount('1')}
+              >
+                1 ETH
+              </Button>
+            </div>
             <Button
               disabled={
                 isCreatingGame || wagerAmount === '' || wagerAmount === '0'
@@ -206,7 +251,6 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
           <SignOutButton />
         </div>
       </div>
-      <CardCarousel />
     </div>
   );
 };
