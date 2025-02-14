@@ -37,6 +37,7 @@ const Root = ({ walletAddress }: Props) => {
     setGameAtom((prev) => ({
       ...prev,
       cardsDeck: cards,
+      isPlayable: true,
     }));
   };
 
@@ -134,6 +135,10 @@ const Root = ({ walletAddress }: Props) => {
         onGameOver();
       } else if (label === 'game-lose') {
         alert('You lost the game!');
+        onGameOver();
+      } else if (label === 'server-error') {
+        console.error('Server error:', parsedPayload);
+        alert('Server error!');
         onGameOver();
       }
     },

@@ -118,6 +118,7 @@ class GameExecutor {
         }
       } catch (error) {
         console.error('Error in new-peer-joined handler:', error);
+        this.sendError(error);
       }
     };
 
@@ -136,6 +137,7 @@ class GameExecutor {
         }
       } catch (error) {
         console.error('Error in receive-data handler:', error);
+        this.sendError(error);
       }
     };
 
@@ -156,6 +158,7 @@ class GameExecutor {
         if (compensatedPlayer) this.cancelGame(compensatedPlayer);
       } catch (error) {
         console.error('Error in peer-left handler:', error);
+        this.sendError(error);
       }
     };
 
@@ -202,6 +205,7 @@ class GameExecutor {
       this.whiteWonCards = [];
     } catch (error) {
       console.error('Error in dispose method:', error);
+      this.sendError(error);
     }
   }
 
@@ -231,22 +235,27 @@ class GameExecutor {
   }
 
   private async receivedPing(from: string, message: string) {
-    if (from === this.blackPeerId) {
-      await this.sendData({
-        to: this.whitePeerId,
-        label: 'pong',
-        payload: JSON.stringify({
-          message,
-        }),
-      });
-    } else if (from === this.whitePeerId) {
-      await this.sendData({
-        to: this.blackPeerId,
-        label: 'pong',
-        payload: JSON.stringify({
-          message,
-        }),
-      });
+    try {
+      if (from === this.blackPeerId) {
+        await this.sendData({
+          to: this.whitePeerId,
+          label: 'pong',
+          payload: JSON.stringify({
+            message,
+          }),
+        });
+      } else if (from === this.whitePeerId) {
+        await this.sendData({
+          to: this.blackPeerId,
+          label: 'pong',
+          payload: JSON.stringify({
+            message,
+          }),
+        });
+      }
+    } catch (error) {
+      console.error('Error in receivedPing method:', error);
+      this.sendError(error);
     }
   }
 
@@ -260,395 +269,424 @@ class GameExecutor {
       id: string;
     },
   ) {
-    if (from === this.blackPeerId) {
-      console.log('Black played', card);
-      // set the active card for black
-      this.blackActiveCard = {
-        card,
-        id,
-      };
+    try {
+      if (from === this.blackPeerId) {
+        console.log('Black played', card);
+        // set the active card for black
+        this.blackActiveCard = {
+          card,
+          id,
+        };
 
-      // if the other player has not played yet, send the redacted played card
-      if (!this.whiteActiveCard) {
-        this.sendData({
-          to: this.whitePeerId,
-          label: 'opponent-card-played',
-          payload: JSON.stringify({
-            card: 'redacted',
-            id,
-          }),
-        });
-      }
-      // else send the actual played card
-      else {
-        Promise.all([
+        // if the other player has not played yet, send the redacted played card
+        if (!this.whiteActiveCard) {
           this.sendData({
             to: this.whitePeerId,
             label: 'opponent-card-played',
-            payload: JSON.stringify(this.blackActiveCard),
-          }),
+            payload: JSON.stringify({
+              card: 'redacted',
+              id,
+            }),
+          });
+        }
+        // else send the actual played card
+        else {
+          Promise.all([
+            this.sendData({
+              to: this.whitePeerId,
+              label: 'opponent-card-played',
+              payload: JSON.stringify(this.blackActiveCard),
+            }),
+            this.sendData({
+              to: this.blackPeerId,
+              label: 'opponent-card-played',
+              payload: JSON.stringify(this.whiteActiveCard),
+            }),
+          ]);
+        }
+      } else if (from === this.whitePeerId) {
+        console.log('White played', card);
+        // set the active card for white
+        this.whiteActiveCard = {
+          card,
+          id,
+        };
+
+        // if the other player has not played yet, send the redacted played card
+        if (!this.blackActiveCard) {
           this.sendData({
             to: this.blackPeerId,
             label: 'opponent-card-played',
-            payload: JSON.stringify(this.whiteActiveCard),
-          }),
-        ]);
-      }
-    } else if (from === this.whitePeerId) {
-      console.log('White played', card);
-      // set the active card for white
-      this.whiteActiveCard = {
-        card,
-        id,
-      };
-
-      // if the other player has not played yet, send the redacted played card
-      if (!this.blackActiveCard) {
-        this.sendData({
-          to: this.blackPeerId,
-          label: 'opponent-card-played',
-          payload: JSON.stringify({
-            card: 'redacted',
-            id,
-          }),
-        });
-      }
-      // else send the actual played card
-      else {
-        Promise.all([
-          this.sendData({
-            to: this.blackPeerId,
-            label: 'opponent-card-played',
-            payload: JSON.stringify(this.whiteActiveCard),
-          }),
-          this.sendData({
-            to: this.whitePeerId,
-            label: 'opponent-card-played',
-            payload: JSON.stringify(this.blackActiveCard),
-          }),
-        ]);
-      }
-    }
-
-    if (this.blackActiveCard && this.whiteActiveCard) {
-      // wait for 2 seconds before comparing cards
-      await this.sleep(2000);
-
-      // compare cards
-      const blackCardSuit = this.blackActiveCard.card.slice(0, 1);
-      const whiteCardSuit = this.whiteActiveCard.card.slice(0, 1);
-
-      const blackCardValue = this.blackActiveCard.card.slice(1);
-      const whiteCardValue = this.whiteActiveCard.card.slice(1);
-
-      if (blackCardSuit === whiteCardSuit) {
-        // compare values
-        if (blackCardValue > whiteCardValue) this.blackWinsTurn();
-        else if (blackCardValue < whiteCardValue) this.whiteWinsTurn();
-        else this.turnDrawn();
-      } else {
-        // A beats H, H beats S, S beats A
-        if (blackCardSuit === 'A') {
-          if (whiteCardSuit === 'H') this.blackWinsTurn();
-          else this.whiteWinsTurn();
-        } else if (blackCardSuit === 'H') {
-          if (whiteCardSuit === 'S') this.blackWinsTurn();
-          else this.whiteWinsTurn();
-        } else if (blackCardSuit === 'S') {
-          if (whiteCardSuit === 'A') this.blackWinsTurn();
-          else this.whiteWinsTurn();
+            payload: JSON.stringify({
+              card: 'redacted',
+              id,
+            }),
+          });
+        }
+        // else send the actual played card
+        else {
+          Promise.all([
+            this.sendData({
+              to: this.blackPeerId,
+              label: 'opponent-card-played',
+              payload: JSON.stringify(this.whiteActiveCard),
+            }),
+            this.sendData({
+              to: this.whitePeerId,
+              label: 'opponent-card-played',
+              payload: JSON.stringify(this.blackActiveCard),
+            }),
+          ]);
         }
       }
+
+      if (this.blackActiveCard && this.whiteActiveCard) {
+        // wait for 2 seconds before comparing cards
+        await this.sleep(2000);
+
+        // compare cards
+        const blackCardSuit = this.blackActiveCard.card.slice(0, 1);
+        const whiteCardSuit = this.whiteActiveCard.card.slice(0, 1);
+
+        const blackCardValue = this.blackActiveCard.card.slice(1);
+        const whiteCardValue = this.whiteActiveCard.card.slice(1);
+
+        if (blackCardSuit === whiteCardSuit) {
+          // compare values
+          if (blackCardValue > whiteCardValue) this.blackWinsTurn();
+          else if (blackCardValue < whiteCardValue) this.whiteWinsTurn();
+          else this.turnDrawn();
+        } else {
+          // A beats H, H beats S, S beats A
+          if (blackCardSuit === 'A') {
+            if (whiteCardSuit === 'H') this.blackWinsTurn();
+            else this.whiteWinsTurn();
+          } else if (blackCardSuit === 'H') {
+            if (whiteCardSuit === 'S') this.blackWinsTurn();
+            else this.whiteWinsTurn();
+          } else if (blackCardSuit === 'S') {
+            if (whiteCardSuit === 'A') this.blackWinsTurn();
+            else this.whiteWinsTurn();
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in cardPlayed method:', error);
+      this.sendError(error);
     }
   }
 
   private async blackWinsTurn() {
-    console.log('Black wins');
+    try {
+      console.log('Black wins');
 
-    if (!this.blackActiveCard || !this.whiteActiveCard) return;
+      if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
-    // add the active card to the winner's won cards
-    this.blackWonCards.push(this.blackActiveCard);
+      // add the active card to the winner's won cards
+      this.blackWonCards.push(this.blackActiveCard);
 
-    // reset cards states
-    this.resetCardsAfterTurn();
+      // reset cards states
+      this.resetCardsAfterTurn();
 
-    // send the updated cards to the players
-    Promise.all([
-      this.sendData({
-        to: this.blackPeerId,
-        label: 'turn-win',
-        payload: JSON.stringify({
-          cards: this.blackCards,
-          wonCards: this.blackWonCards,
-          opponentWonCards: this.whiteWonCards,
+      // send the updated cards to the players
+      Promise.all([
+        this.sendData({
+          to: this.blackPeerId,
+          label: 'turn-win',
+          payload: JSON.stringify({
+            cards: this.blackCards,
+            wonCards: this.blackWonCards,
+            opponentWonCards: this.whiteWonCards,
+          }),
         }),
-      }),
-      this.sendData({
-        to: this.whitePeerId,
-        label: 'turn-lose',
-        payload: JSON.stringify({
-          cards: this.whiteCards,
-          wonCards: this.whiteWonCards,
-          opponentWonCards: this.blackWonCards,
+        this.sendData({
+          to: this.whitePeerId,
+          label: 'turn-lose',
+          payload: JSON.stringify({
+            cards: this.whiteCards,
+            wonCards: this.whiteWonCards,
+            opponentWonCards: this.blackWonCards,
+          }),
         }),
-      }),
-    ]);
+      ]);
+    } catch (error) {
+      console.error('Error in blackWinsTurn method:', error);
+      this.sendError(error);
+    }
   }
 
   private async whiteWinsTurn() {
-    console.log('White wins');
+    try {
+      console.log('White wins');
 
-    if (!this.blackActiveCard || !this.whiteActiveCard) return;
+      if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
-    // add the active cards to the winner's won cards
-    this.whiteWonCards.push(this.whiteActiveCard);
+      // add the active cards to the winner's won cards
+      this.whiteWonCards.push(this.whiteActiveCard);
 
-    // reset cards states
-    this.resetCardsAfterTurn();
+      // reset cards states
+      this.resetCardsAfterTurn();
 
-    // send the updated cards to the players
-    Promise.all([
-      this.sendData({
-        to: this.whitePeerId,
-        label: 'turn-win',
-        payload: JSON.stringify({
-          cards: this.whiteCards,
-          wonCards: this.whiteWonCards,
-          opponentWonCards: this.blackWonCards,
+      // send the updated cards to the players
+      Promise.all([
+        this.sendData({
+          to: this.whitePeerId,
+          label: 'turn-win',
+          payload: JSON.stringify({
+            cards: this.whiteCards,
+            wonCards: this.whiteWonCards,
+            opponentWonCards: this.blackWonCards,
+          }),
         }),
-      }),
-      this.sendData({
-        to: this.blackPeerId,
-        label: 'turn-lose',
-        payload: JSON.stringify({
-          cards: this.blackCards,
-          wonCards: this.blackWonCards,
-          opponentWonCards: this.whiteWonCards,
+        this.sendData({
+          to: this.blackPeerId,
+          label: 'turn-lose',
+          payload: JSON.stringify({
+            cards: this.blackCards,
+            wonCards: this.blackWonCards,
+            opponentWonCards: this.whiteWonCards,
+          }),
         }),
-      }),
-    ]);
+      ]);
+    } catch (error) {
+      console.error('Error in whiteWinsTurn method:', error);
+      this.sendError(error);
+    }
   }
 
   private async turnDrawn() {
-    console.log('Turn drawn');
+    try {
+      console.log('Turn drawn');
 
-    if (!this.blackActiveCard || !this.whiteActiveCard) return;
+      if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
-    // reset cards states
-    this.resetCardsAfterTurn();
+      // reset cards states
+      this.resetCardsAfterTurn();
 
-    // send the updated cards to the players
-    Promise.all([
-      this.sendData({
-        to: this.blackPeerId,
-        label: 'turn-draw',
-        payload: JSON.stringify({
-          cards: this.blackCards,
-          wonCards: this.blackWonCards,
-          opponentWonCards: this.whiteWonCards,
+      // send the updated cards to the players
+      Promise.all([
+        this.sendData({
+          to: this.blackPeerId,
+          label: 'turn-draw',
+          payload: JSON.stringify({
+            cards: this.blackCards,
+            wonCards: this.blackWonCards,
+            opponentWonCards: this.whiteWonCards,
+          }),
         }),
-      }),
-      this.sendData({
-        to: this.whitePeerId,
-        label: 'turn-draw',
-        payload: JSON.stringify({
-          cards: this.whiteCards,
-          wonCards: this.whiteWonCards,
-          opponentWonCards: this.blackWonCards,
+        this.sendData({
+          to: this.whitePeerId,
+          label: 'turn-draw',
+          payload: JSON.stringify({
+            cards: this.whiteCards,
+            wonCards: this.whiteWonCards,
+            opponentWonCards: this.blackWonCards,
+          }),
         }),
-      }),
-    ]);
+      ]);
+    } catch (error) {
+      console.error('Error in turnDrawn method:', error);
+      this.sendError(error);
+    }
   }
 
   private resetCardsAfterTurn() {
-    if (!this.blackActiveCard || !this.whiteActiveCard) return;
+    try {
+      if (!this.blackActiveCard || !this.whiteActiveCard) return;
 
-    const blackIndex = this.blackCards.findIndex(
-      (card) => card.id === this.blackActiveCard?.id,
-    );
-    const whiteIndex = this.whiteCards.findIndex(
-      (card) => card.id === this.whiteActiveCard?.id,
-    );
+      const blackIndex = this.blackCards.findIndex(
+        (card) => card.id === this.blackActiveCard?.id,
+      );
+      const whiteIndex = this.whiteCards.findIndex(
+        (card) => card.id === this.whiteActiveCard?.id,
+      );
 
-    if (blackIndex === -1 || whiteIndex === -1) {
-      console.error('Active card not found in player hands');
-      return;
+      if (blackIndex === -1 || whiteIndex === -1) {
+        throw new Error('Active card not found in player hands');
+      }
+
+      const newBlackCard = CARD_DECK[
+        Math.floor(Math.random() * CARD_DECK.length)
+      ] as TCard;
+      const newWhiteCard = CARD_DECK[
+        Math.floor(Math.random() * CARD_DECK.length)
+      ] as TCard;
+
+      console.log('New black card', newBlackCard);
+      console.log('New white card', newWhiteCard);
+
+      this.blackCards.splice(blackIndex, 1);
+      this.whiteCards.splice(whiteIndex, 1);
+
+      this.blackCards.splice(blackIndex, 0, {
+        card: newBlackCard,
+        id: uuidv4(),
+      });
+      this.whiteCards.splice(whiteIndex, 0, {
+        card: newWhiteCard,
+        id: uuidv4(),
+      });
+
+      this.blackActiveCard = undefined;
+      this.whiteActiveCard = undefined;
+
+      this.checkGameOver();
+    } catch (error) {
+      console.error('Error in resetCardsAfterTurn method:', error);
+      this.sendError(error);
     }
-
-    if (CARD_DECK.length === 0) {
-      console.error('No cards left in deck');
-      return;
-    }
-
-    const newBlackCard = CARD_DECK[
-      Math.floor(Math.random() * CARD_DECK.length)
-    ] as TCard;
-    const newWhiteCard = CARD_DECK[
-      Math.floor(Math.random() * CARD_DECK.length)
-    ] as TCard;
-
-    console.log('New black card', newBlackCard);
-    console.log('New white card', newWhiteCard);
-
-    this.blackCards.splice(blackIndex, 1);
-    this.whiteCards.splice(whiteIndex, 1);
-
-    this.blackCards.splice(blackIndex, 0, {
-      card: newBlackCard,
-      id: uuidv4(),
-    });
-    this.whiteCards.splice(whiteIndex, 0, {
-      card: newWhiteCard,
-      id: uuidv4(),
-    });
-
-    this.blackActiveCard = undefined;
-    this.whiteActiveCard = undefined;
-
-    this.checkGameOver();
   }
 
   private async checkGameOver() {
-    if (this.blackWonCards.length >= 3) {
-      // check if there are 3 cards with same suit or 3 cards with all different suits
-      const suits = this.blackWonCards.map((card) => card.card.slice(0, 1));
+    try {
+      if (this.blackWonCards.length >= 3) {
+        // check if there are 3 cards with same suit or 3 cards with all different suits
+        const suits = this.blackWonCards.map((card) => card.card.slice(0, 1));
 
-      if (
-        suits.filter((suit) => suit === 'A').length === 3 ||
-        suits.filter((suit) => suit === 'H').length === 3 ||
-        suits.filter((suit) => suit === 'S').length === 3 ||
-        new Set(suits).size === 3
-      ) {
-        console.log('Black wins the game');
+        if (
+          suits.filter((suit) => suit === 'A').length === 3 ||
+          suits.filter((suit) => suit === 'H').length === 3 ||
+          suits.filter((suit) => suit === 'S').length === 3 ||
+          new Set(suits).size === 3
+        ) {
+          console.log('Black wins the game');
 
-        // wait for 1 second before sending the win message
-        await this.sleep(1000);
+          // wait for 1 second before sending the win message
+          await this.sleep(1000);
 
-        Promise.all([
-          this.sendData({
-            to: this.blackPeerId,
-            label: 'game-win',
-            payload: JSON.stringify({
-              message: 'You win!',
+          Promise.all([
+            this.sendData({
+              to: this.blackPeerId,
+              label: 'game-win',
+              payload: JSON.stringify({
+                message: 'You win!',
+              }),
             }),
-          }),
-          this.sendData({
-            to: this.whitePeerId,
-            label: 'game-lose',
-            payload: JSON.stringify({
-              message: 'You lose!',
+            this.sendData({
+              to: this.whitePeerId,
+              label: 'game-lose',
+              payload: JSON.stringify({
+                message: 'You lose!',
+              }),
             }),
-          }),
-        ]);
+          ]);
 
-        // call the completeGame function on the smart contract
-        if (this.wagerAmount && this.gameCode) {
-          const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+          // call the completeGame function on the smart contract
+          if (this.wagerAmount && this.gameCode) {
+            const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
 
-          const adminAccount = getAccountFromPrivateKey(
-            adminPrivateKey as `0x${string}`,
-          );
+            const adminAccount = getAccountFromPrivateKey(
+              adminPrivateKey as `0x${string}`,
+            );
 
-          const txnHash = await walletClient.writeContract({
-            account: adminAccount,
-            abi: GameWagerABI,
-            address: GAME_WAGER_ADDRESS,
-            functionName: 'completeGame',
-            args: [this.gameCode, this.blackWalletAddress as `0x${string}`],
-          });
+            const txnHash = await walletClient.writeContract({
+              account: adminAccount,
+              abi: GameWagerABI,
+              address: GAME_WAGER_ADDRESS,
+              functionName: 'completeGame',
+              args: [this.gameCode, this.blackWalletAddress as `0x${string}`],
+            });
 
-          console.log('Black player rewarded:', txnHash);
+            console.log('Black player rewarded:', txnHash);
+          }
+
+          // close the room
+          this.dispose();
+
+          return;
         }
-
-        // close the room
-        this.dispose();
-
-        return;
       }
-    }
 
-    if (this.whiteWonCards.length >= 3) {
-      // check if there are 3 cards with same suit or 3 cards with all different suits
-      const suits = this.whiteWonCards.map((card) => card.card.slice(0, 1));
+      if (this.whiteWonCards.length >= 3) {
+        // check if there are 3 cards with same suit or 3 cards with all different suits
+        const suits = this.whiteWonCards.map((card) => card.card.slice(0, 1));
 
-      if (
-        suits.filter((suit) => suit === 'A').length === 3 ||
-        suits.filter((suit) => suit === 'H').length === 3 ||
-        suits.filter((suit) => suit === 'S').length === 3 ||
-        new Set(suits).size === 3
-      ) {
-        console.log('White wins the game');
+        if (
+          suits.filter((suit) => suit === 'A').length === 3 ||
+          suits.filter((suit) => suit === 'H').length === 3 ||
+          suits.filter((suit) => suit === 'S').length === 3 ||
+          new Set(suits).size === 3
+        ) {
+          console.log('White wins the game');
 
-        // wait for 2 seconds before sending the win message
-        await this.sleep(2000);
+          // wait for 2 seconds before sending the win message
+          await this.sleep(2000);
 
-        Promise.all([
-          this.sendData({
-            to: this.whitePeerId,
-            label: 'game-win',
-            payload: JSON.stringify({
-              message: 'You win!',
+          Promise.all([
+            this.sendData({
+              to: this.whitePeerId,
+              label: 'game-win',
+              payload: JSON.stringify({
+                message: 'You win!',
+              }),
             }),
-          }),
-          this.sendData({
-            to: this.blackPeerId,
-            label: 'game-lose',
-            payload: JSON.stringify({
-              message: 'You lose!',
+            this.sendData({
+              to: this.blackPeerId,
+              label: 'game-lose',
+              payload: JSON.stringify({
+                message: 'You lose!',
+              }),
             }),
-          }),
-        ]);
+          ]);
 
-        // call the completeGame function on the smart contract
-        if (this.wagerAmount && this.gameCode) {
-          const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+          // call the completeGame function on the smart contract
+          if (this.wagerAmount && this.gameCode) {
+            const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
 
-          const adminAccount = getAccountFromPrivateKey(
-            adminPrivateKey as `0x${string}`,
-          );
+            const adminAccount = getAccountFromPrivateKey(
+              adminPrivateKey as `0x${string}`,
+            );
 
-          const txnHash = await walletClient.writeContract({
-            account: adminAccount,
-            abi: GameWagerABI,
-            address: GAME_WAGER_ADDRESS,
-            functionName: 'completeGame',
-            args: [this.gameCode, this.whiteWalletAddress as `0x${string}`],
-          });
+            const txnHash = await walletClient.writeContract({
+              account: adminAccount,
+              abi: GameWagerABI,
+              address: GAME_WAGER_ADDRESS,
+              functionName: 'completeGame',
+              args: [this.gameCode, this.whiteWalletAddress as `0x${string}`],
+            });
 
-          console.log('White player rewarded', txnHash);
+            console.log('White player rewarded', txnHash);
+          }
+
+          // close the room
+          this.dispose();
+
+          return;
         }
-
-        // close the room
-        this.dispose();
-
-        return;
       }
+    } catch (error) {
+      console.error('Error in checkGameOver method:', error);
+      this.sendError(error);
     }
   }
 
   private async cancelGame(compensatedPlayer: string) {
-    // call the cancelGame function on the smart contract
-    if (this.gameCode) {
-      const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+    try {
+      // call the cancelGame function on the smart contract
+      if (this.gameCode) {
+        const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
 
-      const adminAccount = getAccountFromPrivateKey(
-        adminPrivateKey as `0x${string}`,
-      );
+        const adminAccount = getAccountFromPrivateKey(
+          adminPrivateKey as `0x${string}`,
+        );
 
-      const txnHash = await walletClient.writeContract({
-        account: adminAccount,
-        abi: GameWagerABI,
-        address: GAME_WAGER_ADDRESS,
-        functionName: 'cancelGame',
-        args: [this.gameCode, compensatedPlayer as `0x${string}`],
-      });
+        const txnHash = await walletClient.writeContract({
+          account: adminAccount,
+          abi: GameWagerABI,
+          address: GAME_WAGER_ADDRESS,
+          functionName: 'cancelGame',
+          args: [this.gameCode, compensatedPlayer as `0x${string}`],
+        });
 
-      console.log('Game canceled', txnHash);
+        console.log('Game canceled', txnHash);
+      }
+
+      // close the room
+      this.dispose();
+    } catch (error) {
+      console.error('Error in cancelGame method:', error);
+      this.sendError(error);
     }
-
-    // close the room
-    this.dispose();
   }
 
   private async sendData({
@@ -656,18 +694,37 @@ class GameExecutor {
     label,
     payload,
   }: { to?: string; label: string; payload: string }) {
-    if (!to) return;
-
-    console.log('sendData called ', to, label);
-
     try {
+      if (!to) return;
+
+      console.log('sendData called ', to, label);
+
       await this.#client.localPeer.sendData({
         to: [to],
         label,
         payload,
       });
     } catch (err) {
-      console.error('Error sending data', err);
+      console.error('Error sending data:', err);
+    }
+  }
+
+  private async sendError(error: unknown) {
+    try {
+      const to = [];
+
+      if (this.blackPeerId) to.push(this.blackPeerId);
+      if (this.whitePeerId) to.push(this.whitePeerId);
+
+      if (to.length === 0) return;
+
+      await this.#client.localPeer.sendData({
+        to,
+        label: 'server-error',
+        payload: JSON.stringify(error),
+      });
+    } catch (err) {
+      console.error('Error sending error kek:', err);
     }
   }
 }
