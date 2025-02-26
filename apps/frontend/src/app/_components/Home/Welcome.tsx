@@ -6,9 +6,8 @@ import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
 import { useState } from 'react';
 import { parseEther } from 'viem';
 import { useReadContract, useWriteContract } from 'wagmi';
-import { api } from '~/trpc/react';
+import { env } from '~/env';
 import SignOutButton from '../common/SignOutButton';
-import PlayerStats from './PlayerStats';
 import Leaderboard from './Leaderboard';
 
 interface Props {
@@ -17,7 +16,6 @@ interface Props {
 }
 
 const Welcome = ({ walletAddress, joinRoom }: Props) => {
-  const [createdGameCode, setCreatedGameCode] = useState('');
   const [enteredGameCode, setEnteredGameCode] = useState('');
   const [wagerAmount, setWagerAmount] = useState('');
   const [isCreatingGame, setIsCreatingGame] = useState(false);
@@ -34,69 +32,6 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
     },
   });
 
-  const { mutateAsync: gameCreated } = api.room.gameCreated.useMutation({
-    onSuccess: async ({ roomId }) => {
-      await createAccessToken({ roomId });
-    },
-    onError: (error) => {
-      console.error(error);
-      setIsCreatingGame(false);
-    },
-  });
-
-  const { mutateAsync: createRoom } = api.room.createRoom.useMutation({
-    onSuccess: async ({ roomId }) => {
-      setCreatedGameCode(roomId);
-
-      const txnHash = await writeContractAsync({
-        abi: GameWagerABI,
-        address: GAME_WAGER_ADDRESS,
-        functionName: 'createGame',
-        args: [roomId],
-        value: parseEther(wagerAmount),
-      });
-
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: txnHash,
-        retryCount: 3,
-        retryDelay: 1000,
-      });
-
-      console.log(receipt);
-
-      if (receipt.status !== 'success') {
-        console.error({ receipt });
-        throw new Error('Create Game Transaction failed');
-      }
-
-      await gameCreated({ roomId, wagerAmount });
-    },
-    onError: (error) => {
-      console.error(error);
-      setIsCreatingGame(false);
-    },
-  });
-
-  const { mutateAsync: createAccessToken } =
-    api.room.createAccessToken.useMutation({
-      onSuccess: async (token) => {
-        const roomId =
-          createdGameCode.length > 0 ? createdGameCode : enteredGameCode;
-        if (roomId.length === 0) return;
-        await joinRoom({
-          roomId,
-          token,
-        });
-        setIsCreatingGame(false);
-        setIsJoiningGame(false);
-      },
-      onError: (error) => {
-        console.error(error);
-        setIsCreatingGame(false);
-        setIsJoiningGame(false);
-      },
-    });
-
   const onCreateGameHandler = async () => {
     try {
       if (wagerAmount === '' || wagerAmount === '0') {
@@ -106,7 +41,60 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
 
       setIsCreatingGame(true);
 
-      await createRoom({ wagerAmount });
+      const resp = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/room`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wagerAmount,
+        }),
+      });
+
+      const data = (await resp.json()) as { roomId: string };
+
+      const roomId = data.roomId;
+
+      // const txnHash = await writeContractAsync({
+      //   abi: GameWagerABI,
+      //   address: GAME_WAGER_ADDRESS,
+      //   functionName: 'createGame',
+      //   args: [roomId],
+      //   value: parseEther(wagerAmount),
+      // });
+
+      // const receipt = await publicClient.waitForTransactionReceipt({
+      //   hash: txnHash,
+      //   retryCount: 3,
+      //   retryDelay: 1000,
+      // });
+
+      // if (receipt.status !== 'success') {
+      //   console.error({ receipt });
+      //   throw new Error('Create Game Transaction failed');
+      // }
+
+      const tokenResp = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId,
+          walletAddress,
+        }),
+      });
+
+      const tokenData = (await tokenResp.json()) as { token: string };
+
+      await joinRoom({
+        roomId,
+        token: tokenData.token,
+      });
+      setIsCreatingGame(false);
+      setIsJoiningGame(false);
+
+      console.log(data);
     } catch (error) {
       console.error(error);
       setIsCreatingGame(false);
@@ -129,26 +117,42 @@ const Welcome = ({ walletAddress, joinRoom }: Props) => {
         return;
       }
 
-      const txnHash = await writeContractAsync({
-        abi: GameWagerABI,
-        address: GAME_WAGER_ADDRESS,
-        functionName: 'joinGame',
-        args: [enteredGameCode],
-        value: gameInfo.data.wagerAmount,
+      // const txnHash = await writeContractAsync({
+      //   abi: GameWagerABI,
+      //   address: GAME_WAGER_ADDRESS,
+      //   functionName: 'joinGame',
+      //   args: [enteredGameCode],
+      //   value: gameInfo.data.wagerAmount,
+      // });
+
+      // const receipt = await publicClient.waitForTransactionReceipt({
+      //   hash: txnHash,
+      //   retryCount: 3,
+      //   retryDelay: 1000,
+      // });
+
+      // if (receipt.status !== 'success') {
+      //   console.error({ receipt });
+      //   throw new Error('Join Game Transaction failed');
+      // }
+
+      const tokenResp = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId: enteredGameCode,
+          walletAddress,
+        }),
       });
 
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: txnHash,
-        retryCount: 3,
-        retryDelay: 1000,
+      const tokenData = (await tokenResp.json()) as { token: string };
+
+      await joinRoom({
+        roomId: enteredGameCode,
+        token: tokenData.token,
       });
-
-      if (receipt.status !== 'success') {
-        console.error({ receipt });
-        throw new Error('Join Game Transaction failed');
-      }
-
-      await createAccessToken({ roomId: enteredGameCode });
     } catch (error) {
       console.error(error);
       setIsJoiningGame(false);
