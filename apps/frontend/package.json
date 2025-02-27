@@ -23,6 +23,7 @@
     "@trpc/client": "catalog:",
     "@trpc/react-query": "catalog:",
     "@trpc/server": "catalog:",
+    "emoji-blast": "^0.10.2",
     "ethereum-blockies-base64": "^1.0.2",
     "jotai": "^2.10.3",
     "lucide-react": "^0.468.0",

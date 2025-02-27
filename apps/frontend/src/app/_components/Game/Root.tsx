@@ -14,6 +14,7 @@ import { env } from '~/env';
 import { generateGameCode } from '~/app/utils';
 import { publicClient } from '@battleground/web3/client';
 import { parseEther } from 'viem';
+import { emojiBlasts } from 'emoji-blast';
 
 interface Props {
   walletAddress: string;
@@ -118,10 +119,29 @@ const Root = ({ walletAddress }: Props) => {
     }));
   };
 
-  const onGameOver = (data: { message: string }) => {
+  const onGameOver = (
+    data: { message: string; txnHash?: string },
+    isWinner: boolean,
+  ) => {
     partySocket?.close();
     resetGameAtom();
-    alert(data.message);
+
+    const msg =
+      isWinner && data.txnHash
+        ? `${data.message} Winning Txn: ${data.txnHash}`
+        : data.message;
+
+    if (isWinner) {
+      const { cancel } = emojiBlasts({
+        interval: 20,
+      });
+      setTimeout(() => {
+        cancel();
+        alert(msg);
+      }, 1000);
+    } else {
+      alert(msg);
+    }
   };
 
   const onCreateGameHandler = async () => {
@@ -188,10 +208,10 @@ const Root = ({ walletAddress }: Props) => {
           onOpponentCardPlayed(parsedPayload.data);
         } else if (label === 'game-win') {
           console.log('You won the game!', parsedPayload.data);
-          onGameOver(parsedPayload.data);
+          onGameOver(parsedPayload.data, true);
         } else if (label === 'game-lose') {
           console.log('You lost the game!', parsedPayload.data);
-          onGameOver(parsedPayload.data);
+          onGameOver(parsedPayload.data, false);
         }
       });
 
@@ -274,10 +294,10 @@ const Root = ({ walletAddress }: Props) => {
           onOpponentCardPlayed(parsedPayload.data);
         } else if (label === 'game-win') {
           console.log('You won the game!');
-          onGameOver(parsedPayload.data);
+          onGameOver(parsedPayload.data, true);
         } else if (label === 'game-lose') {
           console.log('You lost the game!');
-          onGameOver(parsedPayload.data);
+          onGameOver(parsedPayload.data, false);
         }
       });
 
