@@ -1,0 +1,7 @@
+{
+  "$schema": "https://www.partykit.io/schema.json",
+  "name": "battleground-dashboard-party",
+  "main": "party/index.ts",
+  "compatibilityDate": "2025-02-27",
+  "domain": "triumvirate.huddle01.workers.dev"
+}

@@ -8,7 +8,6 @@ import { TRPCReactProvider } from '~/trpc/react';
 
 import '~/app/globals.css';
 
-import { MyHuddleProvider } from './_layouts/HuddleProvider';
 import { Web3Provider } from './_layouts/Web3Provider';
 
 export const viewport: Viewport = {
@@ -79,11 +78,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         />
         <Web3Provider>
           <SessionProvider>
-            <MyHuddleProvider>
-              <TRPCReactProvider>
-                <div className="relative z-10">{props.children}</div>
-              </TRPCReactProvider>
-            </MyHuddleProvider>
+            <TRPCReactProvider>
+              <div className="relative z-10">{props.children}</div>
+            </TRPCReactProvider>
           </SessionProvider>
         </Web3Provider>
       </body>

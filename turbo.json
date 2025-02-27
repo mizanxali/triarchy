@@ -41,9 +41,8 @@
     "AUTH_REDIRECT_PROXY_URL",
     "AUTH_SECRET",
     "PORT",
-    "HUDDLE01_API_KEY",
-    "SERVER_URL",
-    "ADMIN_API_KEY"
+    "ADMIN_API_KEY",
+    "NEXT_PUBLIC_PARTYKIT_HOST"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

@@ -1,7 +1,8 @@
 import type { TCard } from '@battleground/validators';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atomWithReset, useResetAtom } from 'jotai/utils';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
+import type PartySocket from 'partysocket';
 
 type GameAtom = {
   gameCode?: string;
@@ -26,6 +27,7 @@ type GameAtom = {
     id: string;
   };
   isPlayable: boolean;
+  partySocket: PartySocket | null;
 };
 
 const defaultGameAtom: GameAtom = {
@@ -36,79 +38,81 @@ const defaultGameAtom: GameAtom = {
   activeCard: undefined,
   opponentActiveCard: undefined,
   isPlayable: false,
+  partySocket: null,
 };
 
 const dummyGameAtom: GameAtom = {
   gameCode: 'xxf-bvgv-ydn',
+  partySocket: null,
   cardsDeck: [
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H4',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'A5',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H7',
-      id: uuidv4(),
+      id: nanoid(),
     },
   ],
   wonCards: [
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H4',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'A5',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H7',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
   ],
   opponentWonCards: [
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
   ],
   activeCard: {
     card: 'A2',
-    id: uuidv4(),
+    id: nanoid(),
   },
   opponentActiveCard: {
     card: 'redacted',
-    id: uuidv4(),
+    id: nanoid(),
   },
   isPlayable: false,
 };

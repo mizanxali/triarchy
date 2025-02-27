@@ -4,11 +4,7 @@ import Card from './Card';
 import type { TCard } from '@battleground/validators';
 import GameInfo from './GameInfo';
 
-interface Props {
-  gameCode: string;
-}
-
-const WinningCardStacks = ({ gameCode }: Props) => {
+const WinningCardStacks = () => {
   const [{ wonCards, opponentWonCards }, setGameAtom] = useGameAtom();
 
   const myArchers = wonCards.filter((card) => card.card.slice(0, 1) === 'A');
@@ -50,7 +46,7 @@ const WinningCardStacks = ({ gameCode }: Props) => {
         <div className="w-24">{renderStack(myHorsemen)}</div>
       </div>
 
-      <GameInfo gameCode={gameCode} />
+      <GameInfo />
 
       <div className="flex flex-row justify-end items-start gap-2">
         <div className="w-24">{renderStack(opponentHorsemen)}</div>
