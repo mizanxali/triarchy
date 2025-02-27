@@ -135,25 +135,23 @@ const Root = ({ walletAddress }: Props) => {
 
       const roomId = generateGameCode();
 
-      if (env.NODE_ENV === 'production') {
-        const txnHash = await writeContractAsync({
-          abi: GameWagerABI,
-          address: GAME_WAGER_ADDRESS,
-          functionName: 'createGame',
-          args: [roomId],
-          value: parseEther(wagerAmount),
-        });
+      const txnHash = await writeContractAsync({
+        abi: GameWagerABI,
+        address: GAME_WAGER_ADDRESS,
+        functionName: 'createGame',
+        args: [roomId],
+        value: parseEther(wagerAmount),
+      });
 
-        const receipt = await publicClient.waitForTransactionReceipt({
-          hash: txnHash,
-          retryCount: 3,
-          retryDelay: 1000,
-        });
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txnHash,
+        retryCount: 3,
+        retryDelay: 1000,
+      });
 
-        if (receipt.status !== 'success') {
-          console.error({ receipt });
-          throw new Error('Create Game Transaction failed');
-        }
+      if (receipt.status !== 'success') {
+        console.error({ receipt });
+        throw new Error('Create Game Transaction failed');
       }
 
       const partySocket = new PartySocket({
@@ -189,10 +187,10 @@ const Root = ({ walletAddress }: Props) => {
           console.log('Opponent card played!', parsedPayload.data);
           onOpponentCardPlayed(parsedPayload.data);
         } else if (label === 'game-win') {
-          console.log('You won the game!');
+          console.log('You won the game!', parsedPayload.data);
           onGameOver(parsedPayload.data);
         } else if (label === 'game-lose') {
-          console.log('You lost the game!');
+          console.log('You lost the game!', parsedPayload.data);
           onGameOver(parsedPayload.data);
         }
       });
@@ -226,25 +224,23 @@ const Root = ({ walletAddress }: Props) => {
         return;
       }
 
-      if (env.NODE_ENV === 'production') {
-        const txnHash = await writeContractAsync({
-          abi: GameWagerABI,
-          address: GAME_WAGER_ADDRESS,
-          functionName: 'joinGame',
-          args: [enteredGameCode],
-          value: gameInfo.data.wagerAmount,
-        });
+      const txnHash = await writeContractAsync({
+        abi: GameWagerABI,
+        address: GAME_WAGER_ADDRESS,
+        functionName: 'joinGame',
+        args: [enteredGameCode],
+        value: gameInfo.data.wagerAmount,
+      });
 
-        const receipt = await publicClient.waitForTransactionReceipt({
-          hash: txnHash,
-          retryCount: 3,
-          retryDelay: 1000,
-        });
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txnHash,
+        retryCount: 3,
+        retryDelay: 1000,
+      });
 
-        if (receipt.status !== 'success') {
-          console.error({ receipt });
-          throw new Error('Join Game Transaction failed');
-        }
+      if (receipt.status !== 'success') {
+        console.error({ receipt });
+        throw new Error('Join Game Transaction failed');
       }
 
       const partySocket = new PartySocket({

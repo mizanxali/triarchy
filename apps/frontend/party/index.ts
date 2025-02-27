@@ -1,6 +1,10 @@
 import type { TCard } from '@battleground/validators';
 import type * as Party from 'partykit/server';
 import { nanoid } from 'nanoid';
+import { walletClient } from '@battleground/web3/client';
+import { getAccountFromPrivateKey } from '@battleground/web3/client';
+import { GameWagerABI } from '@battleground/web3/abis';
+import { GAME_WAGER_ADDRESS } from '@battleground/web3/constants';
 
 export const CARD_DECK: TCard[] = [
   'A2',
@@ -34,7 +38,7 @@ interface GameState {
   whiteActiveCard?: { card: TCard; id: string };
   blackWonCards: Array<{ card: TCard; id: string }>;
   whiteWonCards: Array<{ card: TCard; id: string }>;
-  wagerAmount: string;
+  wagerAmount?: string;
   blackPeerId?: string;
   whitePeerId?: string;
   isGameOver: boolean;
@@ -55,7 +59,7 @@ export default class Server implements Party.Server {
       whiteActiveCard: undefined,
       blackWonCards: [],
       whiteWonCards: [],
-      wagerAmount: '',
+      wagerAmount: undefined,
       blackPeerId: undefined,
       whitePeerId: undefined,
       isGameOver: false,
@@ -214,6 +218,27 @@ export default class Server implements Party.Server {
             },
           }),
         );
+
+        if (this.state.whiteWalletAddress) {
+          const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+
+          const adminAccount = getAccountFromPrivateKey(
+            adminPrivateKey as `0x${string}`,
+          );
+
+          const txnHash = await walletClient.writeContract({
+            account: adminAccount,
+            abi: GameWagerABI,
+            address: GAME_WAGER_ADDRESS,
+            functionName: 'cancelGame',
+            args: [
+              this.state.gameCode,
+              this.state.whiteWalletAddress as `0x${string}`,
+            ],
+          });
+
+          console.log('txnHash', txnHash);
+        }
       }
     } else if (connection.id === this.state.whitePeerId) {
       this.state.whitePeerId = undefined;
@@ -230,6 +255,27 @@ export default class Server implements Party.Server {
             },
           }),
         );
+
+        if (this.state.blackWalletAddress) {
+          const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+
+          const adminAccount = getAccountFromPrivateKey(
+            adminPrivateKey as `0x${string}`,
+          );
+
+          const txnHash = await walletClient.writeContract({
+            account: adminAccount,
+            abi: GameWagerABI,
+            address: GAME_WAGER_ADDRESS,
+            functionName: 'cancelGame',
+            args: [
+              this.state.gameCode,
+              this.state.blackWalletAddress as `0x${string}`,
+            ],
+          });
+
+          console.log('txnHash', txnHash);
+        }
       }
     }
   }
@@ -380,47 +426,59 @@ export default class Server implements Party.Server {
 
   private async sendGameOverMessages() {
     if (this.state.isGameOver && this.state.winner) {
+      let txnHash: `0x${string}` | undefined;
+
+      if (this.state.wagerAmount) {
+        const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
+
+        const adminAccount = getAccountFromPrivateKey(
+          adminPrivateKey as `0x${string}`,
+        );
+
+        txnHash = await walletClient.writeContract({
+          account: adminAccount,
+          abi: GameWagerABI,
+          address: GAME_WAGER_ADDRESS,
+          functionName: 'completeGame',
+          args: [
+            this.state.gameCode,
+            this.state.winner === 'black'
+              ? (this.state.blackWalletAddress as `0x${string}`)
+              : (this.state.whiteWalletAddress as `0x${string}`),
+          ],
+        });
+      }
+
       await this.sleep(1000);
 
-      if (this.state.winner === 'black' && this.state.blackPeerId) {
-        this.room.getConnection(this.state.blackPeerId)?.send(
+      const winnerPeerId =
+        this.state.winner === 'black'
+          ? this.state.blackPeerId
+          : this.state.whitePeerId;
+      const loserPeerId =
+        this.state.winner === 'black'
+          ? this.state.whitePeerId
+          : this.state.blackPeerId;
+
+      if (winnerPeerId) {
+        this.room.getConnection(winnerPeerId)?.send(
           JSON.stringify({
             type: 'game-win',
             data: {
               message: 'You win!',
+              txnHash,
             },
           }),
         );
       }
 
-      if (this.state.winner === 'white' && this.state.whitePeerId) {
-        this.room.getConnection(this.state.whitePeerId)?.send(
-          JSON.stringify({
-            type: 'game-win',
-            data: {
-              message: 'You win!',
-            },
-          }),
-        );
-      }
-
-      if (this.state.winner === 'black' && this.state.whitePeerId) {
-        this.room.getConnection(this.state.whitePeerId)?.send(
+      if (loserPeerId) {
+        this.room.getConnection(loserPeerId)?.send(
           JSON.stringify({
             type: 'game-lose',
             data: {
               message: 'You lose!',
-            },
-          }),
-        );
-      }
-
-      if (this.state.winner === 'white' && this.state.blackPeerId) {
-        this.room.getConnection(this.state.blackPeerId)?.send(
-          JSON.stringify({
-            type: 'game-lose',
-            data: {
-              message: 'You lose!',
+              txnHash,
             },
           }),
         );
