@@ -119,6 +119,7 @@ const Root = ({ walletAddress }: Props) => {
   };
 
   const onGameOver = (data: { message: string }) => {
+    partySocket?.close();
     resetGameAtom();
     alert(data.message);
   };
