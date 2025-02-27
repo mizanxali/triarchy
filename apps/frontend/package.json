@@ -27,6 +27,7 @@
     "jotai": "^2.10.3",
     "lucide-react": "^0.468.0",
     "motion": "^11.13.5",
+    "nanoid": "^5.1.2",
     "next": "15.0.1",
     "next-auth": "5.0.0-beta.25",
     "partysocket": "1.0.3",
@@ -35,7 +36,6 @@
     "superjson": "2.2.1",
     "use-sound": "^4.0.3",
     "usehooks-ts": "^3.1.0",
-    "uuid": "^11.0.5",
     "viem": "^2.21.52",
     "wagmi": "2.12.8",
     "zod": "catalog:"

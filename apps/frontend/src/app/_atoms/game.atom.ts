@@ -1,8 +1,8 @@
 import type { TCard } from '@battleground/validators';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atomWithReset, useResetAtom } from 'jotai/utils';
+import { nanoid } from 'nanoid';
 import type PartySocket from 'partysocket';
-import { v4 as uuidv4 } from 'uuid';
 
 type GameAtom = {
   gameCode?: string;
@@ -47,72 +47,72 @@ const dummyGameAtom: GameAtom = {
   cardsDeck: [
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H4',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'A5',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H7',
-      id: uuidv4(),
+      id: nanoid(),
     },
   ],
   wonCards: [
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H4',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'A5',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'H7',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
   ],
   opponentWonCards: [
     {
       card: 'A2',
-      id: uuidv4(),
+      id: nanoid(),
     },
     {
       card: 'S3',
-      id: uuidv4(),
+      id: nanoid(),
     },
   ],
   activeCard: {
     card: 'A2',
-    id: uuidv4(),
+    id: nanoid(),
   },
   opponentActiveCard: {
     card: 'redacted',
-    id: uuidv4(),
+    id: nanoid(),
   },
   isPlayable: false,
 };

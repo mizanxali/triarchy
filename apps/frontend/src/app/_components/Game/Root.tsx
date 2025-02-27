@@ -11,7 +11,10 @@ import PartySocket from 'partysocket';
 import { GameWagerABI } from '@battleground/web3/abis';
 import { useReadContract, useWriteContract } from 'wagmi';
 import { env } from '~/env';
-import { v4 as uuidv4 } from 'uuid';
+import { generateGameCode } from '~/app/utils';
+import { publicClient } from '@battleground/web3/client';
+import { parseEther } from 'viem';
+
 interface Props {
   walletAddress: string;
 }
@@ -129,28 +132,31 @@ const Root = ({ walletAddress }: Props) => {
 
       setIsCreatingGame(true);
 
-      // const txnHash = await writeContractAsync({
-      //   abi: GameWagerABI,
-      //   address: GAME_WAGER_ADDRESS,
-      //   functionName: 'createGame',
-      //   args: [roomId],
-      //   value: parseEther(wagerAmount),
-      // });
+      const roomId = generateGameCode();
+      console.log({ roomId });
 
-      // const receipt = await publicClient.waitForTransactionReceipt({
-      //   hash: txnHash,
-      //   retryCount: 3,
-      //   retryDelay: 1000,
-      // });
+      const txnHash = await writeContractAsync({
+        abi: GameWagerABI,
+        address: GAME_WAGER_ADDRESS,
+        functionName: 'createGame',
+        args: [roomId],
+        value: parseEther(wagerAmount),
+      });
 
-      // if (receipt.status !== 'success') {
-      //   console.error({ receipt });
-      //   throw new Error('Create Game Transaction failed');
-      // }
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txnHash,
+        retryCount: 3,
+        retryDelay: 1000,
+      });
+
+      if (receipt.status !== 'success') {
+        console.error({ receipt });
+        throw new Error('Create Game Transaction failed');
+      }
 
       const partySocket = new PartySocket({
         host: env.NEXT_PUBLIC_PARTYKIT_HOST,
-        room: uuidv4(),
+        room: roomId,
       });
 
       partySocket.addEventListener('message', (e) => {
@@ -207,24 +213,31 @@ const Root = ({ walletAddress }: Props) => {
 
       setIsJoiningGame(true);
 
-      // const txnHash = await writeContractAsync({
-      //   abi: GameWagerABI,
-      //   address: GAME_WAGER_ADDRESS,
-      //   functionName: 'joinGame',
-      //   args: [enteredGameCode],
-      //   value: gameInfo.data.wagerAmount,
-      // });
+      const gameInfo = await fetchGameInfo();
 
-      // const receipt = await publicClient.waitForTransactionReceipt({
-      //   hash: txnHash,
-      //   retryCount: 3,
-      //   retryDelay: 1000,
-      // });
+      if (!gameInfo.data) {
+        alert('Game not found');
+        return;
+      }
 
-      // if (receipt.status !== 'success') {
-      //   console.error({ receipt });
-      //   throw new Error('Join Game Transaction failed');
-      // }
+      const txnHash = await writeContractAsync({
+        abi: GameWagerABI,
+        address: GAME_WAGER_ADDRESS,
+        functionName: 'joinGame',
+        args: [enteredGameCode],
+        value: gameInfo.data.wagerAmount,
+      });
+
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txnHash,
+        retryCount: 3,
+        retryDelay: 1000,
+      });
+
+      if (receipt.status !== 'success') {
+        console.error({ receipt });
+        throw new Error('Join Game Transaction failed');
+      }
 
       const partySocket = new PartySocket({
         host: env.NEXT_PUBLIC_PARTYKIT_HOST,

@@ -1,5 +1,5 @@
 import type { TCard } from '@battleground/validators';
-import { v4 as uuidv4 } from 'uuid';
+import { customAlphabet, nanoid } from 'nanoid';
 
 export const getOrderedCards = (): {
   card: TCard;
@@ -79,7 +79,7 @@ export const getOrderedCards = (): {
   for (const card of cards) {
     orderedCards.push({
       card,
-      id: uuidv4(),
+      id: nanoid(),
     });
   }
 
@@ -90,4 +90,14 @@ export const isMobileDevice = () => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent,
   );
+};
+
+export const generateGameCode = () => {
+  const a = customAlphabet('abcdefghijklmnopqrstuvwxyz', 10);
+  const text = a();
+  const textLength = text.length;
+  const textPart1 = text.substring(0, textLength / 3);
+  const textPart2 = text.substring(textLength / 3, (textLength / 3) * 2 + 1);
+  const textPart3 = text.substring((textLength / 3) * 2 + 1, textLength);
+  return `${textPart1}-${textPart2}-${textPart3}`;
 };

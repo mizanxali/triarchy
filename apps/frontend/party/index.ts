@@ -1,6 +1,6 @@
 import type { TCard } from '@battleground/validators';
 import type * as Party from 'partykit/server';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 export const CARD_DECK: TCard[] = [
   'A2',
@@ -105,7 +105,7 @@ export default class Server implements Party.Server {
         usedIndices.add(randomIndex);
         initialCards.push({
           card: CARD_DECK[randomIndex] as TCard,
-          id: uuidv4(),
+          id: nanoid(),
         });
       }
     }
@@ -196,12 +196,12 @@ export default class Server implements Party.Server {
 
     this.state.blackCards.splice(blackIndex, 0, {
       card: newBlackCard,
-      id: uuidv4(),
+      id: nanoid(),
     });
 
     this.state.whiteCards.splice(whiteIndex, 0, {
       card: newWhiteCard,
-      id: uuidv4(),
+      id: nanoid(),
     });
 
     this.state.blackActiveCard = undefined;
