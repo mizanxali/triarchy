@@ -41,12 +41,12 @@ const Root = ({ walletAddress }: Props) => {
 
   const onInitialCardsReceived = (data: {
     cards: { card: TCard; id: string }[];
-    gameCode: string;
+    opponentWalletAddress: string;
   }) => {
     setGameAtom((prev) => ({
       ...prev,
       cardsDeck: data.cards,
-      gameCode: data.gameCode,
+      opponentWalletAddress: data.opponentWalletAddress,
       isPlayable: true,
     }));
   };
@@ -134,30 +134,35 @@ const Root = ({ walletAddress }: Props) => {
       setIsCreatingGame(true);
 
       const roomId = generateGameCode();
-      console.log({ roomId });
 
-      const txnHash = await writeContractAsync({
-        abi: GameWagerABI,
-        address: GAME_WAGER_ADDRESS,
-        functionName: 'createGame',
-        args: [roomId],
-        value: parseEther(wagerAmount),
-      });
+      if (env.NODE_ENV === 'production') {
+        const txnHash = await writeContractAsync({
+          abi: GameWagerABI,
+          address: GAME_WAGER_ADDRESS,
+          functionName: 'createGame',
+          args: [roomId],
+          value: parseEther(wagerAmount),
+        });
 
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: txnHash,
-        retryCount: 3,
-        retryDelay: 1000,
-      });
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: txnHash,
+          retryCount: 3,
+          retryDelay: 1000,
+        });
 
-      if (receipt.status !== 'success') {
-        console.error({ receipt });
-        throw new Error('Create Game Transaction failed');
+        if (receipt.status !== 'success') {
+          console.error({ receipt });
+          throw new Error('Create Game Transaction failed');
+        }
       }
 
       const partySocket = new PartySocket({
         host: env.NEXT_PUBLIC_PARTYKIT_HOST,
         room: roomId,
+        query: {
+          wagerAmount,
+          walletAddress,
+        },
       });
 
       partySocket.addEventListener('message', (e) => {
@@ -192,13 +197,13 @@ const Root = ({ walletAddress }: Props) => {
         }
       });
 
+      setIsCreatingGame(false);
+
       setGameAtom((prev) => ({
         ...prev,
         partySocket,
+        gameCode: roomId,
       }));
-
-      setIsCreatingGame(false);
-      setIsJoiningGame(false);
     } catch (error) {
       console.error(error);
       setIsCreatingGame(false);
@@ -221,28 +226,33 @@ const Root = ({ walletAddress }: Props) => {
         return;
       }
 
-      const txnHash = await writeContractAsync({
-        abi: GameWagerABI,
-        address: GAME_WAGER_ADDRESS,
-        functionName: 'joinGame',
-        args: [enteredGameCode],
-        value: gameInfo.data.wagerAmount,
-      });
+      if (env.NODE_ENV === 'production') {
+        const txnHash = await writeContractAsync({
+          abi: GameWagerABI,
+          address: GAME_WAGER_ADDRESS,
+          functionName: 'joinGame',
+          args: [enteredGameCode],
+          value: gameInfo.data.wagerAmount,
+        });
 
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: txnHash,
-        retryCount: 3,
-        retryDelay: 1000,
-      });
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: txnHash,
+          retryCount: 3,
+          retryDelay: 1000,
+        });
 
-      if (receipt.status !== 'success') {
-        console.error({ receipt });
-        throw new Error('Join Game Transaction failed');
+        if (receipt.status !== 'success') {
+          console.error({ receipt });
+          throw new Error('Join Game Transaction failed');
+        }
       }
 
       const partySocket = new PartySocket({
         host: env.NEXT_PUBLIC_PARTYKIT_HOST,
         room: enteredGameCode,
+        query: {
+          walletAddress,
+        },
       });
 
       partySocket.addEventListener('message', (e) => {
@@ -251,8 +261,6 @@ const Root = ({ walletAddress }: Props) => {
         const parsedPayload = JSON.parse(e.data);
 
         const label = parsedPayload.type;
-
-        console.log({ label });
 
         if (label === 'initial-cards') {
           onInitialCardsReceived(parsedPayload.data);
@@ -277,9 +285,12 @@ const Root = ({ walletAddress }: Props) => {
         }
       });
 
+      setIsJoiningGame(false);
+
       setGameAtom((prev) => ({
         ...prev,
         partySocket,
+        gameCode: enteredGameCode,
       }));
     } catch (error) {
       console.error(error);
@@ -383,7 +394,7 @@ const Root = ({ walletAddress }: Props) => {
       </div>
     );
 
-  return <GameWrapper />;
+  return <GameWrapper walletAddress={walletAddress} />;
 };
 
 export default Root;

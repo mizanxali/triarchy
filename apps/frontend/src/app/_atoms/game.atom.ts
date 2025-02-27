@@ -28,6 +28,7 @@ type GameAtom = {
   };
   isPlayable: boolean;
   partySocket: PartySocket | null;
+  opponentWalletAddress?: string;
 };
 
 const defaultGameAtom: GameAtom = {
@@ -39,6 +40,7 @@ const defaultGameAtom: GameAtom = {
   opponentActiveCard: undefined,
   isPlayable: false,
   partySocket: null,
+  opponentWalletAddress: undefined,
 };
 
 const dummyGameAtom: GameAtom = {
@@ -115,6 +117,7 @@ const dummyGameAtom: GameAtom = {
     id: nanoid(),
   },
   isPlayable: false,
+  opponentWalletAddress: '0x1234567890123456789012345678901234567890',
 };
 
 const gameAtom = atomWithReset<GameAtom>(defaultGameAtom);

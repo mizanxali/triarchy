@@ -39,6 +39,8 @@ interface GameState {
   whitePeerId?: string;
   isGameOver: boolean;
   winner?: 'black' | 'white';
+  blackWalletAddress?: string;
+  whiteWalletAddress?: string;
 }
 
 export default class Server implements Party.Server {
@@ -46,7 +48,7 @@ export default class Server implements Party.Server {
 
   constructor(readonly room: Party.Room) {
     this.state = {
-      gameCode: room.id, // Use room ID as game code
+      gameCode: room.id,
       blackCards: [],
       whiteCards: [],
       blackActiveCard: undefined,
@@ -58,40 +60,177 @@ export default class Server implements Party.Server {
       whitePeerId: undefined,
       isGameOver: false,
       winner: undefined,
+      blackWalletAddress: undefined,
+      whiteWalletAddress: undefined,
     };
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    const queryParams = new URLSearchParams(ctx.request.url);
+    const wagerAmount = queryParams.get('wagerAmount');
+    const walletAddress = queryParams.get('walletAddress');
+
     if (!this.state.blackPeerId) {
       this.state.blackPeerId = conn.id;
+      if (wagerAmount) this.state.wagerAmount = wagerAmount;
+      if (walletAddress) this.state.blackWalletAddress = walletAddress;
 
       if (this.state.blackCards.length === 0) {
         this.state.blackCards = this.generateInitialCards();
       }
-
-      conn.send(
-        JSON.stringify({
-          type: 'initial-cards',
-          data: { cards: this.state.blackCards, gameCode: this.state.gameCode },
-        }),
-      );
     } else if (!this.state.whitePeerId && conn.id !== this.state.blackPeerId) {
       this.state.whitePeerId = conn.id;
+      if (wagerAmount) this.state.wagerAmount = wagerAmount;
+      if (walletAddress) this.state.whiteWalletAddress = walletAddress;
 
       if (this.state.whiteCards.length === 0) {
         this.state.whiteCards = this.generateInitialCards();
       }
+    }
 
-      conn.send(
+    if (this.state.blackPeerId && this.state.whitePeerId) {
+      this.room.getConnection(this.state.blackPeerId)?.send(
         JSON.stringify({
           type: 'initial-cards',
-          data: { cards: this.state.whiteCards, gameCode: this.state.gameCode },
+          data: {
+            cards: this.state.blackCards,
+            opponentWalletAddress: this.state.whiteWalletAddress,
+          },
         }),
       );
+
+      this.room.getConnection(this.state.whitePeerId)?.send(
+        JSON.stringify({
+          type: 'initial-cards',
+          data: {
+            cards: this.state.whiteCards,
+            opponentWalletAddress: this.state.blackWalletAddress,
+          },
+        }),
+      );
+    }
+  }
+
+  async onMessage(message: string, sender: Party.Connection) {
+    const data = JSON.parse(message);
+
+    switch (data.type) {
+      case 'card-played': {
+        const isBlackPlayer = sender.id === this.state.blackPeerId;
+        const card = data.data.card;
+        const id = data.data.id;
+
+        if (isBlackPlayer) {
+          this.state.blackActiveCard = { card, id };
+
+          if (this.state.whitePeerId) {
+            this.room.getConnection(this.state.whitePeerId)?.send(
+              JSON.stringify({
+                type: 'opponent-card-played',
+                data: {
+                  card: 'redacted',
+                  id,
+                },
+              }),
+            );
+          }
+        } else {
+          this.state.whiteActiveCard = { card, id };
+
+          if (this.state.blackPeerId) {
+            this.room.getConnection(this.state.blackPeerId)?.send(
+              JSON.stringify({
+                type: 'opponent-card-played',
+                data: {
+                  card: 'redacted',
+                  id,
+                },
+              }),
+            );
+          }
+        }
+
+        if (this.state.blackActiveCard && this.state.whiteActiveCard) {
+          if (this.state.blackPeerId) {
+            this.room.getConnection(this.state.blackPeerId)?.send(
+              JSON.stringify({
+                type: 'opponent-card-played',
+                data: this.state.whiteActiveCard,
+              }),
+            );
+          }
+
+          if (this.state.whitePeerId) {
+            this.room.getConnection(this.state.whitePeerId)?.send(
+              JSON.stringify({
+                type: 'opponent-card-played',
+                data: this.state.blackActiveCard,
+              }),
+            );
+          }
+
+          await this.sleep(2000);
+
+          const result = this.evaluateCards(
+            this.state.blackActiveCard.card,
+            this.state.whiteActiveCard.card,
+          );
+
+          if (result === 'win') {
+            this.state.blackWonCards.push(this.state.blackActiveCard);
+            this.resetCardsAfterTurn();
+            this.sendTurnResults('win', 'lose');
+          } else if (result === 'lose') {
+            this.state.whiteWonCards.push(this.state.whiteActiveCard);
+            this.resetCardsAfterTurn();
+            this.sendTurnResults('lose', 'win');
+          } else {
+            this.resetCardsAfterTurn();
+            this.sendTurnResults('draw', 'draw');
+          }
+
+          if (this.checkGameOver()) {
+            this.sendGameOverMessages();
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  async onClose(connection: Party.Connection) {
+    if (connection.id === this.state.blackPeerId) {
+      this.state.blackPeerId = undefined;
+
+      if (this.state.whitePeerId) {
+        this.state.isGameOver = true;
+        this.state.winner = 'white';
+
+        this.room.getConnection(this.state.whitePeerId)?.send(
+          JSON.stringify({
+            type: 'game-win',
+            data: {
+              message: 'Opponent disconnected. You win!',
+            },
+          }),
+        );
+      }
+    } else if (connection.id === this.state.whitePeerId) {
+      this.state.whitePeerId = undefined;
+
+      if (this.state.blackPeerId) {
+        this.state.isGameOver = true;
+        this.state.winner = 'black';
+
+        this.room.getConnection(this.state.blackPeerId)?.send(
+          JSON.stringify({
+            type: 'game-win',
+            data: {
+              message: 'Opponent disconnected. You win!',
+            },
+          }),
+        );
+      }
     }
   }
 
@@ -208,93 +347,6 @@ export default class Server implements Party.Server {
     this.state.whiteActiveCard = undefined;
   }
 
-  async onMessage(message: string, sender: Party.Connection) {
-    const data = JSON.parse(message);
-
-    switch (data.type) {
-      case 'card-played': {
-        const isBlackPlayer = sender.id === this.state.blackPeerId;
-        const card = data.data.card;
-        const id = data.data.id;
-
-        if (isBlackPlayer) {
-          this.state.blackActiveCard = { card, id };
-
-          if (this.state.whitePeerId) {
-            this.room.getConnection(this.state.whitePeerId)?.send(
-              JSON.stringify({
-                type: 'opponent-card-played',
-                data: {
-                  card: 'redacted',
-                  id,
-                },
-              }),
-            );
-          }
-        } else {
-          this.state.whiteActiveCard = { card, id };
-
-          if (this.state.blackPeerId) {
-            this.room.getConnection(this.state.blackPeerId)?.send(
-              JSON.stringify({
-                type: 'opponent-card-played',
-                data: {
-                  card: 'redacted',
-                  id,
-                },
-              }),
-            );
-          }
-        }
-
-        if (this.state.blackActiveCard && this.state.whiteActiveCard) {
-          if (this.state.blackPeerId) {
-            this.room.getConnection(this.state.blackPeerId)?.send(
-              JSON.stringify({
-                type: 'opponent-card-played',
-                data: this.state.whiteActiveCard,
-              }),
-            );
-          }
-
-          if (this.state.whitePeerId) {
-            this.room.getConnection(this.state.whitePeerId)?.send(
-              JSON.stringify({
-                type: 'opponent-card-played',
-                data: this.state.blackActiveCard,
-              }),
-            );
-          }
-
-          await this.sleep(2000);
-
-          const result = this.evaluateCards(
-            this.state.blackActiveCard.card,
-            this.state.whiteActiveCard.card,
-          );
-
-          if (result === 'win') {
-            this.state.blackWonCards.push(this.state.blackActiveCard);
-            this.resetCardsAfterTurn();
-            this.sendTurnResults('win', 'lose');
-          } else if (result === 'lose') {
-            this.state.whiteWonCards.push(this.state.whiteActiveCard);
-            this.resetCardsAfterTurn();
-            this.sendTurnResults('lose', 'win');
-          } else {
-            this.resetCardsAfterTurn();
-            this.sendTurnResults('draw', 'draw');
-          }
-
-          if (this.checkGameOver()) {
-            this.sendGameOverMessages();
-          }
-        }
-        break;
-      }
-    }
-  }
-
   private sendTurnResults(
     blackResult: 'win' | 'lose' | 'draw',
     whiteResult: 'win' | 'lose' | 'draw',
@@ -376,40 +428,8 @@ export default class Server implements Party.Server {
     }
   }
 
-  async onClose(connection: Party.Connection) {
-    if (connection.id === this.state.blackPeerId) {
-      this.state.blackPeerId = undefined;
-
-      if (this.state.whitePeerId) {
-        this.state.isGameOver = true;
-        this.state.winner = 'white';
-
-        this.room.getConnection(this.state.whitePeerId)?.send(
-          JSON.stringify({
-            type: 'game-win',
-            data: {
-              message: 'Opponent disconnected. You win!',
-            },
-          }),
-        );
-      }
-    } else if (connection.id === this.state.whitePeerId) {
-      this.state.whitePeerId = undefined;
-
-      if (this.state.blackPeerId) {
-        this.state.isGameOver = true;
-        this.state.winner = 'black';
-
-        this.room.getConnection(this.state.blackPeerId)?.send(
-          JSON.stringify({
-            type: 'game-win',
-            data: {
-              message: 'Opponent disconnected. You win!',
-            },
-          }),
-        );
-      }
-    }
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

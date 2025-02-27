@@ -3,7 +3,7 @@ import CopyButton from '../Button/CopyButton';
 import { useGameAtom } from '~/app/_atoms/game.atom';
 
 const GameInfo = () => {
-  const [{ gameCode }] = useGameAtom();
+  const [{ gameCode, opponentWalletAddress }] = useGameAtom();
 
   return (
     <div className="flex flex-col gap-4 text-center items-center text-white mt-6">
@@ -14,11 +14,11 @@ const GameInfo = () => {
         <CopyButton text={gameCode ?? ''} />
       </div>
       <div>
-        {/* {opponentPeerId ? null : (
+        {!opponentWalletAddress ? (
           <div className="text-xl font-medium">
             <span>Waiting for opponent...</span>
           </div>
-        )} */}
+        ) : null}
       </div>
       <Rules />
     </div>
