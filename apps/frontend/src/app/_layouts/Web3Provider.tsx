@@ -16,8 +16,8 @@ const metadata = {
   name: 'Triarchy',
   description:
     'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',
-  url: 'https://play-triarchy.vercel.app/',
-  icons: ['https://play-triarchy.vercel.app/favicon.ico'],
+  url: 'https://triarchy.vercel.app/',
+  icons: ['https://triarchy.vercel.app/favicon.ico'],
 };
 
 const wagmiAdapter = new WagmiAdapter({
