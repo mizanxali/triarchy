@@ -48,7 +48,7 @@ const MobileChecker = () => {
       ) : (
         <div className="w-1/2 mx-auto text-center h-screen flex flex-col items-center gap-8 pt-32">
           <h1 className="text-[82px] uppercase text-yellow-600 font-sancreek">
-            Triumvirate
+            Triarchy
           </h1>
           <div className="text-3xl">
             Master the trinity of combat in this tactical card game where

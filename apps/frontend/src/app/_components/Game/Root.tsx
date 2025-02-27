@@ -302,7 +302,7 @@ const Root = ({ walletAddress }: Props) => {
     return (
       <div className="w-full text-center h-screen flex flex-col items-center gap-10 pt-32">
         <h1 className="text-[82px] uppercase text-yellow-600 font-sancreek">
-          Triumvirate
+          Triarchy
         </h1>
         <div className="flex-1 flex flex-col gap-8 items-center w-3/4">
           <div className="w-full grid grid-cols-2 pt-4">

@@ -15,8 +15,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://play-triumvirate.vercel.app'),
-  title: 'Triumvirate',
+  metadataBase: new URL('https://play-triarchy.vercel.app'),
+  title: 'Triarchy',
   description:
     'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',
 };

@@ -1,4 +1,4 @@
-# Triumvirate
+# Triarchy
 
 Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.
 

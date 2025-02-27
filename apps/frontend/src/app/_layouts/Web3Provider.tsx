@@ -13,11 +13,11 @@ import { env } from '~/env';
 const queryClient = new QueryClient();
 
 const metadata = {
-  name: 'Triumvirate',
+  name: 'Triarchy',
   description:
     'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',
-  url: 'https://play-triumvirate.vercel.app/',
-  icons: ['https://play-triumvirate.vercel.app/favicon.ico'],
+  url: 'https://play-triarchy.vercel.app/',
+  icons: ['https://play-triarchy.vercel.app/favicon.ico'],
 };
 
 const wagmiAdapter = new WagmiAdapter({
