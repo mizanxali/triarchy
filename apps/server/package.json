@@ -16,6 +16,7 @@
     "@battleground/web3": "workspace:*",
     "@huddle01/server-sdk": "^2.5.6",
     "@huddle01/web-core": "^2.3.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mediasoup-client-werift": "^0.0.5",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@battleground/tsconfig": "workspace:*",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^20",
     "@types/ws": "^8.5.14",

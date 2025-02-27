@@ -15,10 +15,10 @@ const Root = ({ walletAddress }: Props) => {
   const { joinRoom, closeRoom } = useRoom({
     onJoin: ({ room }) => {
       if (room.roomId) {
-        setGameAtom((prev) => ({
-          ...prev,
-          gameCode: room.roomId as string,
-        }));
+        // setGameAtom((prev) => ({
+        //   ...prev,
+        //   gameCode: room.roomId as string,
+        // }));
       }
     },
     onLeave: (data) => {
