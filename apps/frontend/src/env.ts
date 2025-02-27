@@ -12,8 +12,7 @@ export const env = createEnv({
       .default('development'),
 
     ADMIN_API_KEY: z.string().optional(),
-    NEXT_PUBLIC_PROJECT_ID: z.string(),
-    NEXT_PUBLIC_SERVER_URL: z.string(),
+    NEXT_PUBLIC_PARTYKIT_HOST: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here.
@@ -31,8 +30,7 @@ export const env = createEnv({
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: z.string(),
     NEXT_PUBLIC_ALCHEMY_URL: z.string(),
-    NEXT_PUBLIC_PROJECT_ID: z.string(),
-    NEXT_PUBLIC_SERVER_URL: z.string(),
+    NEXT_PUBLIC_PARTYKIT_HOST: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -43,8 +41,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
     NEXT_PUBLIC_ALCHEMY_URL: process.env.NEXT_PUBLIC_ALCHEMY_URL,
     ADMIN_API_KEY: process.env.ADMIN_API_KEY,
-    NEXT_PUBLIC_PROJECT_ID: process.env.NEXT_PUBLIC_PROJECT_ID,
-    NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
+    NEXT_PUBLIC_PARTYKIT_HOST: process.env.NEXT_PUBLIC_PARTYKIT_HOST,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   skipValidation:

@@ -1,20 +1,12 @@
 import type { TCard } from '@battleground/validators';
-import { useDataMessage, usePeerIds, useRoom } from '@huddle01/react';
-import { Role } from '@huddle01/server-sdk/auth';
 import { useGameAtom } from '~/app/_atoms/game.atom';
 import Card from './Card';
 
 const CardDeck = () => {
-  const { state } = useRoom();
-  const [serverPeerId] = usePeerIds({ roles: [Role.HOST] }).peerIds;
-  const [opponentPeerId] = usePeerIds({ roles: [Role.GUEST] }).peerIds;
-
-  const [{ cardsDeck, isPlayable }, setGameAtom] = useGameAtom();
-
-  const { sendData } = useDataMessage();
+  const [{ cardsDeck, isPlayable, partySocket }, setGameAtom] = useGameAtom();
 
   const onPlayCardHandler = async (card: TCard | 'redacted', id: string) => {
-    if (!serverPeerId || card === 'redacted' || !isPlayable) return;
+    if (card === 'redacted' || !isPlayable) return;
 
     setGameAtom((prev) => ({
       ...prev,
@@ -34,19 +26,15 @@ const CardDeck = () => {
       isPlayable: false,
     }));
 
-    await sendData({
-      to: [serverPeerId],
-      label: 'card-played',
-      payload: JSON.stringify({
-        card,
-        id,
-      }),
-    });
+    if (partySocket) {
+      partySocket.send(
+        JSON.stringify({
+          type: 'card-played',
+          data: { card, id },
+        }),
+      );
+    }
   };
-
-  if (state !== 'connected' || !opponentPeerId) {
-    return null;
-  }
 
   return (
     <div className="flex justify-center items-center">

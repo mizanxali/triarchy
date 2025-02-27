@@ -1,6 +1,7 @@
 import type { TCard } from '@battleground/validators';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
 import { atomWithReset, useResetAtom } from 'jotai/utils';
+import type PartySocket from 'partysocket';
 import { v4 as uuidv4 } from 'uuid';
 
 type GameAtom = {
@@ -26,6 +27,7 @@ type GameAtom = {
     id: string;
   };
   isPlayable: boolean;
+  partySocket: PartySocket | null;
 };
 
 const defaultGameAtom: GameAtom = {
@@ -36,10 +38,12 @@ const defaultGameAtom: GameAtom = {
   activeCard: undefined,
   opponentActiveCard: undefined,
   isPlayable: false,
+  partySocket: null,
 };
 
 const dummyGameAtom: GameAtom = {
   gameCode: 'xxf-bvgv-ydn',
+  partySocket: null,
   cardsDeck: [
     {
       card: 'A2',

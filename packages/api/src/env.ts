@@ -12,7 +12,6 @@ export const env = createEnv({
       .default('development'),
 
     ADMIN_API_KEY: z.string().optional(),
-    HUDDLE01_API_KEY: z.string(),
     SERVER_URL: z.string(),
   },
   /**
@@ -21,7 +20,6 @@ export const env = createEnv({
    */
   server: {
     ADMIN_API_KEY: z.string().optional(),
-    HUDDLE01_API_KEY: z.string(),
     SERVER_URL: z.string(),
   },
 
@@ -39,7 +37,6 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
 
     ADMIN_API_KEY: process.env.ADMIN_API_KEY,
-    HUDDLE01_API_KEY: process.env.HUDDLE01_API_KEY,
     SERVER_URL: process.env.SERVER_URL,
   },
   skipValidation:
