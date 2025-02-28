@@ -9,12 +9,13 @@ import { GAME_WAGER_ADDRESS } from '~/lib/web3/constants';
 import { useState } from 'react';
 import PartySocket from 'partysocket';
 import { GameWagerABI } from '~/lib/web3/abis';
-import { useReadContract, useWriteContract } from 'wagmi';
+import { useBalance, useReadContract, useWriteContract } from 'wagmi';
 import { env } from '~/env';
 import { generateGameCode } from '~/app/utils';
 import { publicClient } from '~/lib/web3/client';
-import { parseEther } from 'viem';
+import { formatEther, parseEther } from 'viem';
 import { emojiBlasts } from 'emoji-blast';
+import { Wallet } from 'lucide-react';
 
 interface Props {
   walletAddress: string;
@@ -29,6 +30,9 @@ const Root = ({ walletAddress }: Props) => {
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [isJoiningGame, setIsJoiningGame] = useState(false);
 
+  const { data: balance } = useBalance({
+    address: walletAddress as `0x${string}`,
+  });
   const { writeContractAsync } = useWriteContract();
   const { refetch: fetchGameInfo } = useReadContract({
     abi: GameWagerABI,
@@ -330,6 +334,14 @@ const Root = ({ walletAddress }: Props) => {
                 placeholder="Enter Wager Amount (ETH)"
                 type="number"
               />
+              {balance ? (
+                <div className="text-zinc-200 font-bold text-lg flex items-center gap-2">
+                  <Wallet className="w-5 h-5" />
+                  <div>
+                    Balance: {Number(formatEther(balance.value)).toFixed(4)} ETH
+                  </div>
+                </div>
+              ) : null}
               <div className="flex items-center gap-2 my-2">
                 <Button
                   variant={'secondary'}
@@ -378,7 +390,11 @@ const Root = ({ walletAddress }: Props) => {
               </div>
               <Button
                 disabled={
-                  isCreatingGame || wagerAmount === '' || wagerAmount === '0'
+                  isCreatingGame ||
+                  wagerAmount === '' ||
+                  wagerAmount === '0' ||
+                  !balance ||
+                  Number(wagerAmount) > Number(formatEther(balance.value))
                 }
                 onClick={onCreateGameHandler}
                 variant={'primary'}
