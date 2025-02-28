@@ -449,8 +449,6 @@ export default class Server implements Party.Server {
         });
       }
 
-      await this.sleep(1000);
-
       const winnerPeerId =
         this.state.winner === 'black'
           ? this.state.blackPeerId
