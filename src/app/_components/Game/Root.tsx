@@ -14,8 +14,8 @@ import { env } from '~/env';
 import { generateGameCode } from '~/app/utils';
 import { publicClient } from '~/lib/web3/client';
 import { formatEther, parseEther } from 'viem';
-import { emojiBlasts } from 'emoji-blast';
 import { Wallet } from 'lucide-react';
+import { useMiscSetAtom } from '~/app/_atoms/misc.atom';
 
 interface Props {
   walletAddress: string;
@@ -24,6 +24,7 @@ interface Props {
 const Root = ({ walletAddress }: Props) => {
   const [{ partySocket }, setGameAtom] = useGameAtom();
   const resetGameAtom = useGameResetAtom();
+  const setMiscAtom = useMiscSetAtom();
 
   const [enteredGameCode, setEnteredGameCode] = useState('');
   const [wagerAmount, setWagerAmount] = useState('');
@@ -127,25 +128,15 @@ const Root = ({ walletAddress }: Props) => {
     data: { message: string; txnHash?: string },
     isWinner: boolean,
   ) => {
-    partySocket?.close();
     resetGameAtom();
 
-    const msg =
-      isWinner && data.txnHash
-        ? `${data.message} Winning Txn: ${data.txnHash}`
-        : data.message;
-
-    if (isWinner) {
-      const { cancel } = emojiBlasts({
-        interval: 20,
-      });
-      setTimeout(() => {
-        cancel();
-        alert(msg);
-      }, 1000);
-    } else {
-      alert(msg);
-    }
+    setMiscAtom((prev) => ({
+      ...prev,
+      showGameOver: true,
+      txnHash: data.txnHash,
+      gameOverMessage: data.message,
+      isWinner,
+    }));
   };
 
   const onCreateGameHandler = async () => {
@@ -188,13 +179,8 @@ const Root = ({ walletAddress }: Props) => {
       });
 
       partySocket.addEventListener('message', (e) => {
-        console.log(e.data);
-
         const parsedPayload = JSON.parse(e.data);
-
         const label = parsedPayload.type;
-
-        console.log({ label });
 
         if (label === 'initial-cards') {
           onInitialCardsReceived(parsedPayload.data);
@@ -215,6 +201,9 @@ const Root = ({ walletAddress }: Props) => {
           onGameOver(parsedPayload.data, true);
         } else if (label === 'game-lose') {
           console.log('You lost the game!', parsedPayload.data);
+          onGameOver(parsedPayload.data, false);
+        } else if (label === 'game-canceled') {
+          console.log('Game canceled!', parsedPayload.data);
           onGameOver(parsedPayload.data, false);
         }
       });
@@ -276,10 +265,7 @@ const Root = ({ walletAddress }: Props) => {
       });
 
       partySocket.addEventListener('message', (e) => {
-        console.log(e.data);
-
         const parsedPayload = JSON.parse(e.data);
-
         const label = parsedPayload.type;
 
         if (label === 'initial-cards') {
@@ -301,6 +287,9 @@ const Root = ({ walletAddress }: Props) => {
           onGameOver(parsedPayload.data, true);
         } else if (label === 'game-lose') {
           console.log('You lost the game!');
+          onGameOver(parsedPayload.data, false);
+        } else if (label === 'game-canceled') {
+          console.log('Game canceled!', parsedPayload.data);
           onGameOver(parsedPayload.data, false);
         }
       });

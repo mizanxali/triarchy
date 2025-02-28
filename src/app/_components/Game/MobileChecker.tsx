@@ -11,6 +11,7 @@ import Rules from '../common/Rules';
 import { useGameAtom } from '~/app/_atoms/game.atom';
 import Leaderboard from '../Home/Leaderboard';
 import CardCarousel from '../Home/CardCarousel';
+import GameOver from '../common/GameOver';
 
 const MobileChecker = () => {
   const { isMobile, isLoading } = useMobile();
@@ -44,7 +45,10 @@ const MobileChecker = () => {
         </div>
       )}
       {session ? (
-        <Root walletAddress={session.user.walletAddress} />
+        <>
+          <GameOver />
+          <Root walletAddress={session.user.walletAddress} />
+        </>
       ) : (
         <div className="w-1/2 mx-auto text-center h-screen flex flex-col items-center gap-8 pt-32">
           <h1 className="text-[82px] uppercase text-yellow-600 font-sancreek">

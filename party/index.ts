@@ -203,30 +203,24 @@ export default class Server implements Party.Server {
   }
 
   async onClose(connection: Party.Connection) {
+    if (this.state.isGameOver) return;
+
     if (connection.id === this.state.blackPeerId) {
       this.state.blackPeerId = undefined;
-
       if (this.state.whitePeerId) {
         this.state.isGameOver = true;
         this.state.winner = 'white';
 
-        this.room.getConnection(this.state.whitePeerId)?.send(
-          JSON.stringify({
-            type: 'game-win',
-            data: {
-              message: 'Opponent disconnected. You win!',
-            },
-          }),
-        );
+        let txnHash: `0x${string}` | undefined;
 
-        if (this.state.whiteWalletAddress) {
+        if (this.state.whiteWalletAddress && this.state.wagerAmount) {
           const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
 
           const adminAccount = getAccountFromPrivateKey(
             adminPrivateKey as `0x${string}`,
           );
 
-          const txnHash = await walletClient.writeContract({
+          txnHash = await walletClient.writeContract({
             account: adminAccount,
             abi: GameWagerABI,
             address: GAME_WAGER_ADDRESS,
@@ -236,9 +230,17 @@ export default class Server implements Party.Server {
               this.state.whiteWalletAddress as `0x${string}`,
             ],
           });
-
-          console.log('txnHash', txnHash);
         }
+
+        this.room.getConnection(this.state.whitePeerId)?.send(
+          JSON.stringify({
+            type: 'game-canceled',
+            data: {
+              message: `Opponent disconnected. ${Number(this.state.wagerAmount).toFixed(4)} ETH was returned to your wallet.`,
+              txnHash,
+            },
+          }),
+        );
       }
     } else if (connection.id === this.state.whitePeerId) {
       this.state.whitePeerId = undefined;
@@ -247,23 +249,16 @@ export default class Server implements Party.Server {
         this.state.isGameOver = true;
         this.state.winner = 'black';
 
-        this.room.getConnection(this.state.blackPeerId)?.send(
-          JSON.stringify({
-            type: 'game-win',
-            data: {
-              message: 'Opponent disconnected. You win!',
-            },
-          }),
-        );
+        let txnHash: `0x${string}` | undefined;
 
-        if (this.state.blackWalletAddress) {
+        if (this.state.blackWalletAddress && this.state.wagerAmount) {
           const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
 
           const adminAccount = getAccountFromPrivateKey(
             adminPrivateKey as `0x${string}`,
           );
 
-          const txnHash = await walletClient.writeContract({
+          txnHash = await walletClient.writeContract({
             account: adminAccount,
             abi: GameWagerABI,
             address: GAME_WAGER_ADDRESS,
@@ -273,9 +268,17 @@ export default class Server implements Party.Server {
               this.state.blackWalletAddress as `0x${string}`,
             ],
           });
-
-          console.log('txnHash', txnHash);
         }
+
+        this.room.getConnection(this.state.blackPeerId)?.send(
+          JSON.stringify({
+            type: 'game-canceled',
+            data: {
+              message: `Opponent disconnected. ${Number(this.state.wagerAmount).toFixed(4)} ETH was returned to your wallet.`,
+              txnHash,
+            },
+          }),
+        );
       }
     }
   }
@@ -428,7 +431,11 @@ export default class Server implements Party.Server {
     if (this.state.isGameOver && this.state.winner) {
       let txnHash: `0x${string}` | undefined;
 
-      if (this.state.wagerAmount) {
+      if (
+        this.state.wagerAmount &&
+        this.state.blackWalletAddress &&
+        this.state.whiteWalletAddress
+      ) {
         const adminPrivateKey = process.env.GAME_ADMIN_PRIVATE_KEY;
 
         const adminAccount = getAccountFromPrivateKey(
@@ -463,7 +470,7 @@ export default class Server implements Party.Server {
           JSON.stringify({
             type: 'game-win',
             data: {
-              message: 'You win!',
+              message: `You win! ${(Number(this.state.wagerAmount) * 2 * 0.8).toFixed(4)} ETH was transferred to your wallet.`,
               txnHash,
             },
           }),
@@ -476,16 +483,29 @@ export default class Server implements Party.Server {
             type: 'game-lose',
             data: {
               message: 'You lose!',
-              txnHash,
             },
           }),
         );
       }
+
+      this.disposeGame();
     }
   }
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private disposeGame() {
+    if (this.state.blackPeerId) {
+      this.room.getConnection(this.state.blackPeerId)?.close();
+      this.state.blackPeerId = undefined;
+    }
+
+    if (this.state.whitePeerId) {
+      this.room.getConnection(this.state.whitePeerId)?.close();
+      this.state.whitePeerId = undefined;
+    }
   }
 }
 
