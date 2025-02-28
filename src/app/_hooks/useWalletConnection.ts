@@ -3,7 +3,6 @@
 import { hudlChain } from '~/lib/web3/client';
 import { useAppKitState } from '@reown/appkit/react';
 import { getSession } from 'next-auth/react';
-import { isRedirectError } from 'next/dist/client/components/redirect';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -36,8 +35,6 @@ const useWalletConnection = (connectorId: string) => {
 
   const handleError = useCallback(
     async (error: unknown) => {
-      if (isRedirectError(error)) return;
-
       console.error('Signing message failed:', error);
       const errorMessage =
         error instanceof Error

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "~/components/ui/button";
+import { Button } from '~/components/ui/button';
 import {
   Table,
   TableBody,
@@ -8,14 +8,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "~/components/ui/table";
-import { ListOrdered, ShieldCloseIcon } from "lucide-react";
-import { useGameAtomValue } from "~/app/_atoms/game.atom";
-import { useMiscAtom } from "~/app/_atoms/misc.atom";
-import { useSession } from "next-auth/react";
-import { cn } from "~/components/ui";
-import { useEffect, useState } from "react";
-import { fetchLeaderboard } from "~/app/_actions";
+} from '~/components/ui/table';
+import { ListOrdered, ShieldCloseIcon } from 'lucide-react';
+import { useGameAtomValue } from '~/app/_atoms/game.atom';
+import { useMiscAtom } from '~/app/_atoms/misc.atom';
+import { useSession } from 'next-auth/react';
+import { cn } from '~/components/ui';
+import { useEffect, useState } from 'react';
+import { fetchLeaderboard } from '~/app/_actions';
 
 interface Leaderboard {
   walletAddress: `0x${string}`;
@@ -43,12 +43,12 @@ const Leaderboard = () => {
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setMisc((prev) => ({ ...prev, showLeaderboard: false }));
       }
     };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
   if (!leaderboard) return null;
@@ -56,8 +56,8 @@ const Leaderboard = () => {
   if (!showLeaderboard)
     return (
       <Button
-        variant={"primary"}
-        size={gameCode ? "icon" : "md"}
+        variant={'primary'}
+        size={gameCode ? 'icon' : 'md'}
         onClick={() =>
           setMisc((prev) => ({
             ...prev,
@@ -95,11 +95,11 @@ const Leaderboard = () => {
         className="rounded-md px-16 py-24 text-black flex flex-col items-center justify-between"
         style={{
           backgroundImage: `url('container.png')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          width: "820px",
-          height: "820px",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          width: '820px',
+          height: '820px',
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -132,50 +132,50 @@ const Leaderboard = () => {
               <TableRow key={user.walletAddress}>
                 <TableCell
                   className={cn(
-                    "text-left",
+                    'text-left',
                     user.walletAddress === session?.user.walletAddress
-                      ? "text-yellow-600 font-bold"
-                      : "text-black font-medium"
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
                   )}
                 >
                   {user.walletAddress}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "text-center",
+                    'text-center',
                     user.walletAddress === session?.user.walletAddress
-                      ? "text-yellow-600 font-bold"
-                      : "text-black font-medium"
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
                   )}
                 >
                   {user.wins}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "text-center",
+                    'text-center',
                     user.walletAddress === session?.user.walletAddress
-                      ? "text-yellow-600 font-bold"
-                      : "text-black font-medium"
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
                   )}
                 >
                   {user.losses}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "text-center",
+                    'text-center',
                     user.walletAddress === session?.user.walletAddress
-                      ? "text-yellow-600 font-bold"
-                      : "text-black font-medium"
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
                   )}
                 >
                   {user.totalWagered}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "text-right",
+                    'text-right',
                     user.walletAddress === session?.user.walletAddress
-                      ? "text-yellow-600 font-bold"
-                      : "text-black font-medium"
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
                   )}
                 >
                   {user.totalWon}

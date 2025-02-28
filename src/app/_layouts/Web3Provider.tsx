@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { hudlChain } from "~/lib/web3/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createAppKit } from "@reown/appkit/react";
-import { WagmiProvider, type Config } from "wagmi";
-import { cookieStorage, createStorage, http } from "@wagmi/core";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { mainnet } from "wagmi/chains";
+import { hudlChain } from '~/lib/web3/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createAppKit } from '@reown/appkit/react';
+import { WagmiProvider, type Config } from 'wagmi';
+import { cookieStorage, createStorage, http } from '@wagmi/core';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { mainnet } from 'wagmi/chains';
 
-import { env } from "~/env";
+import { env } from '~/env';
 
 const queryClient = new QueryClient();
 
 const metadata = {
-  name: "Triarchy",
+  name: 'Triarchy',
   description:
-    "Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.",
-  url: "https://triarchy.vercel.app/",
-  icons: ["https://triarchy.vercel.app/favicon.ico"],
+    'Master the trinity of combat in this tactical card game where superior numbers meet strategic counters in a battle for supremacy.',
+  url: 'https://triarchy.vercel.app/',
+  icons: ['https://triarchy.vercel.app/favicon.ico'],
 };
 
 const wagmiAdapter = new WagmiAdapter({
@@ -30,7 +30,7 @@ const wagmiAdapter = new WagmiAdapter({
   networks: [hudlChain],
   transports: {
     [mainnet.id]: http(env.NEXT_PUBLIC_ALCHEMY_URL),
-    [hudlChain.id]: http("https://huddle-testnet.rpc.caldera.xyz/http"),
+    [hudlChain.id]: http('https://huddle-testnet.rpc.caldera.xyz/http'),
   },
 });
 
@@ -41,7 +41,7 @@ createAppKit({
   defaultNetwork: hudlChain,
   metadata: metadata,
   excludeWalletIds: [
-    "a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393",
+    'a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393',
   ],
   enableWalletConnect: false,
   features: {
