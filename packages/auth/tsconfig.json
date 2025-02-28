@@ -1,5 +1,0 @@
-{
-  "extends": "@battleground/tsconfig/base.json",
-  "include": ["src", "*.ts", "providers"],
-  "exclude": ["node_modules"]
-}
