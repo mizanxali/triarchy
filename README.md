@@ -60,3 +60,5 @@ Win by achieving either:
 - Stable internet connection is required for gameplay
 - Huddle01 Testnet must be added to your wallet
 - Transactions may take a few moments to process
+
+  ok
