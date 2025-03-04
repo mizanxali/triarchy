@@ -19,6 +19,7 @@ const GameOver = () => {
           gameOverMessage: '',
           txnHash: undefined,
         }));
+        window.location.reload();
       }
     };
     window.addEventListener('keydown', handleEscape);
@@ -42,6 +43,7 @@ const GameOver = () => {
           gameOverMessage: '',
           txnHash: undefined,
         }));
+        window.location.reload();
       }}
     >
       {isWinner ? <Confetti /> : null}
@@ -50,14 +52,15 @@ const GameOver = () => {
           type="button"
           size="icon"
           className=""
-          onClick={() =>
+          onClick={() => {
             setMisc((prev) => ({
               ...prev,
               showGameOver: false,
               gameOverMessage: '',
               txnHash: undefined,
-            }))
-          }
+            }));
+            window.location.reload();
+          }}
         >
           <ShieldCloseIcon size={20} />
         </Button>
