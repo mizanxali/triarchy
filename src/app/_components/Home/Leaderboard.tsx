@@ -15,7 +15,6 @@ import { useMiscAtom } from '~/app/_atoms/misc.atom';
 import { useSession } from 'next-auth/react';
 import { cn } from '~/components/ui';
 import { useEffect, useState } from 'react';
-import { fetchLeaderboard } from '~/app/_actions';
 
 interface Leaderboard {
   walletAddress: `0x${string}`;
@@ -35,8 +34,9 @@ const Leaderboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const leaderboard = await fetchLeaderboard();
-      setLeaderboard(leaderboard);
+      const leaderboard = await fetch('/api/leaderboard');
+      const data = await leaderboard.json();
+      setLeaderboard(data);
     };
     fetchData();
   }, []);

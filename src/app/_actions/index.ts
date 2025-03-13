@@ -53,23 +53,3 @@ export const logout = async () => {
     throw new Error('An error occurred while logging out');
   }
 };
-
-export const fetchLeaderboard = async () => {
-  const leaderboard = await publicClient.readContract({
-    address: GAME_WAGER_ADDRESS,
-    abi: GameWagerABI,
-    functionName: 'getAllPlayerStats',
-  });
-
-  const playerStats = leaderboard.map((player) => ({
-    walletAddress: player.playerAddress,
-    wins: Number(player.wins),
-    losses: Number(player.losses),
-    totalWon: Number(formatEther(player.totalWon)).toFixed(4),
-    totalWagered: Number(formatEther(player.totalWagered)).toFixed(4),
-  }));
-
-  const sortedLeaderboard = playerStats.sort((a, b) => b.wins - a.wins);
-
-  return sortedLeaderboard;
-};
