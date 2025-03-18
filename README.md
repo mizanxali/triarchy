@@ -4,6 +4,10 @@ Master the trinity of combat in this tactical card game where superior numbers m
 
 CA: 0xf9f14af5039f903DDde3A6837f6e570EAD2322A8
 
+<p align="center">
+<img src="https://github.com/mizanxali/triarchy/blob/main/image.png" alt="drawing" width="1200"/>
+</p>
+
 ## Creating a Game
 - Choose an amount of ETH to wager
 - Create a game which generates a unique game code
