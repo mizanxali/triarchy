@@ -7,6 +7,7 @@ import { cn } from '~/components/ui';
 import '~/app/globals.css';
 
 import { Web3Provider } from './_layouts/Web3Provider';
+import Script from 'next/script';
 
 export const viewport: Viewport = {
   themeColor: [{ media: '(prefers-color-scheme: dark)', color: 'black' }],
@@ -46,6 +47,9 @@ const cairo = Cairo({
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script defer src="https://assets.onedollarstats.com/stonks.js" />
+      </head>
       <body
         className={cn(
           'font-cairo min-h-screen text-white antialiased relative',
