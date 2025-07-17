@@ -84,9 +84,21 @@ const GameOver = () => {
 
         <h4 className="text-xl text-wrap">{gameOverMessage}</h4>
         {txnHash ? (
-          <Button variant={'primary'} onClick={handleView}>
-            View Transaction
-          </Button>
+          <>
+            <Button
+              variant={'primary'}
+              onClick={() => {
+                window
+                  .open('https://testnet.huddle01.com/quests', '_blank')
+                  ?.focus();
+              }}
+            >
+              Claim Rewards on Huddle01 Testnet
+            </Button>
+            <Button variant={'primary'} onClick={handleView}>
+              View Winnings Transaction
+            </Button>
+          </>
         ) : null}
       </div>
     </div>

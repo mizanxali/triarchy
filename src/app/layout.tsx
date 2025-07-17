@@ -8,6 +8,8 @@ import '~/app/globals.css';
 
 import { Web3Provider } from './_layouts/Web3Provider';
 import Script from 'next/script';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export const viewport: Viewport = {
   themeColor: [{ media: '(prefers-color-scheme: dark)', color: 'black' }],
@@ -72,7 +74,24 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         />
         <Web3Provider>
           <SessionProvider>
-            <div className="relative z-10">{props.children}</div>
+            <div className="relative z-10">
+              <>
+                <Link href="https://testnet.huddle01.com" passHref>
+                  <div className="flex cursor-pointer items-center space-x-1 px-6 py-6 text-lg font-bold text-yellow-600">
+                    <div>Powered by </div>
+                    <Image
+                      src="/hud-blue.png"
+                      width={75}
+                      height={15}
+                      alt="Huddle01 Logo"
+                      className=""
+                    />
+                    <div>testnet</div>
+                  </div>
+                </Link>
+                {props.children}
+              </>
+            </div>
           </SessionProvider>
         </Web3Provider>
       </body>

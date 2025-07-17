@@ -110,6 +110,9 @@ const Leaderboard = () => {
         <Table className="w-full flex-1 mb-10 mt-4">
           <TableHeader>
             <TableRow>
+              <TableHead className="text-center w-[50px] text-black font-extrabold">
+                Rank
+              </TableHead>
               <TableHead className="text-left text-black font-extrabold">
                 Wallet Address
               </TableHead>
@@ -128,8 +131,18 @@ const Leaderboard = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leaderboard.map((user) => (
+            {leaderboard.map((user, index) => (
               <TableRow key={user.walletAddress}>
+                <TableCell
+                  className={cn(
+                    'text-center',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
+                  {index + 1}
+                </TableCell>
                 <TableCell
                   className={cn(
                     'text-left',
