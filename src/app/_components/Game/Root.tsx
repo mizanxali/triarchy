@@ -154,7 +154,7 @@ const Root = ({ walletAddress }: Props) => {
 
       const roomId = generateGameCode();
 
-      const isFirstGame = true;
+      let isFirstGame = true;
 
       const [wins, losses] = await publicClient.readContract({
         address: GAME_WAGER_ADDRESS,
@@ -163,9 +163,9 @@ const Root = ({ walletAddress }: Props) => {
         args: [walletAddress as `0x${string}`],
       });
 
-      // if (Number(wins) === 0 && Number(losses) === 0) {
-      //   isFirstGame = true;
-      // }
+      if (Number(wins) === 0 && Number(losses) === 0) {
+        isFirstGame = true;
+      }
 
       const txnHash = await writeContractAsync({
         abi: GameWagerABI,
