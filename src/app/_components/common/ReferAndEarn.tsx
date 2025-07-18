@@ -109,7 +109,7 @@ const ReferAndEarn = ({ walletAddress }: Props) => {
           <div>
             <ul className="list-disc font-semibold pl-6 mb-2">
               <li>
-                Share your referral link with your friends and earn 10% of their{' '}
+                Share your referral link with your friends and earn 20% of their{' '}
                 <span className="font-bold">first</span> game's wager amount.
               </li>
               <li>The more friends you refer, the more you earn.</li>
