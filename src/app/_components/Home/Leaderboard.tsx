@@ -22,6 +22,7 @@ interface Leaderboard {
   losses: number;
   totalWon: string;
   totalWagered: string;
+  referrals: number;
 }
 [];
 
@@ -98,8 +99,8 @@ const Leaderboard = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          width: '820px',
-          height: '820px',
+          width: '900px',
+          height: '900px',
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -127,6 +128,9 @@ const Leaderboard = () => {
               </TableHead>
               <TableHead className="text-right w-[80px] text-black font-extrabold">
                 Total Won
+              </TableHead>
+              <TableHead className="text-right w-[80px] text-black font-extrabold">
+                Referrals
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -192,6 +196,16 @@ const Leaderboard = () => {
                   )}
                 >
                   {user.totalWon}
+                </TableCell>
+                <TableCell
+                  className={cn(
+                    'text-right',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
+                  {user.referrals}
                 </TableCell>
               </TableRow>
             ))}

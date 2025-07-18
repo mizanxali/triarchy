@@ -8,6 +8,7 @@ type MiscAtom = {
   gameOverMessage: string;
   txnHash?: string;
   isWinner: boolean;
+  showReferAndEarn: boolean;
 };
 
 const defaultMiscAtom: MiscAtom = {
@@ -17,6 +18,7 @@ const defaultMiscAtom: MiscAtom = {
   gameOverMessage: '',
   txnHash: undefined,
   isWinner: false,
+  showReferAndEarn: false,
 };
 
 const miscAtom = atomWithReset<MiscAtom>(defaultMiscAtom);

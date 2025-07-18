@@ -16,12 +16,16 @@ import { publicClient } from '~/lib/web3/client';
 import { formatEther, parseEther } from 'viem';
 import { Wallet } from 'lucide-react';
 import { useMiscSetAtom } from '~/app/_atoms/misc.atom';
+import { useSearchParams } from 'next/navigation';
 
 interface Props {
   walletAddress: string;
 }
 
 const Root = ({ walletAddress }: Props) => {
+  const searchParams = useSearchParams();
+  const referralCode = searchParams.get('referralCode');
+
   const [{ partySocket }, setGameAtom] = useGameAtom();
   const resetGameAtom = useGameResetAtom();
   const setMiscAtom = useMiscSetAtom();
@@ -150,6 +154,19 @@ const Root = ({ walletAddress }: Props) => {
 
       const roomId = generateGameCode();
 
+      const isFirstGame = true;
+
+      const [wins, losses] = await publicClient.readContract({
+        address: GAME_WAGER_ADDRESS,
+        abi: GameWagerABI,
+        functionName: 'getPlayerStats',
+        args: [walletAddress as `0x${string}`],
+      });
+
+      // if (Number(wins) === 0 && Number(losses) === 0) {
+      //   isFirstGame = true;
+      // }
+
       const txnHash = await writeContractAsync({
         abi: GameWagerABI,
         address: GAME_WAGER_ADDRESS,
@@ -175,6 +192,7 @@ const Root = ({ walletAddress }: Props) => {
         query: {
           wagerAmount,
           walletAddress,
+          referralCode: isFirstGame ? referralCode : undefined,
         },
       });
 

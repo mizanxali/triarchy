@@ -3,8 +3,14 @@ import type * as Party from 'partykit/server';
 import { nanoid } from 'nanoid';
 import { walletClient } from '~/lib/web3/client';
 import { getAccountFromPrivateKey } from '~/lib/web3/client';
-import { GameWagerABI } from '~/lib/web3/abis';
-import { GAME_WAGER_ADDRESS } from '~/lib/web3/constants';
+import { GameReferralsABI, GameWagerABI } from '~/lib/web3/abis';
+import {
+  GAME_REFERRALS_ADDRESS,
+  GAME_WAGER_ADDRESS,
+} from '~/lib/web3/constants';
+import { parseEther } from 'viem';
+
+const WINNING_CARD_COUNT = 1;
 
 export const CARD_DECK: TCard[] = [
   'A2',
@@ -32,6 +38,8 @@ export const CARD_DECK: TCard[] = [
 
 interface GameState {
   gameCode: string;
+  blackReferralCode?: string;
+  whiteReferralCode?: string;
   blackCards: Array<{ card: TCard; id: string }>;
   whiteCards: Array<{ card: TCard; id: string }>;
   blackActiveCard?: { card: TCard; id: string };
@@ -53,6 +61,8 @@ export default class Server implements Party.Server {
   constructor(readonly room: Party.Room) {
     this.state = {
       gameCode: room.id,
+      blackReferralCode: undefined,
+      whiteReferralCode: undefined,
       blackCards: [],
       whiteCards: [],
       blackActiveCard: undefined,
@@ -73,11 +83,13 @@ export default class Server implements Party.Server {
     const queryParams = new URLSearchParams(ctx.request.url);
     const wagerAmount = queryParams.get('wagerAmount');
     const walletAddress = queryParams.get('walletAddress');
+    const referralCode = queryParams.get('referralCode');
 
     if (!this.state.blackPeerId) {
       this.state.blackPeerId = conn.id;
       if (wagerAmount) this.state.wagerAmount = wagerAmount;
       if (walletAddress) this.state.blackWalletAddress = walletAddress;
+      if (referralCode) this.state.blackReferralCode = referralCode;
 
       if (this.state.blackCards.length === 0) {
         this.state.blackCards = this.generateInitialCards();
@@ -86,6 +98,7 @@ export default class Server implements Party.Server {
       this.state.whitePeerId = conn.id;
       if (wagerAmount) this.state.wagerAmount = wagerAmount;
       if (walletAddress) this.state.whiteWalletAddress = walletAddress;
+      if (referralCode) this.state.whiteReferralCode = referralCode;
 
       if (this.state.whiteCards.length === 0) {
         this.state.whiteCards = this.generateInitialCards();
@@ -318,16 +331,16 @@ export default class Server implements Party.Server {
   }
 
   private checkGameOver() {
-    if (this.state.blackWonCards.length >= 3) {
+    if (this.state.blackWonCards.length >= WINNING_CARD_COUNT) {
       const suits = this.state.blackWonCards.map((card) =>
         card.card.slice(0, 1),
       );
 
       if (
-        suits.filter((suit) => suit === 'A').length >= 3 ||
-        suits.filter((suit) => suit === 'H').length >= 3 ||
-        suits.filter((suit) => suit === 'S').length >= 3 ||
-        new Set(suits).size >= 3
+        suits.filter((suit) => suit === 'A').length >= WINNING_CARD_COUNT ||
+        suits.filter((suit) => suit === 'H').length >= WINNING_CARD_COUNT ||
+        suits.filter((suit) => suit === 'S').length >= WINNING_CARD_COUNT ||
+        new Set(suits).size >= WINNING_CARD_COUNT
       ) {
         this.state.isGameOver = true;
         this.state.winner = 'black';
@@ -335,16 +348,16 @@ export default class Server implements Party.Server {
       }
     }
 
-    if (this.state.whiteWonCards.length >= 3) {
+    if (this.state.whiteWonCards.length >= WINNING_CARD_COUNT) {
       const suits = this.state.whiteWonCards.map((card) =>
         card.card.slice(0, 1),
       );
 
       if (
-        suits.filter((suit) => suit === 'A').length >= 3 ||
-        suits.filter((suit) => suit === 'H').length >= 3 ||
-        suits.filter((suit) => suit === 'S').length >= 3 ||
-        new Set(suits).size >= 3
+        suits.filter((suit) => suit === 'A').length >= WINNING_CARD_COUNT ||
+        suits.filter((suit) => suit === 'H').length >= WINNING_CARD_COUNT ||
+        suits.filter((suit) => suit === 'S').length >= WINNING_CARD_COUNT ||
+        new Set(suits).size >= WINNING_CARD_COUNT
       ) {
         this.state.isGameOver = true;
         this.state.winner = 'white';
@@ -454,6 +467,44 @@ export default class Server implements Party.Server {
               : (this.state.whiteWalletAddress as `0x${string}`),
           ],
         });
+
+        if (this.state.blackReferralCode) {
+          try {
+            const wagerAmountWei = parseEther(this.state.wagerAmount);
+            const rewardWei = (wagerAmountWei * 20n) / 100n;
+
+            walletClient.writeContract({
+              account: adminAccount,
+              abi: GameReferralsABI,
+              address: GAME_REFERRALS_ADDRESS,
+              functionName: 'incrementReferral',
+              args: [
+                this.state.blackReferralCode as `0x${string}`,
+                wagerAmountWei,
+              ],
+              value: rewardWei,
+            });
+          } catch (error) {}
+        }
+
+        if (this.state.whiteReferralCode) {
+          try {
+            const wagerAmountWei = parseEther(this.state.wagerAmount);
+            const rewardWei = (wagerAmountWei * 20n) / 100n;
+
+            walletClient.writeContract({
+              account: adminAccount,
+              abi: GameReferralsABI,
+              address: GAME_REFERRALS_ADDRESS,
+              functionName: 'incrementReferral',
+              args: [
+                this.state.whiteReferralCode as `0x${string}`,
+                wagerAmountWei,
+              ],
+              value: rewardWei,
+            });
+          } catch (error) {}
+        }
       }
 
       const winnerPeerId =

@@ -12,6 +12,7 @@ import { useGameAtom } from '~/app/_atoms/game.atom';
 import Leaderboard from '../Home/Leaderboard';
 import CardCarousel from '../Home/CardCarousel';
 import GameOver from '../common/GameOver';
+import ReferAndEarn from '../common/ReferAndEarn';
 
 const MobileChecker = () => {
   const { isMobile, isLoading } = useMobile();
@@ -40,7 +41,10 @@ const MobileChecker = () => {
   return (
     <>
       {gameCode ? null : (
-        <div className="fixed top-8 right-8 z-20">
+        <div className="fixed top-8 right-8 z-20 flex flex-row gap-4">
+          {session ? (
+            <ReferAndEarn walletAddress={session.user.walletAddress} />
+          ) : null}
           <Rules />
         </div>
       )}

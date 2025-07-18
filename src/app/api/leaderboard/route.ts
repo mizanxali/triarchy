@@ -1,7 +1,10 @@
 import { formatEther } from 'viem/utils';
-import { GameWagerABI } from '~/lib/web3/abis';
+import { GameReferralsABI, GameWagerABI } from '~/lib/web3/abis';
 import { publicClient } from '~/lib/web3/client';
-import { GAME_WAGER_ADDRESS } from '~/lib/web3/constants';
+import {
+  GAME_REFERRALS_ADDRESS,
+  GAME_WAGER_ADDRESS,
+} from '~/lib/web3/constants';
 
 export async function GET(request: Request) {
   try {
@@ -13,13 +16,32 @@ export async function GET(request: Request) {
       functionName: 'getAllPlayerStats',
     });
 
-    const playerStats = leaderboard.map((player) => ({
-      walletAddress: player.playerAddress,
-      wins: Number(player.wins),
-      losses: Number(player.losses),
-      totalWon: Number(formatEther(player.totalWon)).toFixed(4),
-      totalWagered: Number(formatEther(player.totalWagered)).toFixed(4),
-    }));
+    const result = await publicClient.readContract({
+      address: GAME_REFERRALS_ADDRESS,
+      abi: GameReferralsABI,
+      functionName: 'getAllReferralData',
+    });
+    const [users, counts, earnings] = result as [string[], bigint[], bigint[]];
+
+    const playerStats = [];
+
+    for (const player of leaderboard) {
+      const playerStat = {
+        walletAddress: player.playerAddress,
+        wins: Number(player.wins),
+        losses: Number(player.losses),
+        totalWon: Number(formatEther(player.totalWon)).toFixed(4),
+        totalWagered: Number(formatEther(player.totalWagered)).toFixed(4),
+        referrals: 0,
+      };
+      const referralIndex = users.findIndex(
+        (user) => user === player.playerAddress,
+      );
+      if (referralIndex !== -1) {
+        playerStat.referrals = Number(counts[referralIndex]);
+      }
+      playerStats.push(playerStat);
+    }
 
     const sortedLeaderboard = playerStats.sort((a, b) => {
       // First sort by wins
