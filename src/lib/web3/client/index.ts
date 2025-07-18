@@ -5,7 +5,6 @@ import {
   http,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import 'viem/chains';
 import { HUDL_RPC_URLS } from '../constants';
 
 export const hudlChain = defineChain(HUDL_RPC_URLS);

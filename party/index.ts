@@ -10,7 +10,7 @@ import {
 } from '~/lib/web3/constants';
 import { parseEther } from 'viem';
 
-const WINNING_CARD_COUNT = 1;
+const WINNING_CARD_COUNT = 3;
 
 export const CARD_DECK: TCard[] = [
   'A2',
