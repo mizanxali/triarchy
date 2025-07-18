@@ -23,6 +23,7 @@ interface Leaderboard {
   totalWon: string;
   totalWagered: string;
   referrals: number;
+  points: number;
 }
 [];
 
@@ -99,8 +100,8 @@ const Leaderboard = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          width: '900px',
-          height: '900px',
+          width: '960px',
+          height: '960px',
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -117,20 +118,23 @@ const Leaderboard = () => {
               <TableHead className="text-left text-black font-extrabold">
                 Wallet Address
               </TableHead>
-              <TableHead className="text-center w-[50px] text-black font-extrabold">
+              <TableHead className="text-center text-black font-extrabold">
                 Wins
               </TableHead>
-              <TableHead className="text-center w-[50px] text-black font-extrabold">
+              <TableHead className="text-center text-black font-extrabold">
                 Losses
               </TableHead>
-              <TableHead className="text-center w-[110px] text-black font-extrabold">
+              <TableHead className="text-center  text-black font-extrabold">
                 Total Wagered
               </TableHead>
-              <TableHead className="text-right w-[80px] text-black font-extrabold">
+              <TableHead className="text-right text-black font-extrabold">
                 Total Won
               </TableHead>
-              <TableHead className="text-right w-[80px] text-black font-extrabold">
+              <TableHead className="text-right text-black font-extrabold">
                 Referrals
+              </TableHead>
+              <TableHead className="text-right  text-black font-extrabold">
+                Points (Wins + Referrals)
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -206,6 +210,16 @@ const Leaderboard = () => {
                   )}
                 >
                   {user.referrals}
+                </TableCell>
+                <TableCell
+                  className={cn(
+                    'text-right',
+                    user.walletAddress === session?.user.walletAddress
+                      ? 'text-yellow-600 font-bold'
+                      : 'text-black font-medium',
+                  )}
+                >
+                  {user.points}
                 </TableCell>
               </TableRow>
             ))}

@@ -33,18 +33,26 @@ export async function GET(request: Request) {
         totalWon: Number(formatEther(player.totalWon)).toFixed(4),
         totalWagered: Number(formatEther(player.totalWagered)).toFixed(4),
         referrals: 0,
+        points: Number(player.wins),
       };
       const referralIndex = users.findIndex(
         (user) => user === player.playerAddress,
       );
       if (referralIndex !== -1) {
         playerStat.referrals = Number(counts[referralIndex]);
+        playerStat.points =
+          Number(playerStat.wins) + Number(playerStat.referrals);
       }
       playerStats.push(playerStat);
     }
 
     const sortedLeaderboard = playerStats.sort((a, b) => {
-      // First sort by wins
+      // First sort by points
+      if (b.points !== a.points) {
+        return b.points - a.points;
+      }
+
+      // If points are the same, sort by wins
       if (b.wins !== a.wins) {
         return b.wins - a.wins;
       }
